@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dana Pendidikan | Cerdas Finansial</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/pendidikan.css">
+</head>
+<body>
+<header class="app-header">
+  <a href="../index.html" class="back-button"><i class="bi bi-arrow-left"></i></a>
+  <div><h1>🎓 Dana Pendidikan</h1><p>Cerdas Finansial Calculator</p></div>
+</header>
+<main class="container py-4">
+<form id="simulasiForm" novalidate>
+  <section class="section-card">
+    <div class="section-title"><i class="bi bi-people-fill"></i><div><h2>1. Data Orang Tua</h2><p>Semua data wajib diisi untuk membaca batas persiapan dana sebelum masa pensiun.</p></div></div>
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label">Nama Ayah <span>*</span></label><input required type="text" id="namaAyah" class="form-control" placeholder="Contoh: Budi Santoso"></div>
+      <div class="col-md-3"><label class="form-label">Usia Ayah <span>*</span></label><input required type="number" min="18" max="80" id="usiaAyah" class="form-control" placeholder="Contoh: 35"></div>
+      <div class="col-md-6"><label class="form-label">Nama Ibu <span>*</span></label><input required type="text" id="namaIbu" class="form-control" placeholder="Contoh: Maria"></div>
+      <div class="col-md-3"><label class="form-label">Usia Ibu <span>*</span></label><input required type="number" min="18" max="80" id="usiaIbu" class="form-control" placeholder="Contoh: 33"></div>
+      <div class="col-md-3"><label class="form-label">Usia Pensiun <span>*</span></label><input required type="number" min="50" max="75" id="usiaPensiun" class="form-control" value="65"><small class="text-muted">Default 65 tahun, bisa disesuaikan.</small></div>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <div class="section-title"><i class="bi bi-person-vcard"></i><div><h2>2. Data Anak & Target Pendidikan</h2><p>Isi data anak dan target pendidikan. Biaya pendidikan diisi manual agar lebih fleksibel.</p></div></div>
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label">Nama Anak <span>*</span></label><input required type="text" id="namaAnak" class="form-control" placeholder="Contoh: Michael"></div>
+      <div class="col-md-3"><label class="form-label">Usia Anak Saat Ini <span>*</span></label><input required type="number" min="0" max="25" id="usiaAnak" class="form-control" placeholder="Contoh: 5"></div>
+      <div class="col-md-3"><label class="form-label">Target Pendidikan <span>*</span></label><select required id="targetPendidikan" class="form-select"><option value="">Pilih target</option><option value="sd">SD Swasta</option><option value="smp">SMP Swasta</option><option value="sma">SMA Swasta</option><option value="s1dn">S1 Dalam Negeri</option><option value="s1ln">S1 Luar Negeri</option><option value="kedokteran">Kedokteran</option><option value="s2dn">S2 Dalam Negeri</option><option value="s2ln">S2 Luar Negeri</option><option value="custom">Custom</option></select></div>
+      <div class="col-md-3"><label class="form-label">Usia Masuk <span>*</span></label><input required type="number" min="1" max="40" id="usiaMasuk" class="form-control" placeholder="Contoh: 18"></div>
+      <div class="col-md-3"><label class="form-label">Lama Studi <span>*</span></label><input required type="number" min="1" max="10" id="lamaStudi" class="form-control" placeholder="Contoh: 4"></div>
+      <div class="col-md-6"><label class="form-label">Biaya Pendidikan Saat Ini <span>*</span></label><input required type="text" id="biayaSaatIni" class="form-control money-input" placeholder="Contoh: 250.000.000"></div>
+      <div class="col-md-3"><label class="form-label">Inflasi Pendidikan (%) <span>*</span></label><input required type="number" min="0" max="30" step="0.1" id="inflasi" class="form-control" placeholder="Contoh: 7"><small class="text-muted">Gambaran umum inflasi pendidikan di Indonesia sekitar <strong>5–10% per tahun</strong>.</small></div>
+      <div class="col-md-3"><label class="form-label">Tahun Sekarang</label><input type="number" id="tahunSekarang" class="form-control" readonly></div>
+      <div class="col-md-6"><label class="form-label">Dana yang Sudah Ada <span>*</span></label><input required type="text" id="danaAda" class="form-control money-input" placeholder="Contoh: 0"></div>
+      <div class="col-md-6"><label class="form-label">Catatan / Tujuan <span>*</span></label><input required type="text" id="catatan" class="form-control" placeholder="Contoh: Kedokteran / S1 Dalam Negeri / Luar Negeri"></div>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <div class="section-title"><i class="bi bi-sliders"></i><div><h2>3. Strategi & Periode Persiapan Dana</h2><p>Pilih strategi simulasi dan periode pengumpulan dana yang tersedia berdasarkan usia orang tua dan waktu menuju pendidikan.</p></div></div>
+    <div class="strategy-option-grid mb-4">
+      <label class="strategy-option"><input type="radio" name="strategiInvestasi" value="0.02"><strong>🟢 Konservatif</strong><span>1–2% per tahun</span><small>Untuk profil yang mengutamakan stabilitas.</small></label>
+      <label class="strategy-option recommended"><input type="radio" name="strategiInvestasi" value="0.04" checked><strong>🔵 Moderat <em>Default</em></strong><span>3–5% per tahun</span><small>Simulasi menggunakan nilai tengah 4% per tahun.</small></label>
+      <label class="strategy-option"><input type="radio" name="strategiInvestasi" value="0.06"><strong>🟠 Agresif</strong><span>6% ke atas per tahun</span><small>Potensi lebih tinggi dengan risiko lebih besar.</small></label>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label">Periode Persiapan Dana <span>*</span></label><select required id="periodePersiapan" class="form-select"></select><small id="periodeInfo" class="text-muted">Isi data orang tua dan anak untuk melihat pilihan periode.</small></div>
+      <div class="col-md-3 d-none" id="customTahunBox"><label class="form-label">Custom Tahun <span>*</span></label><input type="number" min="1" max="40" id="customTahun" class="form-control" placeholder="Contoh: 6"><small class="text-muted">Tidak boleh melebihi batas usia pensiun dan sisa waktu menuju pendidikan.</small></div>
+    </div>
+    <div id="pensionWarning" class="warning-box d-none"></div>
+  </section>
+</form>
+
+<section class="result-section">
+  <div class="result-card"><div class="result-icon"><i class="bi bi-calendar-check"></i></div><p>Sisa Waktu</p><h3 id="sisaWaktu">0 Tahun</h3></div>
+  <div class="result-card primary-result"><div class="result-icon"><i class="bi bi-cash-stack"></i></div><p>Dana Dibutuhkan</p><h3 id="danaDibutuhkan">Rp0</h3></div>
+  <div class="result-card"><div class="result-icon"><i class="bi bi-wallet2"></i></div><p>Kekurangan Dana</p><h3 id="kekuranganDana">Rp0</h3></div>
+  <div class="result-card"><div class="result-icon"><i class="bi bi-piggy-bank"></i></div><p>Estimasi Setoran</p><h3 id="setoranBulanan">Rp0</h3></div>
+</section>
+
+<section class="section-card"><div class="section-title"><i class="bi bi-lightbulb"></i><div><h2>Ringkasan Simulasi</h2><p id="ringkasanText">Lengkapi semua data wajib untuk melihat hasil simulasi.</p></div></div></section>
+<section class="section-card"><div class="section-title"><i class="bi bi-clock-history"></i><div><h2>Insight Usia Orang Tua</h2><p id="insightOrtu">Lengkapi data orang tua untuk melihat analisis kesiapan sebelum masa pensiun.</p></div></div></section>
+<section class="section-card"><div class="section-title"><i class="bi bi-table"></i><div><h2>Timeline Perkembangan Dana</h2><p>Estimasi biaya pendidikan setiap tahun sampai target pendidikan dimulai.</p></div></div><div class="table-responsive"><table class="table table-bordered table-hover align-middle"><thead><tr><th>Tahun</th><th>Usia Anak</th><th>Dana Pendidikan</th><th>Kenaikan dari Awal</th></tr></thead><tbody id="tabelDana"></tbody></table></div></section>
+
+<section class="section-card cta-section d-none" id="ctaSection">
+  <div class="section-title"><i class="bi bi-bullseye"></i><div><h2>Butuh Bantuan Menyusun Strategi?</h2><p>Diskusikan hasil simulasi ini agar strategi yang dipilih sesuai dengan kondisi keluarga.</p></div></div>
+  <div class="readiness-box"><div class="readiness-top"><div><h3>Kesiapan Dana Pendidikan</h3><p id="readinessText">Lengkapi data untuk melihat kesiapan.</p></div><div class="readiness-score-circle" id="readinessScore">0%</div></div><div class="readiness-progress"><div class="progress-bar" id="readinessBar" style="width:0%"></div></div><div class="readiness-checklist" id="readinessChecklist"></div></div>
+  <div class="contact-card"><div class="planner-profile"><div class="planner-avatar">SG</div><div><h3>Septino Gao, QWP®, CIS®</h3><p>Financial Planner</p><span>Perencana Keuangan Keluarga • Dana Pendidikan • Proteksi • Investasi</span><div class="planner-contact-info"><div><i class="bi bi-whatsapp"></i> 0811-6946-999</div><div><i class="bi bi-envelope"></i> septinogao@gmail.com</div><div><i class="bi bi-instagram"></i> @septino.gao</div></div></div></div><div class="cta-buttons"><button type="button" class="btn btn-success" onclick="konsultasiWhatsApp()"><i class="bi bi-whatsapp"></i> Konsultasi via WhatsApp</button><button type="button" class="btn btn-outline-primary" onclick="konsultasiEmail()"><i class="bi bi-envelope"></i> Konsultasi via Email</button><button type="button" class="btn btn-outline-danger" onclick="konsultasiInstagram()"><i class="bi bi-instagram"></i> Konsultasi via Instagram</button><button type="button" class="btn btn-outline-success" onclick="exportPDF()"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button></div></div>
+</section>
+
+<section class="action-buttons"><button type="button" class="btn btn-secondary" onclick="resetForm()"><i class="bi bi-arrow-counterclockwise"></i> Reset</button><a href="../index.html" class="btn btn-primary"><i class="bi bi-house-door"></i> Dashboard</a></section>
+<footer class="app-footer"><strong>CERDAS FINANSIAL</strong><br>Digital Financial Planner untuk membantu keluarga Indonesia merencanakan masa depan keuangan dengan lebih baik.<br>© 2026 Septino Gao</footer>
+</main>
+<script src="../js/pendidikan.js"></script>
+</body>
+</html>
