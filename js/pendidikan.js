@@ -261,21 +261,54 @@ function exportPDF(){
         doc.text(lines,x,y);
         return y + lines.length*lineH;
     }
-    function logo(x,y,s=1){
-        fill(C.softGreen); doc.roundedRect(x,y,12*s,12*s,3*s,3*s,'F');
-        stroke(C.green); doc.setLineWidth(.7*s); doc.circle(x+6*s,y+6*s,4*s,'S');
-        doc.line(x+3.5*s,y+6*s,x+8.5*s,y+6*s); doc.line(x+6*s,y+3.5*s,x+6*s,y+8.5*s);
+    function drawCFLogo(x, y, s = 1){
+    // kotak logo
+    fill(C.white);
+    doc.roundedRect(x, y, 14*s, 14*s, 3*s, 3*s, 'F');
+
+    stroke(C.line);
+    doc.setLineWidth(0.45*s);
+    doc.roundedRect(x, y, 14*s, 14*s, 3*s, 3*s, 'S');
+
+    // lingkaran
+    stroke(C.green);
+    doc.setLineWidth(1*s);
+    doc.circle(x + 7*s, y + 7*s, 4.2*s, 'S');
+
+    // plus
+    doc.setLineWidth(0.9*s);
+    doc.line(x + 7*s, y + 4.4*s, x + 7*s, y + 9.6*s);
+    doc.line(x + 4.4*s, y + 7*s, x + 9.6*s, y + 7*s);
+}
+
+function drawCFBrand(x, y, s = 1, darkHeader = false){
+    drawCFLogo(x, y, s);
+
+    setFont(8.8*s, 'bold', darkHeader ? C.white : C.navy);
+    doc.text('CERDAS', x + 18*s, y + 6*s);
+
+    setFont(8.8*s, 'bold', darkHeader ? [168,227,192] : C.green);
+    doc.text('FINANSIAL', x + 18*s, y + 13*s);
+}
     }
     function header(page){
-        fill(C.white); doc.rect(0,0,W,24,'F');
-        line(0,24,W,24,C.line,.35);
-        logo(M,6,.9);
-        setFont(8.5,'bold',C.navy); doc.text('CERDAS',M+15,11);
-        setFont(8.5,'bold',C.green); doc.text('FINANSIAL',M+15,17);
-        line(M+42,7,M+42,19,C.line,.35);
-        setFont(8.2,'bold',C.navy); doc.text('Laporan Simulasi Dana Pendidikan',M+48,15);
-        setFont(7.2,'normal',C.muted); doc.text(`Halaman ${page} dari 3`,W-M,10,{align:'right'});
-        line(W-M-30,16,W-M,16,C.green,.45);
+    fill(C.white);
+    doc.rect(0,0,W,24,'F');
+
+    line(0,24,W,24,C.line,.35);
+
+    drawCFBrand(M,5,.95,false);
+
+    line(M+48,7,M+48,19,C.line,.35);
+
+    setFont(8.2,'bold',C.navy);
+    doc.text('Laporan Simulasi Dana Pendidikan',M+54,15);
+
+    setFont(7.2,'normal',C.muted);
+    doc.text(`Halaman ${page} dari 3`,W-M,10,{align:'right'});
+
+    line(W-M-30,16,W-M,16,C.green,.45);
+}
     }
     function footer(page){
         const y = H - 18;
@@ -345,9 +378,7 @@ function exportPDF(){
     // PAGE 1
     fill(C.navy2); doc.rect(0,0,W,38,'F');
     fill(C.green); doc.rect(0,38,W,2.8,'F');
-    logo(M,10,1.05);
-    setFont(13,'bold',C.white); doc.text('CERDAS',M+18,19);
-    setFont(13,'bold',[168,227,192]); doc.text('FINANSIAL',M+18,29);
+    drawCFBrand(M,10,1.05,true);
     setFont(11,'bold',C.white); doc.text('Laporan Simulasi Dana Pendidikan',W-M,18,{align:'right'});
     setFont(7.4,'normal',[222,232,240]); doc.text(`No. ${reportNo}`,W-M,27,{align:'right'});
 
