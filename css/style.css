@@ -1,1 +1,58 @@
-body{background:#eef3f8;font-family:Arial,Helvetica,sans-serif;color:#243043}.brand-title{color:#0B3C5D}.menu-card{background:white;border-radius:22px;padding:42px;text-align:center;box-shadow:0 12px 35px rgba(0,0,0,.08);transition:.25s;min-height:230px}.menu-card:hover{transform:translateY(-6px)}.menu-card i{font-size:52px;color:#2E8B57}.menu-card h4{margin-top:22px;color:#0B3C5D;font-weight:800}.menu-card p{color:#6b7280}.menu-card.disabled{opacity:.7;cursor:not-allowed}
+body{
+  background:#eef3f8;
+  font-family:Arial,Helvetica,sans-serif;
+  color:#243043;
+}
+
+.hero-brand{
+  padding-top:20px;
+}
+
+.main-logo{
+  width:360px;
+  max-width:85%;
+  height:auto;
+  display:block;
+  margin:0 auto;
+}
+
+.menu-card{
+  background:white;
+  border-radius:22px;
+  padding:42px;
+  text-align:center;
+  box-shadow:0 12px 35px rgba(0,0,0,.08);
+  transition:.25s;
+  min-height:230px;
+  border:1px solid #dce6ef;
+}
+
+.menu-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 18px 45px rgba(0,0,0,.12);
+}
+
+.menu-card i{
+  font-size:52px;
+  color:#2E8B57;
+}
+
+.menu-card h4{
+  margin-top:22px;
+  color:#0B3C5D;
+  font-weight:800;
+}
+
+.menu-card p{
+  color:#6b7280;
+  margin-bottom:0;
+}
+
+.menu-card.disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+a{
+  color:inherit;
+}
