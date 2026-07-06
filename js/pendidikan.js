@@ -289,17 +289,22 @@ function exportPDF(){
     doc.line(x+3.5*s,y+6*s,x+8.5*s,y+6*s);
     doc.line(x+6*s,y+3.5*s,x+6*s,y+8.5*s);
 }
-    function header(page){
-        fill(C.white); doc.rect(0,0,W,24,'F');
-        line(0,24,W,24,C.line,.35);
-        logo(M,6,.9);
-        setFont(8.5,'bold',C.navy); doc.text('CERDAS',M+15,11);
-        setFont(8.5,'bold',C.green); doc.text('FINANSIAL',M+15,17);
-        line(M+42,7,M+42,19,C.line,.35);
-        setFont(8.2,'bold',C.navy); doc.text('Laporan Simulasi Dana Pendidikan',M+48,15);
-        setFont(7.2,'normal',C.muted); doc.text(`Halaman ${page} dari 3`,W-M,10,{align:'right'});
-        line(W-M-30,16,W-M,16,C.green,.45);
-    }
+function header(page){
+    fill(C.white);
+    doc.rect(0,0,W,24,'F');
+
+    line(0,24,W,24,C.line,.35);
+
+    logo(M,5,1.35);
+
+    setFont(8.2,'bold',C.navy);
+    doc.text('Laporan Simulasi Dana Pendidikan',M+26,15);
+
+    setFont(7.2,'normal',C.muted);
+    doc.text(`Halaman ${page} dari 3`,W-M,10,{align:'right'});
+
+    line(W-M-30,16,W-M,16,C.green,.45);
+}
     function footer(page){
         const y = H - 18;
         line(M,y,W-M,y,C.line,.3);
@@ -366,20 +371,29 @@ function exportPDF(){
     }
 
     // PAGE 1
-    fill(C.navy2); doc.rect(0,0,W,38,'F');
-    fill(C.green); doc.rect(0,38,W,2.8,'F');
-    logo(M,10,1.05);
-    setFont(13,'bold',C.white); doc.text('CERDAS',M+18,19);
-    setFont(13,'bold',[168,227,192]); doc.text('FINANSIAL',M+18,29);
-    setFont(11,'bold',C.white); doc.text('Laporan Simulasi Dana Pendidikan',W-M,18,{align:'right'});
-    setFont(7.4,'normal',[222,232,240]); doc.text(`No. ${reportNo}`,W-M,27,{align:'right'});
+    fill(C.white);
+doc.rect(0,0,W,24,'F');
 
-    sectionTitle('Ringkasan Eksekutif','Simulasi disusun berdasarkan data keluarga, target pendidikan, dan asumsi yang diinput pada aplikasi.',52);
-    card(W-M-46,48,46,22,C.soft,C.line,5);
-    smallCaps('Tanggal Simulasi',W-M-38,57,C.muted); setFont(8.5,'bold',C.green); doc.text(today,W-M-38,66);
-    line(W-M-38,72,W-M-12,72,C.green,.45);
+line(0,24,W,24,C.line,.35);
 
-    profileRow(M,78,W-M*2,[
+logo(M,5,1.45);
+
+setFont(10,'bold',C.navy);
+doc.text('Laporan Simulasi Dana Pendidikan',W-M,12,{align:'right'});
+
+setFont(7.4,'normal',C.muted);
+doc.text(`No. ${reportNo}`,W-M,20,{align:'right'});
+
+line(W-M-38,22,W-M,22,C.green,.45);
+
+    sectionTitle('Ringkasan Eksekutif','Simulasi disusun berdasarkan data keluarga, target pendidikan, dan asumsi yang diinput pada aplikasi.',38);
+    card(W-M-46,34,46,22,C.soft,C.line,5);
+smallCaps('Tanggal Simulasi',W-M-38,43,C.muted); 
+setFont(8.5,'bold',C.green); 
+doc.text(today,W-M-38,52);
+line(W-M-38,58,W-M-12,58,C.green,.45);
+
+    profileRow(M,64,W-M*2,[
         {label:'Nama Ayah',value:`${safe(d.namaAyah)} (${d.usiaAyah} th)`},
         {label:'Nama Ibu',value:`${safe(d.namaIbu)} (${d.usiaIbu} th)`},
         {label:'Nama Anak',value:`${safe(d.namaAnak)} (${d.usiaAnak} th)`},
