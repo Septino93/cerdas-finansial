@@ -490,3 +490,135 @@ body{margin:0;background:#eef3f8;font-family:Arial,Helvetica,sans-serif;color:#1
     border-radius:8px!important;
   }
 }
+
+/* v13: Export PDF seluruh keluarga dalam 1 file */
+.family-pdf-print-area{
+  display:none;
+}
+
+@media print{
+  body.pdf-family-mode .top-header,
+  body.pdf-family-mode .review-page-full,
+  body.pdf-family-mode .modal-backdrop-custom{
+    display:none!important;
+  }
+
+  body.pdf-family-mode .family-pdf-print-area{
+    display:block!important;
+    width:100%!important;
+  }
+
+  body.pdf-family-mode .pdf-cover-page,
+  body.pdf-family-mode .pdf-member-page{
+    width:100%!important;
+    min-height:calc(210mm - 16mm)!important;
+    page-break-after:always!important;
+    break-after:page!important;
+  }
+
+  body.pdf-family-mode .pdf-member-page:last-child{
+    page-break-after:auto!important;
+    break-after:auto!important;
+  }
+
+  body.pdf-family-mode .pdf-cover-card{
+    width:100%;
+    min-height:calc(210mm - 16mm);
+    border:1px solid #dce8f2;
+    border-radius:10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    background:linear-gradient(135deg,#ffffff,#eef6fb)!important;
+    padding:14mm;
+  }
+
+  body.pdf-family-mode .pdf-cover-logo{
+    width:92mm;
+    max-height:72mm;
+    object-fit:contain;
+    margin-bottom:6mm;
+  }
+
+  body.pdf-family-mode .pdf-cover-card h1{
+    font-size:28px;
+    letter-spacing:1px;
+    color:#b40000;
+    font-weight:900;
+    margin:0 0 4mm;
+  }
+
+  body.pdf-family-mode .pdf-cover-card h2{
+    font-size:15px;
+    color:#0b3c5d;
+    font-weight:900;
+    margin:0 0 10mm;
+  }
+
+  body.pdf-family-mode .pdf-cover-info{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:4mm;
+    width:100%;
+  }
+
+  body.pdf-family-mode .pdf-cover-info div{
+    border:1px solid #dce8f2;
+    border-radius:8px;
+    background:#fff!important;
+    padding:5mm 3mm;
+  }
+
+  body.pdf-family-mode .pdf-cover-info span{
+    display:block;
+    font-size:9px;
+    color:#667085;
+    font-weight:800;
+    margin-bottom:2mm;
+  }
+
+  body.pdf-family-mode .pdf-cover-info strong{
+    display:block;
+    font-size:12px;
+    color:#0b3c5d;
+    font-weight:900;
+  }
+
+  body.pdf-family-mode .pdf-member-page .matrix-sheet{
+    width:100%!important;
+    min-height:calc(210mm - 16mm)!important;
+    margin:0!important;
+    padding:6mm!important;
+    box-shadow:none!important;
+    border-radius:10px!important;
+    page-break-inside:avoid!important;
+  }
+
+  body.pdf-family-mode .pdf-summary-row{
+    display:grid!important;
+    grid-template-columns:repeat(4,1fr)!important;
+    gap:5px!important;
+    margin-bottom:4mm!important;
+  }
+
+  body.pdf-family-mode .pdf-summary-row .summary-card{
+    padding:6px 8px!important;
+  }
+
+  body.pdf-family-mode .pdf-summary-row .summary-card span,
+  body.pdf-family-mode .pdf-summary-row .summary-card small{
+    font-size:8px!important;
+  }
+
+  body.pdf-family-mode .pdf-summary-row .summary-card strong{
+    font-size:14px!important;
+  }
+
+  body.pdf-family-mode .pdf-matrix-table th,
+  body.pdf-family-mode .pdf-matrix-table td{
+    font-size:8.4px!important;
+    padding:4px 5px!important;
+  }
+}

@@ -493,3 +493,170 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+/* v13: Export seluruh keluarga dalam 1 PDF landscape */
+function escapeHtml(value){
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function getSheetClassForMember(member){
+  if(!member) return "";
+  if(member.id === "pasangan") return "pasangan-sheet";
+  if(member.id.startsWith("anak")) return `${member.id}-sheet`;
+  return "";
+}
+
+function renderPdfTableRows(matrix){
+  return matrix.map((row, index) => `
+    <tr>
+      <td class="status-cell"><div class="status-band ${escapeHtml(row.warna)}"></div></td>
+      <td class="row-no">${index + 1}</td>
+      <td class="row-category">${escapeHtml(row.kategori)}</td>
+      <td class="row-function">${escapeHtml(row.fungsi)}</td>
+      <td class="text-center">${row.punya === "ya" ? escapeHtml(row.brand || "-") : "-"}</td>
+      <td class="text-center">${row.punya === "ya" ? escapeHtml(row.produk || "-") : "-"}</td>
+      <td class="text-center">${row.punya === "ya" ? escapeHtml(row.manfaat || "-") : "-"}</td>
+      <td class="check-cell">
+        ${row.punya === "ya" ? `<span class="status-pill pill-owned">Sudah</span>` : `<span class="status-pill pill-none">Belum</span>`}
+      </td>
+      <td class="text-center">
+        ${escapeHtml(row.catatan || "-")}
+        ${row.premi ? `<div class="small-muted">Premi: ${escapeHtml(row.premi)}</div>` : ""}
+        ${row.masa ? `<div class="small-muted">Masa: ${escapeHtml(row.masa)}</div>` : ""}
+      </td>
+    </tr>
+  `).join("");
+}
+
+function renderPdfSummaryCards(matrix){
+  const wajib = getCategorySummary(matrix, "red");
+  const kebutuhan = getCategorySummary(matrix, "green");
+  const distribusi = getCategorySummary(matrix, "yellow");
+  const akumulasi = getCategorySummary(matrix, "blue");
+  return `
+    <div class="summary-row summary-category-row pdf-summary-row">
+      <div class="summary-card wajib"><span>Wajib Dimiliki</span><strong>${wajib.owned}/${wajib.total}</strong><small>${wajib.percent}% terpenuhi</small></div>
+      <div class="summary-card kebutuhan"><span>Sesuai Kebutuhan</span><strong>${kebutuhan.owned}/${kebutuhan.total}</strong><small>${kebutuhan.percent}% terpenuhi</small></div>
+      <div class="summary-card distribusi"><span>Distribusi Kekayaan</span><strong>${distribusi.owned}/${distribusi.total}</strong><small>${distribusi.percent}% terpenuhi</small></div>
+      <div class="summary-card akumulasi"><span>Fungsi Akumulasi</span><strong>${akumulasi.owned}/${akumulasi.total}</strong><small>${akumulasi.percent}% terpenuhi</small></div>
+    </div>
+  `;
+}
+
+function renderMemberPdfPage(member){
+  syncMatrixWithTemplate(member.id);
+  const matrix = state.polis[member.id] || [];
+  const sheetClass = getSheetClassForMember(member);
+
+  return `
+    <section class="pdf-member-page">
+      <div class="matrix-sheet ${sheetClass}">
+        <div class="matrix-redbar">
+          <div>${escapeHtml(getMemberNumber(member))}</div>
+          <div class="matrix-name-box">
+            <label>Nama:</label>
+            <input value="${escapeHtml(member.nama)}" readonly>
+          </div>
+        </div>
+
+        <div class="matrix-hero">
+          <div class="legend-vertical">
+            <div><span class="legend-dot red"></span> Wajib Dimiliki</div>
+            <div><span class="legend-dot green"></span> Sesuai Kebutuhan / Tidak Wajib</div>
+            <div><span class="legend-dot yellow"></span> Distribusi Kekayaan</div>
+            <div><span class="legend-dot blue"></span> Fungsi Akumulasi</div>
+          </div>
+          <div class="matrix-title">INSURANCE<br>MATRIX</div>
+          <div class="brand-logo"><img src="../asset/logo-cerdas-finansial.png" alt="Cerdas Finansial"></div>
+        </div>
+
+        ${renderPdfSummaryCards(matrix)}
+
+        <div class="table-wrap">
+          <table class="matrix-table pdf-matrix-table">
+            <thead>
+              <tr>
+                <th rowspan="2">Status</th>
+                <th rowspan="2">No</th>
+                <th rowspan="2">Kategori</th>
+                <th rowspan="2">Fungsi Keuangan</th>
+                <th colspan="3">Punya</th>
+                <th rowspan="2">Tidak<br>Punya</th>
+                <th rowspan="2">Keterangan<br>Tambahan</th>
+              </tr>
+              <tr>
+                <th>Brand</th>
+                <th>Jenis Produk Dasar</th>
+                <th>Manfaat</th>
+              </tr>
+            </thead>
+            <tbody>${renderPdfTableRows(matrix)}</tbody>
+          </table>
+        </div>
+
+        <div class="note-box">Table ini harus di-review kembali setiap tahun agar memastikan apakah manfaat polis tersebut masih sesuai dengan fungsi dan tujuan keuangan.</div>
+      </div>
+    </section>
+  `;
+}
+
+function renderPdfCover(){
+  const kepala = state.keluarga.find(x => x.id === "kepala");
+  const pasangan = state.keluarga.find(x => x.id === "pasangan");
+  const jumlahAnak = state.keluarga.filter(x => x.id.startsWith("anak")).length;
+  const tanggal = new Date().toLocaleDateString("id-ID", { day:"2-digit", month:"long", year:"numeric" });
+
+  return `
+    <section class="pdf-cover-page">
+      <div class="pdf-cover-card">
+        <img src="../asset/logo-cerdas-finansial.png" alt="Cerdas Finansial" class="pdf-cover-logo">
+        <h1>INSURANCE MATRIX</h1>
+        <h2>Laporan Review Polis Keluarga</h2>
+        <div class="pdf-cover-info">
+          <div><span>Kepala Keluarga</span><strong>${escapeHtml(kepala?.nama || "-")}</strong></div>
+          <div><span>Status</span><strong>${state.statusMenikah === "menikah" ? "Sudah Menikah" : "Belum Menikah"}</strong></div>
+          <div><span>Pasangan</span><strong>${escapeHtml(pasangan?.nama || "-")}</strong></div>
+          <div><span>Jumlah Anak</span><strong>${jumlahAnak}</strong></div>
+          <div><span>Tanggal Review</span><strong>${tanggal}</strong></div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function exportFamilyPDF(){
+  if(!state.keluarga.length){
+    showFamilyError("Isi dan simpan data keluarga terlebih dahulu sebelum export PDF.");
+    window.scrollTo({ top:0, behavior:"smooth" });
+    return;
+  }
+
+  state.keluarga.forEach(member => syncMatrixWithTemplate(member.id));
+  saveState();
+
+  const oldArea = document.getElementById("familyPdfPrintArea");
+  if(oldArea) oldArea.remove();
+
+  const printArea = document.createElement("div");
+  printArea.id = "familyPdfPrintArea";
+  printArea.className = "family-pdf-print-area";
+  printArea.innerHTML = renderPdfCover() + state.keluarga.map(member => renderMemberPdfPage(member)).join("");
+  document.body.appendChild(printArea);
+
+  document.body.classList.add("pdf-family-mode");
+
+  const cleanup = () => {
+    document.body.classList.remove("pdf-family-mode");
+    const area = document.getElementById("familyPdfPrintArea");
+    if(area) area.remove();
+    window.removeEventListener("afterprint", cleanup);
+  };
+
+  window.addEventListener("afterprint", cleanup);
+  setTimeout(() => window.print(), 250);
+}
