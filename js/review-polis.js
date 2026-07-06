@@ -2170,121 +2170,151 @@ function drawAnalysisSection(doc, title, lines, x, y, w){
 function addPlannerAnalysisPage(doc, logoDataUrl, pageNo){
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
+  const waUrl = "https://wa.me/628116946999";
 
-  // Background sama dengan cover
+  // Background bersih, senada dengan cover
   doc.setFillColor(255,255,255);
   doc.rect(0,0,pageWidth,pageHeight,"F");
   doc.setFillColor(236,246,253);
-  doc.circle(20, 18, 54, "F");
+  doc.circle(12, 10, 54, "F");
   doc.setFillColor(252,242,220);
-  doc.circle(pageWidth - 15, pageHeight - 18, 48, "F");
+  doc.circle(pageWidth - 18, pageHeight - 18, 48, "F");
 
-  // Red wave footer
+  // Wave footer merah
   doc.setFillColor(185,0,0);
-  doc.triangle(0, pageHeight - 30, pageWidth, pageHeight - 14, 0, pageHeight, "F");
+  doc.triangle(0, pageHeight - 29, pageWidth, pageHeight - 13, 0, pageHeight, "F");
   doc.setFillColor(210,0,0);
   doc.triangle(0, pageHeight - 22, pageWidth, pageHeight - 6, 0, pageHeight, "F");
   doc.setFillColor(150,0,0);
-  doc.triangle(0, pageHeight - 12, pageWidth, pageHeight, 0, pageHeight, "F");
+  doc.triangle(0, pageHeight - 11, pageWidth, pageHeight, 0, pageHeight, "F");
   doc.setDrawColor(216,168,44);
   doc.setLineWidth(0.35);
-  doc.line(8, pageHeight - 24, pageWidth - 8, pageHeight - 10);
+  doc.line(10, pageHeight - 23, pageWidth - 10, pageHeight - 10);
 
   // Header
-  addLogoToPdf(doc, logoDataUrl, pageWidth/2 - 22, 13, 44, 28);
+  addLogoToPdf(doc, logoDataUrl, pageWidth/2 - 17, 9, 34, 24);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
+  doc.setFontSize(24);
   doc.setTextColor(185,0,0);
-  doc.text("ANALISA FINANCIAL PLANNER", pageWidth/2, 57, { align:"center" });
+  doc.text("ANALISA FINANCIAL PLANNER", pageWidth/2, 43, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.8);
+  doc.setFontSize(9.2);
   doc.setTextColor(71,85,105);
-  doc.text("Kesimpulan singkat berdasarkan hasil Review Polis Cerdas Finansial.", pageWidth/2, 66, { align:"center" });
+  doc.text("Kesimpulan singkat berdasarkan hasil Review Polis Cerdas Finansial.", pageWidth/2, 52, { align:"center" });
 
-  // Main card
-  const cardW = 178;
-  const cardX = (pageWidth - cardW) / 2;
-  const cardY = 78;
-  const cardH = 89;
+  // Card utama
+  const cardX = 28;
+  const cardY = 62;
+  const cardW = pageWidth - 56;
+  const cardH = 98;
   doc.setFillColor(255,255,255);
   doc.setDrawColor(235,120,120);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(cardX, cardY, cardW, cardH, 4, 4, "FD");
+  doc.setLineWidth(0.35);
+  doc.roundedRect(cardX, cardY, cardW, cardH, 5, 5, "FD");
 
-  // Narasi singkat
-  const textX = cardX + 12;
-  const textY = cardY + 15;
+  // Bagian ringkasan
+  doc.setFillColor(11,60,93);
+  doc.circle(cardX + 24, cardY + 23, 13, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(255,255,255);
+  doc.text("✓", cardX + 24, cardY + 28, { align:"center" });
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11.5);
+  doc.setTextColor(11,60,93);
+  doc.text("Hasil Review Polis", cardX + 45, cardY + 17);
+
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+  doc.setFontSize(9.6);
   doc.setTextColor(30,41,59);
-  doc.text(doc.splitTextToSize("Laporan ini merupakan hasil analisis awal berdasarkan data yang telah diinput.", cardW - 24), textX, textY);
-  doc.text(doc.splitTextToSize("Hasil review ini dapat digunakan sebagai referensi untuk melihat kondisi perlindungan keluarga saat ini.", cardW - 24), textX, textY + 17);
+  const paragraph = "Laporan ini merupakan hasil analisis awal berdasarkan data yang telah diinput. Hasil review ini dapat digunakan sebagai referensi untuk melihat kondisi perlindungan keluarga saat ini.";
+  doc.text(doc.splitTextToSize(paragraph, cardW - 72), cardX + 45, cardY + 27);
 
   doc.setDrawColor(230,150,150);
   doc.setLineWidth(0.25);
-  doc.line(cardX + 12, cardY + 39, cardX + cardW - 12, cardY + 39);
+  doc.line(cardX + 16, cardY + 48, cardX + cardW - 16, cardY + 48);
 
-  // CTA WhatsApp + QR
-  const ctaY = cardY + 48;
+  // Bagian CTA WhatsApp
+  const ctaTop = cardY + 58;
+  const leftX = cardX + 22;
   const qrSize = 37;
-  const qrX = cardX + cardW - 52;
-  const qrY = ctaY - 3;
+  const qrX = cardX + cardW - 62;
+  const qrY = ctaTop - 8;
+  const dividerX = qrX - 16;
 
   doc.setFillColor(0,166,81);
-  doc.circle(cardX + 25, ctaY + 16, 10, "F");
+  doc.circle(leftX + 13, ctaTop + 12, 13, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
   doc.setTextColor(255,255,255);
-  doc.text("WA", cardX + 25, ctaY + 20.3, { align:"center" });
+  doc.text("WA", leftX + 13, ctaTop + 16, { align:"center" });
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
+  doc.setFontSize(11.2);
   doc.setTextColor(185,0,0);
-  doc.text("Butuh Penjelasan Lebih Detail?", cardX + 42, ctaY + 7);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.2);
-  doc.setTextColor(30,41,59);
-  const ctaText = "Silakan hubungi Financial Planner melalui WhatsApp untuk mendapatkan penjelasan dan rekomendasi yang lebih sesuai dengan kondisi keluarga Anda.";
-  doc.text(doc.splitTextToSize(ctaText, 84), cardX + 42, ctaY + 16);
+  doc.text("Butuh Penjelasan Lebih Detail?", leftX + 35, ctaTop + 4);
 
-  // Garis pemisah dan QR Code WhatsApp
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.6);
+  doc.setTextColor(30,41,59);
+  const ctaText = "Silakan scan QR Code atau hubungi WhatsApp untuk mendapatkan penjelasan dan rekomendasi yang lebih sesuai dengan kondisi keluarga Anda.";
+  doc.text(doc.splitTextToSize(ctaText, dividerX - leftX - 43), leftX + 35, ctaTop + 13);
+
   doc.setDrawColor(235,120,120);
-  doc.line(qrX - 8, ctaY - 1, qrX - 8, ctaY + qrSize + 3);
+  doc.setLineWidth(0.25);
+  doc.line(dividerX, ctaTop - 10, dividerX, ctaTop + 34);
+
+  // QR Code WhatsApp
   try{
     doc.addImage(WHATSAPP_QR_IMAGE, "JPEG", qrX, qrY, qrSize, qrSize, undefined, "FAST");
-    doc.link(qrX, qrY, qrSize, qrSize, { url:"https://wa.me/628116946999" });
+    doc.link(qrX, qrY, qrSize, qrSize, { url: waUrl });
   }catch(e){
     doc.setDrawColor(0,0,0);
     doc.rect(qrX, qrY, qrSize, qrSize);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setTextColor(0,0,0);
     doc.text("QR WhatsApp", qrX + qrSize/2, qrY + qrSize/2, { align:"center" });
   }
 
-  // Label kecil di bawah QR
   doc.setFillColor(185,0,0);
-  doc.roundedRect(qrX + 2, qrY + qrSize + 3, qrSize - 4, 8, 2, 2, "F");
+  doc.roundedRect(qrX + 2, qrY + qrSize + 3, qrSize - 4, 7.5, 2, 2, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.7);
+  doc.setFontSize(6.5);
   doc.setTextColor(255,255,255);
-  doc.text("Scan untuk Chat", qrX + qrSize/2, qrY + qrSize + 8.3, { align:"center" });
+  doc.text("Scan untuk Chat", qrX + qrSize/2, qrY + qrSize + 8, { align:"center" });
+  doc.link(qrX + 2, qrY + qrSize + 3, qrSize - 4, 7.5, { url: waUrl });
 
-  // Signature
-  const sigY = 178;
-  doc.setFont("helvetica", "bolditalic");
+  // Nomor WhatsApp di dalam card, tidak keluar border
+  const phoneY = cardY + cardH - 13;
+  doc.setFillColor(255,244,244);
+  doc.setDrawColor(245,210,210);
+  doc.roundedRect(cardX + 61, phoneY - 5, 118, 12, 3, 3, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(11,60,93);
+  doc.text("WhatsApp:", cardX + 80, phoneY + 2, { align:"right" });
   doc.setFontSize(13);
+  doc.setTextColor(185,0,0);
+  doc.text("0811-6946-999", cardX + 85, phoneY + 2);
+  doc.link(cardX + 61, phoneY - 5, 118, 12, { url: waUrl });
+
+  // Signature / Planner
+  const sigY = 176;
+  doc.setFont("helvetica", "bolditalic");
+  doc.setFontSize(14);
   doc.setTextColor(11,60,93);
   doc.text("Septino, QWP®, CIS®", pageWidth/2, sigY, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.4);
+  doc.setFontSize(8.6);
   doc.setTextColor(71,85,105);
   doc.text("Financial Planner", pageWidth/2, sigY + 7, { align:"center" });
   doc.setDrawColor(216,168,44);
   doc.setLineWidth(0.4);
-  doc.line(pageWidth/2 - 7, sigY + 12, pageWidth/2 + 7, sigY + 12);
+  doc.line(pageWidth/2 - 12, sigY + 12, pageWidth/2 + 12, sigY + 12);
 
-  // Footer terakhir di atas wave merah
+  // Footer di atas wave
   doc.setDrawColor(255,255,255);
   doc.setLineWidth(0.18);
   doc.line(12, pageHeight - 18, pageWidth - 12, pageHeight - 18);
