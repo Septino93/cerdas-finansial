@@ -1,103 +1,181 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cerdas Finansial</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cerdas Finansial</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 <main class="dashboard-page">
 
   <section class="hero-section">
-    <div class="hero-bg-shape shape-left"></div>
-    <div class="hero-bg-shape shape-right"></div>
+    <div class="hero-orb orb-left"></div>
+    <div class="hero-orb orb-right"></div>
 
     <div class="hero-content">
       <img src="asset/logo-cerdas-finansial.png" alt="Cerdas Finansial" class="hero-logo">
+
+      <div class="hero-badge">
+        <i class="bi bi-stars"></i>
+        Financial Planning Toolkit
+      </div>
+
+      <h1>Cerdas Finansial</h1>
+      <p>
+        Perencanaan keuangan keluarga yang lebih mudah,
+        terukur, dan profesional.
+      </p>
     </div>
   </section>
 
   <section class="menu-section">
     <div class="container">
+
+      <div class="section-heading">
+        <span>Modul Aktif</span>
+        <h2>Mulai Analisis Keuangan</h2>
+      </div>
+
+      <div class="row g-4 mb-5">
+
+        <div class="col-md-6">
+          <a href="pages/pendidikan.html" class="module-link">
+            <div class="module-card active">
+              <div class="module-top">
+                <div class="module-icon green">
+                  <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <span class="module-badge ready">READY</span>
+              </div>
+              <h3>Dana Pendidikan</h3>
+              <p>Simulasi kebutuhan dana pendidikan anak berdasarkan inflasi dan periode persiapan.</p>
+              <div class="module-action">
+                Masuk Modul <i class="bi bi-arrow-right"></i>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-md-6">
+          <a href="pages/review-polis.html" class="module-link">
+            <div class="module-card active">
+              <div class="module-top">
+                <div class="module-icon blue">
+                  <i class="bi bi-clipboard2-check-fill"></i>
+                </div>
+                <span class="module-badge ready">READY</span>
+              </div>
+              <h3>Review Polis</h3>
+              <p>Insurance Matrix keluarga untuk mengecek kelengkapan fungsi perlindungan.</p>
+              <div class="module-action">
+                Masuk Modul <i class="bi bi-arrow-right"></i>
+              </div>
+            </div>
+          </a>
+        </div>
+
+      </div>
+
+      <div class="section-heading">
+        <span>Modul Selanjutnya</span>
+        <h2>Pengembangan Berikutnya</h2>
+      </div>
+
       <div class="row g-4">
 
-        <div class="col-md-6">
-          <a href="pages/pendidikan.html" class="menu-link">
-            <div class="menu-card active-card">
-              <div class="menu-icon"><i class="bi bi-mortarboard-fill"></i></div>
-              <div class="menu-text">
-                <h4>Dana Pendidikan</h4>
-                <p>Simulasi dana pendidikan anak</p>
+        <div class="col-md-6 col-lg-4">
+          <div class="module-card coming">
+            <div class="module-top">
+              <div class="module-icon red">
+                <i class="bi bi-heart-pulse-fill"></i>
               </div>
-              <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+              <span class="module-badge soon">COMING SOON</span>
             </div>
-          </a>
+            <h3>UP Jiwa</h3>
+            <p>Perhitungan uang pertanggungan jiwa sesuai kebutuhan keluarga.</p>
+          </div>
         </div>
 
-        <div class="col-md-6">
-          <a href="pages/review-polis.html" class="menu-link">
-            <div class="menu-card active-card">
-              <div class="menu-icon"><i class="bi bi-clipboard2-check-fill"></i></div>
-              <div class="menu-text">
-                <h4>Review Polis</h4>
-                <p>Insurance Matrix keluarga</p>
+        <div class="col-md-6 col-lg-4">
+          <div class="module-card coming">
+            <div class="module-top">
+              <div class="module-icon cyan">
+                <i class="bi bi-hospital-fill"></i>
               </div>
-              <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+              <span class="module-badge soon">COMING SOON</span>
             </div>
-          </a>
-        </div>
-
-        <div class="col-md-6">
-          <div class="menu-card disabled">
-            <div class="menu-icon"><i class="bi bi-heart-pulse-fill"></i></div>
-            <div class="menu-text">
-              <h4>Uang Pertanggungan Jiwa</h4>
-              <p>Segera hadir</p>
-            </div>
-            <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+            <h3>Asuransi Kesehatan</h3>
+            <p>Analisis kebutuhan limit kesehatan keluarga secara lebih terukur.</p>
           </div>
         </div>
 
-        <div class="col-md-6">
-          <div class="menu-card disabled">
-            <div class="menu-icon"><i class="bi bi-hospital-fill"></i></div>
-            <div class="menu-text">
-              <h4>Asuransi Kesehatan</h4>
-              <p>Segera hadir</p>
+        <div class="col-md-6 col-lg-4">
+          <div class="module-card coming">
+            <div class="module-top">
+              <div class="module-icon purple">
+                <i class="bi bi-shield-plus"></i>
+              </div>
+              <span class="module-badge soon">COMING SOON</span>
             </div>
-            <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+            <h3>Penyakit Kritis</h3>
+            <p>Simulasi kebutuhan perlindungan penyakit kritis dan income replacement.</p>
           </div>
         </div>
 
-        <div class="col-md-6">
-          <div class="menu-card disabled">
-            <div class="menu-icon"><i class="bi bi-shield-plus"></i></div>
-            <div class="menu-text">
-              <h4>Penyakit Kritis</h4>
-              <p>Segera hadir</p>
+        <div class="col-md-6 col-lg-4">
+          <div class="module-card coming">
+            <div class="module-top">
+              <div class="module-icon gold">
+                <i class="bi bi-piggy-bank-fill"></i>
+              </div>
+              <span class="module-badge soon">COMING SOON</span>
             </div>
-            <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+            <h3>Dana Pensiun</h3>
+            <p>Perencanaan kebutuhan pensiun dan estimasi dana yang perlu disiapkan.</p>
           </div>
         </div>
 
-        <div class="col-md-6">
-          <div class="menu-card disabled">
-            <div class="menu-icon"><i class="bi bi-piggy-bank-fill"></i></div>
-            <div class="menu-text">
-              <h4>Dana Pensiun</h4>
-              <p>Segera hadir</p>
+        <div class="col-md-6 col-lg-4">
+          <div class="module-card coming">
+            <div class="module-top">
+              <div class="module-icon green">
+                <i class="bi bi-wallet2"></i>
+              </div>
+              <span class="module-badge soon">COMING SOON</span>
             </div>
-            <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+            <h3>Dana Darurat</h3>
+            <p>Hitung kebutuhan dana darurat keluarga berdasarkan pengeluaran bulanan.</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="module-card coming">
+            <div class="module-top">
+              <div class="module-icon blue">
+                <i class="bi bi-graph-up-arrow"></i>
+              </div>
+              <span class="module-badge soon">COMING SOON</span>
+            </div>
+            <h3>Investasi</h3>
+            <p>Simulasi target investasi dan strategi akumulasi aset jangka panjang.</p>
           </div>
         </div>
 
       </div>
+
     </div>
   </section>
+
+  <footer class="dashboard-footer">
+    <strong>Cerdas Finansial</strong>
+    <span>Version 1.0</span>
+    <small>Developed by Septino</small>
+  </footer>
 
 </main>
 
