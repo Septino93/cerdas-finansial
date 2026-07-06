@@ -1,3 +1,6 @@
+const CF_LOGO_IMG = new Image();
+CF_LOGO_IMG.src = "../asset/logo-cerdas-finansial.png";
+
 const TARGETS={sd:{label:'SD Swasta',usia:6,lama:6},smp:{label:'SMP Swasta',usia:12,lama:3},sma:{label:'SMA Swasta',usia:15,lama:3},s1dn:{label:'S1 Dalam Negeri',usia:18,lama:4},s1ln:{label:'S1 Luar Negeri',usia:18,lama:4},kedokteran:{label:'Kedokteran',usia:18,lama:6},s2dn:{label:'S2 Dalam Negeri',usia:22,lama:2},s2ln:{label:'S2 Luar Negeri',usia:22,lama:2},custom:{label:'Custom',usia:'',lama:''}};
 const FP={whatsapp:'628116946999',email:'septinogao@gmail.com',instagram:'https://instagram.com/septino.gao'};let last=null;
 document.addEventListener('DOMContentLoaded',()=>{tahunSekarang.value=new Date().getFullYear();allInputs().forEach(el=>el.addEventListener('input',()=>{formatIfMoney(el);updateTarget();updatePeriode();hitung();}));targetPendidikan.addEventListener('change',()=>{applyTarget();updatePeriode();hitung();});periodePersiapan.addEventListener('change',()=>{customTahunBox.classList.toggle('d-none',periodePersiapan.value!=='custom');hitung();});document.querySelectorAll('input[name="strategiInvestasi"]').forEach(r=>r.addEventListener('change',hitung));updatePeriode();kosongkan();});
@@ -261,10 +264,26 @@ function exportPDF(){
         doc.text(lines,x,y);
         return y + lines.length*lineH;
     }
-    function logo(x,y,s=1){
-        fill(C.softGreen); doc.roundedRect(x,y,12*s,12*s,3*s,3*s,'F');
-        stroke(C.green); doc.setLineWidth(.7*s); doc.circle(x+6*s,y+6*s,4*s,'S');
-        doc.line(x+3.5*s,y+6*s,x+8.5*s,y+6*s); doc.line(x+6*s,y+3.5*s,x+6*s,y+8.5*s);
+    function logo(x, y, s = 1){
+    const w = 12 * s;
+    const h = 12 * s;
+
+    if (CF_LOGO_IMG.complete && CF_LOGO_IMG.naturalWidth > 0) {
+        doc.addImage(CF_LOGO_IMG, "PNG", x, y, w, h);
+        return;
+    }
+
+    // fallback kalau logo belum sempat load
+    fill(C.softGreen);
+    doc.roundedRect(x, y, 12*s, 12*s, 3*s, 3*s, 'F');
+
+    stroke(C.green);
+    doc.setLineWidth(.7*s);
+    doc.circle(x+6*s, y+6*s, 4*s, 'S');
+
+    doc.line(x+3.5*s, y+6*s, x+8.5*s, y+6*s);
+    doc.line(x+6*s, y+3.5*s, x+6*s, y+8.5*s);
+}
     }
     function header(page){
         fill(C.white); doc.rect(0,0,W,24,'F');
