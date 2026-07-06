@@ -1,5 +1,12 @@
-const CF_LOGO_IMG = new Image();
-CF_LOGO_IMG.src = "../asset/logo-cerdas-finansial.png";
+let CF_LOGO_IMG = null;
+
+function loadCFLogo(){
+    CF_LOGO_IMG = new Image();
+    CF_LOGO_IMG.crossOrigin = "anonymous";
+    CF_LOGO_IMG.src = "../asset/logo-cerdas-finansial.png";
+}
+
+document.addEventListener("DOMContentLoaded", loadCFLogo);
 
 const TARGETS={sd:{label:'SD Swasta',usia:6,lama:6},smp:{label:'SMP Swasta',usia:12,lama:3},sma:{label:'SMA Swasta',usia:15,lama:3},s1dn:{label:'S1 Dalam Negeri',usia:18,lama:4},s1ln:{label:'S1 Luar Negeri',usia:18,lama:4},kedokteran:{label:'Kedokteran',usia:18,lama:6},s2dn:{label:'S2 Dalam Negeri',usia:22,lama:2},s2ln:{label:'S2 Luar Negeri',usia:22,lama:2},custom:{label:'Custom',usia:'',lama:''}};
 const FP={whatsapp:'628116946999',email:'septinogao@gmail.com',instagram:'https://instagram.com/septino.gao'};let last=null;
@@ -264,25 +271,24 @@ function exportPDF(){
         doc.text(lines,x,y);
         return y + lines.length*lineH;
     }
-    function logo(x, y, s = 1){
-    const w = 12 * s;
-    const h = 12 * s;
+    function logo(x,y,s=1){
+    try{
+        if(CF_LOGO_IMG && CF_LOGO_IMG.complete && CF_LOGO_IMG.naturalWidth > 0){
+            doc.addImage(CF_LOGO_IMG,'PNG',x,y,12*s,12*s);
+            return;
+        }
+    }catch(e){}
 
-    if (CF_LOGO_IMG.complete && CF_LOGO_IMG.naturalWidth > 0) {
-        doc.addImage(CF_LOGO_IMG, "PNG", x, y, w, h);
-        return;
-    }
-
-    // fallback kalau logo belum sempat load
     fill(C.softGreen);
-    doc.roundedRect(x, y, 12*s, 12*s, 3*s, 3*s, 'F');
+    doc.roundedRect(x,y,12*s,12*s,3*s,3*s,'F');
 
     stroke(C.green);
     doc.setLineWidth(.7*s);
-    doc.circle(x+6*s, y+6*s, 4*s, 'S');
+    doc.circle(x+6*s,y+6*s,4*s,'S');
 
-    doc.line(x+3.5*s, y+6*s, x+8.5*s, y+6*s);
-    doc.line(x+6*s, y+3.5*s, x+6*s, y+8.5*s);
+    doc.line(x+3.5*s,y+6*s,x+8.5*s,y+6*s);
+    doc.line(x+6*s,y+3.5*s,x+6*s,y+8.5*s);
+}
 }
     }
     function header(page){
