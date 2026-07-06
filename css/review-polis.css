@@ -24,3 +24,45 @@ body{background:#eef3f8;font-family:Arial,Helvetica,sans-serif;color:#172033}
 @media(max-width:900px){.family-grid,.summary-grid{grid-template-columns:repeat(2,1fr)}.matrix-title{font-size:30px}.matrix-head{display:block}.matrix-name{width:100%;margin-top:12px}.page-header h1{font-size:28px}}
 @media(max-width:560px){.family-grid,.summary-grid{grid-template-columns:1fr}.section-card{padding:18px}.page-header{padding:24px 18px}.matrix-title{font-size:25px;text-align:left}}
 @media print{body{background:white}.page-header,.footer-action,.family-grid,.section-card.form-section,.edit-btn,.btn-main,.btn-outline-main,.btn-navy{display:none!important}.container-wide{max-width:none;margin:0;padding:0}.section-card{box-shadow:none;border:0;padding:0}.matrix-table{min-width:auto;font-size:10px}.matrix-table th,.matrix-table td{padding:6px;font-size:10px}.note-box{font-size:13px}.table-wrap{overflow:visible;border:0}.matrix-title{font-size:30px}}
+
+.matrix-title{
+  color:#b40000;
+}
+
+.matrix-table th,
+.matrix-table td{
+  border:1px solid rgba(224,0,0,.35);
+}
+
+.matrix-table th{
+  background:#fff6f6;
+  color:#111;
+}
+
+.row-category,
+.row-function{
+  color:#111;
+  font-weight:900;
+}
+
+.note-box{
+  background:#fff0f0;
+  color:#c00000;
+  border:0;
+}
+
+.status-band.red{
+  background:#e00000;
+}
+
+.status-band.green{
+  background:#00a651;
+}
+
+.status-band.yellow{
+  background:#ffe100;
+}
+
+.status-band.blue{
+  background:#008bd2;
+}

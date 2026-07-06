@@ -6,14 +6,21 @@ let state = {
 };
 
 const matrixTemplate = [
-  { kategori: "Asuransi Jiwa", fungsi: "Menjaga income keluarga jika pencari nafkah meninggal dunia", warna: "red" },
-  { kategori: "Asuransi Penyakit Kritis", fungsi: "Menjaga income dan biaya hidup saat terkena penyakit kritis", warna: "red" },
-  { kategori: "Asuransi Kesehatan", fungsi: "Menanggung biaya rumah sakit dan perawatan medis", warna: "red" },
-  { kategori: "Asuransi Kecelakaan", fungsi: "Perlindungan risiko cacat atau meninggal akibat kecelakaan", warna: "green" },
-  { kategori: "Dana Pendidikan", fungsi: "Menyiapkan biaya pendidikan anak", warna: "blue" },
-  { kategori: "Dana Pensiun", fungsi: "Menyiapkan penghasilan saat usia pensiun", warna: "blue" },
-  { kategori: "Warisan / Legacy", fungsi: "Distribusi kekayaan kepada keluarga atau ahli waris", warna: "yellow" },
-  { kategori: "Investasi / Unit Link", fungsi: "Akumulasi dana jangka menengah dan panjang", warna: "blue" }
+  { kategori: "ASURANSI KESEHATAN", fungsi: "PROTEKSI ASET", warna: "red" },
+  { kategori: "ASURANSI PENYAKIT KRITIS", fungsi: "PROTEKSI INCOME", warna: "red" },
+  { kategori: "ASURANSI JIWA", fungsi: "PROTEKSI INCOME", warna: "red" },
+  { kategori: "ASURANSI PENDIDIKAN ANAK", fungsi: "PENDIDIKAN ANAK 1", warna: "red" },
+  { kategori: "ASURANSI PENDIDIKAN ANAK", fungsi: "PENDIDIKAN ANAK 2", warna: "red" },
+  { kategori: "ASURANSI PENDIDIKAN ANAK", fungsi: "PENDIDIKAN ANAK 3", warna: "red" },
+  { kategori: "ASURANSI JIWA", fungsi: "DANA PENSIUN PASANGAN", warna: "red" },
+  { kategori: "ASURANSI JIWA", fungsi: "PELUNASAN HUTANG", warna: "red" },
+  { kategori: "ASURANSI JIWA", fungsi: "BIAYA PEMAKAMAN", warna: "red" },
+  { kategori: "ASURANSI SANTUNAN HARIAN RAWAT INAP", fungsi: "PROTEKSI INCOME", warna: "green" },
+  { kategori: "ASURANSI CACAT TETAP & TOTAL", fungsi: "PROTEKSI INCOME", warna: "green" },
+  { kategori: "ASURANSI KECELAKAAN", fungsi: "PROTEKSI INCOME", warna: "green" },
+  { kategori: "ASURANSI JIWA", fungsi: "BIAYA DISTRIBUSI ASET", warna: "yellow" },
+  { kategori: "ASURANSI JIWA", fungsi: "WARISAN", warna: "yellow" },
+  { kategori: "ASURANSI DANA PENSIUN", fungsi: "PERSIAPAN INCOME MASA PENSIUN", warna: "blue" }
 ];
 
 function loadState() {
