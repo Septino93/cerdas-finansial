@@ -9,123 +9,116 @@
   <link rel="stylesheet" href="../css/review-polis.css">
 </head>
 <body>
-  <header class="app-topbar">
-    <a href="../index.html" class="topbar-back" aria-label="Kembali"><i class="bi bi-arrow-left"></i></a>
+  <header class="top-header">
+    <a href="../index.html" class="back-link"><i class="bi bi-arrow-left"></i></a>
     <div>
       <h1>Review Polis</h1>
-      <p>Insurance Matrix keluarga</p>
+      <p>Insurance Matrix keluarga untuk mengecek kelengkapan dan fungsi polis.</p>
     </div>
-    <button type="button" class="topbar-print" onclick="window.print()"><i class="bi bi-printer"></i> Export PDF</button>
+    <button class="print-btn" onclick="window.print()"><i class="bi bi-printer"></i> Cetak / PDF</button>
   </header>
 
-  <main class="container-fluid app-shell">
-    <section class="setup-grid form-section">
-      <div class="setup-card">
-        <div class="card-heading red-heading">
-          <div class="heading-icon"><i class="bi bi-people-fill"></i></div>
-          <div>
-            <h2>Data Keluarga</h2>
-            <p>Isi data keluarga untuk membuat insurance matrix.</p>
-          </div>
-        </div>
+  <main class="review-layout">
+    <aside class="side-panel">
+      <section class="side-card">
+        <h2><i class="bi bi-people-fill"></i> Data Keluarga</h2>
+        <label class="form-label">Nama Kepala Keluarga</label>
+        <input id="namaKepala" class="form-control" placeholder="Contoh: Budi Santoso">
 
-        <div class="row g-3 align-items-end">
-          <div class="col-md-4">
-            <label class="form-label">Nama Kepala Keluarga</label>
-            <input id="namaKepala" class="form-control" placeholder="Contoh: Andi">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Nama Pasangan</label>
-            <input id="namaPasangan" class="form-control" placeholder="Contoh: Reny">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Jumlah Anak</label>
-            <select id="jumlahAnak" class="form-select">
-              <option value="0">0 Anak</option>
-              <option value="1">1 Anak</option>
-              <option value="2">2 Anak</option>
-              <option value="3" selected>3 Anak</option>
-              <option value="4">4 Anak</option>
-              <option value="5">5 Anak</option>
-            </select>
-          </div>
-          <div class="col-12 d-flex gap-2 flex-wrap">
-            <button type="button" class="btn-main" onclick="simpanKeluarga()"><i class="bi bi-save"></i> Simpan Data Keluarga</button>
-            <button type="button" class="btn-outline-main" onclick="resetReview()"><i class="bi bi-arrow-clockwise"></i> Reset Review</button>
-          </div>
-        </div>
-      </div>
+        <label class="form-label mt-3">Nama Pasangan</label>
+        <input id="namaPasangan" class="form-control" placeholder="Contoh: Siti Rahayu">
 
-      <div class="setup-card">
-        <div class="card-heading navy-heading">
-          <div class="heading-icon"><i class="bi bi-person-badge-fill"></i></div>
-          <div>
-            <h2>Pilih Anggota Keluarga</h2>
-            <p>Setiap anggota memiliki insurance matrix yang berbeda.</p>
-          </div>
-        </div>
-        <div id="familyGrid" class="family-grid"></div>
-      </div>
-    </section>
+        <label class="form-label mt-3">Status Pasangan</label>
+        <select id="statusPasangan" class="form-select">
+          <option value="kerja" selected>Kerja / Ada Income</option>
+          <option value="tidak_kerja">Tidak Kerja / Tidak Ada Income</option>
+        </select>
 
-    <section class="summary-grid form-section">
-      <div class="summary-card"><p>Total Kategori</p><h3 id="sumTotal">0</h3></div>
-      <div class="summary-card"><p>Sudah Punya</p><h3 id="sumOwned">0</h3></div>
-      <div class="summary-card"><p>Belum Punya</p><h3 id="sumNone">0</h3></div>
-      <div class="summary-card score"><p>Skor Review</p><h3 id="sumScore">0%</h3></div>
-    </section>
+        <label class="form-label mt-3">Jumlah Anak</label>
+        <select id="jumlahAnak" class="form-select">
+          <option value="0">0 Anak</option>
+          <option value="1">1 Anak</option>
+          <option value="2">2 Anak</option>
+          <option value="3" selected>3 Anak</option>
+          <option value="4">4 Anak</option>
+          <option value="5">5 Anak</option>
+        </select>
+
+        <button class="btn-save w-100 mt-3" onclick="simpanKeluarga()"><i class="bi bi-save2"></i> Simpan Data Keluarga</button>
+        <button class="btn-reset w-100 mt-2" onclick="resetReview()"><i class="bi bi-arrow-clockwise"></i> Reset Review</button>
+      </section>
+
+      <section class="side-card mt-3">
+        <h2><i class="bi bi-person-lines-fill"></i> Daftar Anggota</h2>
+        <div id="familyList" class="family-list"></div>
+        <div class="info-box"><i class="bi bi-info-circle-fill"></i> Klik anggota keluarga untuk melihat dan mengedit matrix polis masing-masing.</div>
+      </section>
+    </aside>
 
     <section class="matrix-panel">
-      <div class="matrix-redbar">
-        <div id="memberMatrixLabel" class="member-label">1. KEPALA KELUARGA</div>
-        <div class="name-box">
-          <label for="matrixName">Nama:</label>
-          <input id="matrixName" class="form-control" oninput="updateCurrentName(this.value)">
-        </div>
+      <div class="top-legend">
+        <div><span class="legend-dot red"></span> Wajib Dimiliki</div>
+        <div><span class="legend-dot green"></span> Sesuai Kebutuhan / Tidak Wajib</div>
+        <div><span class="legend-dot yellow"></span> Distribusi Kekayaan</div>
+        <div><span class="legend-dot blue"></span> Fungsi Akumulasi</div>
       </div>
 
-      <div class="matrix-hero">
-        <div class="legend-block">
-          <div class="legend-item"><span class="legend-box red"></span> WAJIB DIMILIKI</div>
-          <div class="legend-item"><span class="legend-box green"></span> SESUAI KEBUTUHAN / TIDAK WAJIB</div>
-          <div class="legend-item"><span class="legend-box yellow"></span> DISTRIBUSI KEKAYAAN</div>
-          <div class="legend-item"><span class="legend-box blue"></span> FUNGSI AKUMULASI</div>
+      <div class="matrix-sheet">
+        <div class="matrix-redbar">
+          <div id="memberMatrixLabel">1. KEPALA KELUARGA</div>
+          <div class="matrix-name-box">
+            <label>Nama:</label>
+            <input id="matrixName" oninput="updateCurrentName(this.value)">
+          </div>
         </div>
 
-        <div class="matrix-title-wrap">
-          <h2 id="matrixTitle">INSURANCE MATRIX</h2>
+        <div class="matrix-hero">
+          <div class="legend-vertical">
+            <div><span class="legend-dot red"></span> Wajib Dimiliki</div>
+            <div><span class="legend-dot green"></span> Sesuai Kebutuhan / Tidak Wajib</div>
+            <div><span class="legend-dot yellow"></span> Distribusi Kekayaan</div>
+            <div><span class="legend-dot blue"></span> Fungsi Akumulasi</div>
+          </div>
+
+          <div class="matrix-title">INSURANCE<br>MATRIX</div>
+
+          <div class="brand-logo">
+            <img src="../assets/logo-cerdas-finansial.png" alt="Cerdas Finansial">
+          </div>
         </div>
 
-        <div class="brand-block">
-          <div class="brand-mark">CF</div>
-          <div class="brand-text">Cerdas<br>Finansial</div>
+        <div class="summary-row">
+          <div><span>Total Kategori</span><strong id="sumTotal">0</strong></div>
+          <div><span>Sudah Punya</span><strong id="sumOwned">0</strong></div>
+          <div><span>Belum Punya</span><strong id="sumNone">0</strong></div>
+          <div><span>Skor Review</span><strong id="sumScore">0%</strong></div>
         </div>
+
+        <div class="table-wrap">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th rowspan="2">Status</th>
+                <th rowspan="2">No</th>
+                <th rowspan="2">Kategori</th>
+                <th rowspan="2">Fungsi Keuangan</th>
+                <th colspan="3">Punya</th>
+                <th rowspan="2">Tidak<br>Punya</th>
+                <th rowspan="2">Keterangan<br>Tambahan</th>
+                <th rowspan="2">Aksi</th>
+              </tr>
+              <tr>
+                <th>Brand</th>
+                <th>Jenis Produk Dasar</th>
+                <th>Manfaat</th>
+              </tr>
+            </thead>
+            <tbody id="matrixBody"></tbody>
+          </table>
+        </div>
+
+        <div class="note-box">Table ini harus di-review kembali setiap tahun agar memastikan apakah manfaat polis tersebut masih sesuai dengan fungsi dan tujuan keuangan.</div>
       </div>
-
-      <div class="table-wrap">
-        <table class="matrix-table">
-          <thead>
-            <tr>
-              <th rowspan="2">STATUS</th>
-              <th rowspan="2">NO</th>
-              <th rowspan="2">KATEGORI</th>
-              <th rowspan="2">FUNGSI KEUANGAN</th>
-              <th colspan="3">PUNYA</th>
-              <th rowspan="2">TIDAK<br>PUNYA</th>
-              <th rowspan="2">KETERANGAN<br>TAMBAHAN</th>
-              <th rowspan="2" class="action-col">AKSI</th>
-            </tr>
-            <tr>
-              <th>BRAND</th>
-              <th>JENIS PRODUK DASAR</th>
-              <th>MANFAAT</th>
-            </tr>
-          </thead>
-          <tbody id="matrixBody"></tbody>
-        </table>
-      </div>
-
-      <div class="note-box">Table ini harus di review kembali setiap tahun agar memastikan apakah manfaat polis tersebut masih sesuai dengan fungsi dan tujuan keuangan.</div>
     </section>
   </main>
 
@@ -133,7 +126,7 @@
     <div class="modal-box">
       <div class="modal-head">
         <h3 id="modalTitle">Edit Polis</h3>
-        <button type="button" class="close-x" onclick="closeModal()">×</button>
+        <button onclick="closeModal()">×</button>
       </div>
       <div class="modal-body-custom">
         <input type="hidden" id="editIndex">
@@ -170,9 +163,9 @@
             <textarea id="editCatatan" class="form-control" rows="3" placeholder="Catatan review, pengecualian, gap manfaat, atau rekomendasi."></textarea>
           </div>
         </div>
-        <div class="actions">
-          <button type="button" class="btn-outline-main" onclick="closeModal()">Batal</button>
-          <button type="button" class="btn-main" onclick="savePolicy()">Simpan</button>
+        <div class="modal-actions">
+          <button class="btn-reset" onclick="closeModal()">Batal</button>
+          <button class="btn-save" onclick="savePolicy()">Simpan</button>
         </div>
       </div>
     </div>
