@@ -2205,7 +2205,7 @@ function addPlannerAnalysisPage(doc, logoDataUrl, pageNo){
   const cardW = 178;
   const cardX = (pageWidth - cardW) / 2;
   const cardY = 78;
-  const cardH = 89;
+  const cardH = 104;
   doc.setFillColor(255,255,255);
   doc.setDrawColor(235,120,120);
   doc.setLineWidth(0.3);
@@ -2226,8 +2226,8 @@ function addPlannerAnalysisPage(doc, logoDataUrl, pageNo){
 
   // CTA WhatsApp + QR
   const ctaY = cardY + 48;
-  const qrSize = 37;
-  const qrX = cardX + cardW - 52;
+  const qrSize = 40;
+  const qrX = cardX + cardW - 55;
   const qrY = ctaY - 3;
 
   doc.setFillColor(0,166,81);
@@ -2245,7 +2245,12 @@ function addPlannerAnalysisPage(doc, logoDataUrl, pageNo){
   doc.setFontSize(8.2);
   doc.setTextColor(30,41,59);
   const ctaText = "Silakan hubungi Financial Planner melalui WhatsApp untuk mendapatkan penjelasan dan rekomendasi yang lebih sesuai dengan kondisi keluarga Anda.";
-  doc.text(doc.splitTextToSize(ctaText, 84), cardX + 42, ctaY + 16);
+  doc.text(doc.splitTextToSize(ctaText, 78), cardX + 42, ctaY + 16);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.2);
+  doc.setTextColor(0,166,81);
+  doc.text("WhatsApp: 0811-6946-999", cardX + 42, ctaY + 39);
 
   // Garis pemisah dan QR Code WhatsApp
   doc.setDrawColor(235,120,120);
@@ -2269,9 +2274,10 @@ function addPlannerAnalysisPage(doc, logoDataUrl, pageNo){
   doc.setFontSize(6.7);
   doc.setTextColor(255,255,255);
   doc.text("Scan untuk Chat", qrX + qrSize/2, qrY + qrSize + 8.3, { align:"center" });
+  doc.link(cardX + 42, ctaY + 33, 50, 10, { url:"https://wa.me/628116946999" });
 
   // Signature
-  const sigY = 178;
+  const sigY = 191;
   doc.setFont("helvetica", "bolditalic");
   doc.setFontSize(13);
   doc.setTextColor(11,60,93);
