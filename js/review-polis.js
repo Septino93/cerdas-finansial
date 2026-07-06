@@ -2170,176 +2170,242 @@ function drawAnalysisSection(doc, title, lines, x, y, w){
 function addPlannerAnalysisPage(doc, logoDataUrl, pageNo){
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
+  const isPortrait = pageHeight > pageWidth;
 
-  // Background sama dengan cover
-  doc.setFillColor(255,255,255);
-  doc.rect(0,0,pageWidth,pageHeight,"F");
-  doc.setFillColor(236,246,253);
-  doc.circle(20, 18, 54, "F");
-  doc.setFillColor(252,242,220);
-  doc.circle(pageWidth - 15, pageHeight - 18, 48, "F");
+  // Layout penutup dibuat sederhana seperti format PDF Dana Pendidikan:
+  // 1 kartu ringkasan, 1 kartu CTA WhatsApp, 2 kartu bawah (planner + disclaimer).
+  doc.setFillColor(246,250,253);
+  doc.rect(0, 0, pageWidth, pageHeight, "F");
 
-  // Red wave footer
-  doc.setFillColor(185,0,0);
-  doc.triangle(0, pageHeight - 30, pageWidth, pageHeight - 14, 0, pageHeight, "F");
-  doc.setFillColor(210,0,0);
-  doc.triangle(0, pageHeight - 22, pageWidth, pageHeight - 6, 0, pageHeight, "F");
-  doc.setFillColor(150,0,0);
-  doc.triangle(0, pageHeight - 12, pageWidth, pageHeight, 0, pageHeight, "F");
-  doc.setDrawColor(216,168,44);
-  doc.setLineWidth(0.35);
-  doc.line(8, pageHeight - 24, pageWidth - 8, pageHeight - 10);
+  // Dekorasi halus
+  doc.setFillColor(232,242,250);
+  doc.circle(4, 6, isPortrait ? 34 : 42, "F");
+  doc.setFillColor(253,244,225);
+  doc.circle(pageWidth - 6, pageHeight - 6, isPortrait ? 26 : 34, "F");
 
   // Header
-  addLogoToPdf(doc, logoDataUrl, pageWidth/2 - 22, 13, 44, 28);
+  const logoW = isPortrait ? 28 : 32;
+  const logoH = isPortrait ? 18 : 21;
+  addLogoToPdf(doc, logoDataUrl, pageWidth / 2 - logoW / 2, isPortrait ? 12 : 10, logoW, logoH);
+
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.setTextColor(185,0,0);
-  doc.text("ANALISA FINANCIAL PLANNER", pageWidth/2, 57, { align:"center" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.8);
-  doc.setTextColor(71,85,105);
-  doc.text("Kesimpulan singkat berdasarkan hasil Review Polis Cerdas Finansial.", pageWidth/2, 66, { align:"center" });
-
-  // Main card
-  const cardW = 204;
-  const cardX = (pageWidth - cardW) / 2;
-  const cardY = 78;
-  const cardH = 92;
-  doc.setFillColor(255,255,255);
-  doc.setDrawColor(235,120,120);
-  doc.setLineWidth(0.35);
-  doc.roundedRect(cardX, cardY, cardW, cardH, 4, 4, "FD");
-
-  // Narasi singkat
-  const textX = cardX + 12;
-  const textY = cardY + 15;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(30,41,59);
-  doc.text(
-    doc.splitTextToSize("Laporan ini merupakan hasil analisis awal berdasarkan data yang telah diinput.", cardW - 24),
-    textX,
-    textY
-  );
-  doc.text(
-    doc.splitTextToSize("Hasil review ini dapat digunakan sebagai referensi untuk melihat kondisi perlindungan keluarga saat ini.", cardW - 24),
-    textX,
-    textY + 17
-  );
-
-  doc.setDrawColor(230,150,150);
-  doc.setLineWidth(0.25);
-  doc.line(cardX + 12, cardY + 39, cardX + cardW - 12, cardY + 39);
-
-  // CTA WhatsApp rapi: nomor berada di sisi kiri dan tidak melewati garis tengah
-  const ctaTop = cardY + 48;
-  const dividerX = cardX + 148;
-  const leftX = cardX + 12;
-  const leftW = dividerX - leftX - 10;
-  const rightX = dividerX + 16;
-
-  // Icon WA
-  doc.setFillColor(0,166,81);
-  doc.circle(leftX + 23, ctaTop + 19, 13, "F");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.setTextColor(255,255,255);
-  doc.text("WA", leftX + 23, ctaTop + 23.5, { align:"center" });
-
-  // Text CTA
-  const ctaTextX = leftX + 48;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10.3);
-  doc.setTextColor(185,0,0);
-  doc.text("Butuh Penjelasan Lebih Detail?", ctaTextX, ctaTop + 5);
+  doc.setFontSize(isPortrait ? 18 : 22);
+  doc.setTextColor(11, 60, 93);
+  doc.text("ANALISA", pageWidth / 2, isPortrait ? 39 : 36, { align:"center" });
+  doc.setTextColor(185, 0, 0);
+  doc.text("FINANCIAL PLANNER", pageWidth / 2, isPortrait ? 48 : 47, { align:"center" });
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.3);
-  doc.setTextColor(30,41,59);
-  const ctaText = "Silakan scan QR Code atau hubungi WhatsApp untuk mendapatkan penjelasan dan rekomendasi yang lebih sesuai dengan kondisi keluarga Anda.";
-  doc.text(doc.splitTextToSize(ctaText, leftW - 50), ctaTextX, ctaTop + 14);
+  doc.setFontSize(isPortrait ? 8.5 : 9);
+  doc.setTextColor(71, 85, 105);
+  doc.text("Kesimpulan singkat berdasarkan hasil Review Polis Cerdas Finansial.", pageWidth / 2, isPortrait ? 56 : 56, { align:"center" });
 
-  // Kotak nomor WhatsApp, dibuat lebih pendek agar tidak lewat garis tengah
-  const phoneX = ctaTextX;
-  const phoneY = ctaTop + 34;
-  const phoneW = leftW - 50;
-  const phoneH = 12;
-  doc.setFillColor(255,248,248);
-  doc.setDrawColor(246,205,205);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(phoneX, phoneY, phoneW, phoneH, 3, 3, "FD");
+  const margin = isPortrait ? 15 : 18;
+  const contentW = pageWidth - margin * 2;
 
-  // Icon telepon sederhana dalam lingkaran kecil
-  doc.setDrawColor(185,0,0);
-  doc.setLineWidth(0.6);
-  doc.circle(phoneX + 7, phoneY + 6, 3.6, "S");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.2);
-  doc.setTextColor(185,0,0);
-  doc.text("☎", phoneX + 7, phoneY + 8.2, { align:"center" });
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.6);
-  doc.setTextColor(11,60,93);
-  doc.text("WhatsApp:", phoneX + 15, phoneY + 7.8);
-  doc.setFontSize(12.5);
-  doc.setTextColor(185,0,0);
-  doc.text("0811-6946-999", phoneX + 44, phoneY + 8.1);
-  doc.link(phoneX, phoneY, phoneW, phoneH, { url:"https://wa.me/628116946999" });
-
-  // Garis pemisah kanan
-  doc.setDrawColor(235,120,120);
-  doc.setLineWidth(0.3);
-  doc.line(dividerX, ctaTop - 3, dividerX, cardY + cardH - 4);
-
-  // QR Code WhatsApp
-  const qrSize = 39;
-  const qrX = rightX + 8;
-  const qrY = ctaTop - 2;
-  try{
-    doc.addImage(WHATSAPP_QR_IMAGE, "JPEG", qrX, qrY, qrSize, qrSize, undefined, "FAST");
-    doc.link(qrX, qrY, qrSize, qrSize, { url:"https://wa.me/628116946999" });
-  }catch(e){
-    doc.setDrawColor(0,0,0);
-    doc.rect(qrX, qrY, qrSize, qrSize);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(0,0,0);
-    doc.text("QR WhatsApp", qrX + qrSize/2, qrY + qrSize/2, { align:"center" });
+  function card(x, y, w, h, fill=[255,255,255], stroke=[207,222,235], radius=5){
+    doc.setFillColor(fill[0], fill[1], fill[2]);
+    doc.setDrawColor(stroke[0], stroke[1], stroke[2]);
+    doc.setLineWidth(0.35);
+    doc.roundedRect(x, y, w, h, radius, radius, "FD");
   }
 
-  // Tombol scan di bawah QR
-  doc.setFillColor(185,0,0);
-  doc.roundedRect(qrX + 1.5, qrY + qrSize + 3, qrSize - 3, 8.5, 2.2, 2.2, "F");
+  // Ringkasan atas
+  const summaryY = isPortrait ? 66 : 68;
+  const summaryH = isPortrait ? 47 : 36;
+  card(margin, summaryY, contentW, summaryH, [255,255,255], [196,216,232], 5);
+
+  doc.setFillColor(11, 60, 93);
+  doc.circle(margin + (isPortrait ? 13 : 14), summaryY + summaryH/2, isPortrait ? 8 : 9, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.8);
+  doc.setFontSize(isPortrait ? 7.5 : 8.5);
   doc.setTextColor(255,255,255);
-  doc.text("Scan untuk Chat", qrX + qrSize/2, qrY + qrSize + 8.5, { align:"center" });
+  doc.text("i", margin + (isPortrait ? 13 : 14), summaryY + summaryH/2 + 2.5, { align:"center" });
 
-  // Signature
-  const sigY = 181;
-  doc.setFont("helvetica", "bolditalic");
-  doc.setFontSize(13);
-  doc.setTextColor(11,60,93);
-  doc.text("Septino, QWP®, CIS®", pageWidth/2, sigY, { align:"center" });
+  const summaryTextX = margin + (isPortrait ? 28 : 34);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.4);
-  doc.setTextColor(71,85,105);
-  doc.text("Financial Planner", pageWidth/2, sigY + 7, { align:"center" });
-  doc.setDrawColor(216,168,44);
-  doc.setLineWidth(0.4);
-  doc.line(pageWidth/2 - 7, sigY + 12, pageWidth/2 + 7, sigY + 12);
+  doc.setFontSize(isPortrait ? 9 : 10);
+  doc.setTextColor(30, 41, 59);
+  const summaryText = "Laporan ini merupakan hasil analisis awal berdasarkan data yang telah diinput. Hasil review ini dapat digunakan sebagai referensi untuk melihat kondisi perlindungan keluarga saat ini.";
+  doc.text(doc.splitTextToSize(summaryText, contentW - (isPortrait ? 42 : 50)), summaryTextX, summaryY + (isPortrait ? 17 : 15));
 
-  // Footer terakhir di atas wave merah
-  doc.setDrawColor(255,255,255);
-  doc.setLineWidth(0.18);
-  doc.line(12, pageHeight - 18, pageWidth - 12, pageHeight - 18);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.2);
-  doc.setTextColor(255,255,255);
-  doc.text("Cerdas Finansial | Insurance Matrix Report", 12, pageHeight - 10);
-  doc.text(`Halaman ${pageNo}`, pageWidth - 12, pageHeight - 10, { align:"right" });
+  // CTA WhatsApp
+  const ctaY = summaryY + summaryH + (isPortrait ? 9 : 8);
+  const ctaH = isPortrait ? 76 : 58;
+  card(margin, ctaY, contentW, ctaH, [255,255,255], [196,216,232], 5);
+
+  if(isPortrait){
+    const qrSize = 43;
+    const qrX = margin + contentW - qrSize - 14;
+    const qrY = ctaY + 16;
+    const leftW = qrX - margin - 28;
+
+    doc.setFillColor(0, 166, 81);
+    doc.circle(margin + 17, ctaY + 28, 13, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(255,255,255);
+    doc.text("WA", margin + 17, ctaY + 32, { align:"center" });
+
+    const textX = margin + 36;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10.5);
+    doc.setTextColor(185,0,0);
+    doc.text("Butuh Penjelasan Lebih Detail?", textX, ctaY + 15);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(30,41,59);
+    doc.text(doc.splitTextToSize("Silakan scan QR Code atau hubungi WhatsApp untuk mendapatkan penjelasan dan rekomendasi yang lebih sesuai dengan kondisi keluarga Anda.", leftW - 36), textX, ctaY + 24);
+
+    const phoneX = textX;
+    const phoneY = ctaY + 48;
+    const phoneW = leftW - 36;
+    card(phoneX, phoneY, phoneW, 15, [255,248,248], [246,205,205], 4);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(11,60,93);
+    doc.text("WhatsApp:", phoneX + 8, phoneY + 9.5);
+    doc.setFontSize(11);
+    doc.setTextColor(185,0,0);
+    doc.text("0811-6946-999", phoneX + 44, phoneY + 9.7);
+    doc.link(phoneX, phoneY, phoneW, 15, { url:"https://wa.me/628116946999" });
+
+    doc.setDrawColor(235,120,120);
+    doc.setLineWidth(0.25);
+    doc.line(qrX - 8, ctaY + 10, qrX - 8, ctaY + ctaH - 10);
+
+    try{
+      doc.addImage(WHATSAPP_QR_IMAGE, "JPEG", qrX, qrY, qrSize, qrSize, undefined, "FAST");
+      doc.link(qrX, qrY, qrSize, qrSize, { url:"https://wa.me/628116946999" });
+    }catch(e){
+      doc.rect(qrX, qrY, qrSize, qrSize);
+      doc.text("QR", qrX + qrSize/2, qrY + qrSize/2, { align:"center" });
+    }
+    doc.setFillColor(185,0,0);
+    doc.roundedRect(qrX + 2, qrY + qrSize + 3, qrSize - 4, 8, 2, 2, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.4);
+    doc.setTextColor(255,255,255);
+    doc.text("Scan untuk Chat", qrX + qrSize/2, qrY + qrSize + 8.2, { align:"center" });
+
+  }else{
+    const qrSize = 42;
+    const qrX = margin + contentW - qrSize - 24;
+    const qrY = ctaY + 7;
+    const dividerX = qrX - 18;
+
+    doc.setFillColor(0, 166, 81);
+    doc.circle(margin + 34, ctaY + ctaH/2, 18, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(17);
+    doc.setTextColor(255,255,255);
+    doc.text("WA", margin + 34, ctaY + ctaH/2 + 5.5, { align:"center" });
+
+    const textX = margin + 68;
+    const leftW = dividerX - textX - 12;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(185,0,0);
+    doc.text("Butuh Penjelasan Lebih Detail?", textX, ctaY + 15);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(30,41,59);
+    doc.text(doc.splitTextToSize("Silakan scan QR Code atau hubungi WhatsApp untuk mendapatkan penjelasan dan rekomendasi yang lebih sesuai dengan kondisi keluarga Anda.", leftW), textX, ctaY + 26);
+
+    const phoneX = textX;
+    const phoneY = ctaY + 40;
+    const phoneW = Math.min(92, leftW);
+    card(phoneX, phoneY, phoneW, 14, [255,248,248], [246,205,205], 4);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(11,60,93);
+    doc.text("WhatsApp:", phoneX + 9, phoneY + 9);
+    doc.setFontSize(12.5);
+    doc.setTextColor(185,0,0);
+    doc.text("0811-6946-999", phoneX + 44, phoneY + 9.2);
+    doc.link(phoneX, phoneY, phoneW, 14, { url:"https://wa.me/628116946999" });
+
+    doc.setDrawColor(235,120,120);
+    doc.setLineWidth(0.25);
+    doc.line(dividerX, ctaY + 8, dividerX, ctaY + ctaH - 8);
+
+    try{
+      doc.addImage(WHATSAPP_QR_IMAGE, "JPEG", qrX, qrY, qrSize, qrSize, undefined, "FAST");
+      doc.link(qrX, qrY, qrSize, qrSize, { url:"https://wa.me/628116946999" });
+    }catch(e){
+      doc.rect(qrX, qrY, qrSize, qrSize);
+      doc.text("QR", qrX + qrSize/2, qrY + qrSize/2, { align:"center" });
+    }
+    doc.setFillColor(185,0,0);
+    doc.roundedRect(qrX + 2, qrY + qrSize + 3, qrSize - 4, 8, 2, 2, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.6);
+    doc.setTextColor(255,255,255);
+    doc.text("Scan untuk Chat", qrX + qrSize/2, qrY + qrSize + 8.2, { align:"center" });
+  }
+
+  // Kartu bawah seperti PDF Dana Pendidikan: profil planner + disclaimer
+  const bottomY = ctaY + ctaH + (isPortrait ? 10 : 9);
+  const bottomH = isPortrait ? 68 : 42;
+
+  if(isPortrait){
+    card(margin, bottomY, contentW, 34, [255,255,255], [207,222,235], 6);
+    doc.setFillColor(11,60,93);
+    doc.circle(margin + 16, bottomY + 17, 10, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(255,255,255);
+    doc.text("SG", margin + 16, bottomY + 20, { align:"center" });
+    doc.setFontSize(12.5);
+    doc.setTextColor(11,60,93);
+    doc.text("Septino, QWP®, CIS®", margin + 32, bottomY + 13);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.3);
+    doc.setTextColor(71,85,105);
+    doc.text("Financial Planner", margin + 32, bottomY + 22);
+
+    card(margin, bottomY + 40, contentW, 36, [238,246,252], [207,222,235], 6);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(11,60,93);
+    doc.text("Disclaimer", margin + 10, bottomY + 52);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.8);
+    doc.setTextColor(71,85,105);
+    doc.text(doc.splitTextToSize("Laporan ini merupakan simulasi berdasarkan data yang diinput. Diskusikan strategi yang sesuai dengan kondisi keluarga bersama Financial Planner.", contentW - 20), margin + 10, bottomY + 62);
+  }else{
+    const gap = 10;
+    const cardW = (contentW - gap) / 2;
+    card(margin, bottomY, cardW, bottomH, [255,255,255], [207,222,235], 6);
+    doc.setFillColor(11,60,93);
+    doc.circle(margin + 22, bottomY + bottomH/2, 14, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(255,255,255);
+    doc.text("SG", margin + 22, bottomY + bottomH/2 + 3.5, { align:"center" });
+    doc.setFontSize(13);
+    doc.setTextColor(11,60,93);
+    doc.text("Septino, QWP®, CIS®", margin + 44, bottomY + 15);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(71,85,105);
+    doc.text("Financial Planner", margin + 44, bottomY + 26);
+    doc.setFontSize(8.5);
+    doc.setTextColor(30,41,59);
+    doc.text("WA 0811-6946-999", margin + 44, bottomY + 36);
+
+    card(margin + cardW + gap, bottomY, cardW, bottomH, [238,246,252], [207,222,235], 6);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(11,60,93);
+    doc.text("Disclaimer", margin + cardW + gap + 14, bottomY + 15);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.4);
+    doc.setTextColor(71,85,105);
+    doc.text(doc.splitTextToSize("Laporan ini merupakan simulasi berdasarkan data yang diinput. Diskusikan strategi yang sesuai dengan kondisi keluarga bersama Financial Planner.", cardW - 28), margin + cardW + gap + 14, bottomY + 28);
+  }
+
+  addPdfFooter(doc, pageNo);
 }
 async function exportFamilyPDF(){
   if(!state.keluarga.length){
