@@ -1372,18 +1372,21 @@ function addRoadmapPage(doc, logoDataUrl, pageNo){
     doc.setDrawColor(208,222,235);
     doc.roundedRect(x, y, w, h, 4, 4, "FD");
 
-    doc.setFillColor(theme[0], theme[1], theme[2], .12);
-    doc.rect(x, y, w, 17, "F");
+    // Header card dibuat solid agar nama dan status terlihat jelas di PDF.
     doc.setFillColor(theme[0], theme[1], theme[2]);
-    doc.circle(x + 8, y + 8.5, 4.4, "F");
+    doc.rect(x, y, w, 17, "F");
+    doc.setFillColor(255,255,255);
+    doc.circle(x + 8.5, y + 8.5, 5.4, "F");
+    doc.setFillColor(theme[0], theme[1], theme[2]);
+    doc.circle(x + 8.5, y + 8.5, 3.7, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.4);
-    doc.setTextColor(theme[0], theme[1], theme[2]);
-    doc.text(safePdfText(member.nama || member.label || "-"), x + 15, y + 7.4, { maxWidth: w - 18 });
+    doc.setFontSize(8.6);
+    doc.setTextColor(255,255,255);
+    doc.text(safePdfText(member.nama || member.label || "-"), x + 16, y + 7.1, { maxWidth: w - 18 });
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.2);
-    doc.setTextColor(15,23,42);
-    doc.text(getMemberRoleLabel(member), x + 15, y + 13.2, { maxWidth: w - 18 });
+    doc.setFontSize(6.3);
+    doc.setTextColor(236,245,255);
+    doc.text(getMemberRoleLabel(member), x + 16, y + 13.1, { maxWidth: w - 18 });
 
     let cy = y + 24;
     if(!items.length){
@@ -1476,15 +1479,24 @@ function addRoadmapPage(doc, logoDataUrl, pageNo){
   doc.setFontSize(8.2);
   doc.setTextColor(204,102,0);
   doc.text("PRIORITAS BERIKUTNYA", 216, bottomY + 7, { align:"center" });
-  const nextItems = ["Dana Pensiun", "Distribusi Aset", "Warisan", "Pelunasan Hutang"];
-  nextItems.forEach((txt, i) => {
+  const nextItems = [
+    { label:"Dana Pensiun", color:[0,105,180], note:"Fungsi Akumulasi" },
+    { label:"Distribusi Aset", color:[255,196,0], note:"Distribusi Kekayaan" },
+    { label:"Warisan", color:[255,196,0], note:"Distribusi Kekayaan" },
+    { label:"Pelunasan Hutang", color:[0,166,81], note:"Sesuai Kebutuhan" }
+  ];
+  nextItems.forEach((item, i) => {
     const nx = 158 + i * 31;
+    doc.setFillColor(item.color[0], item.color[1], item.color[2]);
+    doc.circle(nx + 10, bottomY + 12.2, 4.4, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(6.6);
-    doc.setTextColor(15,23,42);
-    doc.text(txt, nx + 10, bottomY + 21, { align:"center" });
-    doc.setFillColor(230,142,0);
-    doc.circle(nx + 10, bottomY + 13, 4, "F");
+    doc.setFontSize(6.4);
+    doc.setTextColor(item.color[0], item.color[1], item.color[2]);
+    doc.text(item.label, nx + 10, bottomY + 20.2, { align:"center", maxWidth:28 });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(4.8);
+    doc.setTextColor(82,96,112);
+    doc.text(item.note, nx + 10, bottomY + 25, { align:"center", maxWidth:29 });
   });
 
   addPdfFooter(doc, pageNo + (doc.internal.getNumberOfPages() - startPageIndex));
