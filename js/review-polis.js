@@ -1194,62 +1194,59 @@ function cfExecRoundRect(doc, x, y, w, h, r, fill, stroke){
 function cfExecDrawIconBox(doc, x, y, color, text){
   doc.setFillColor(color[0], color[1], color[2]);
   doc.roundedRect(x, y, 10, 10, 2.2, 2.2, "F");
-  // Biarkan kotak icon bersih tanpa huruf KG/PS/AK/TG/FP agar tampilan PDF lebih rapi.
-  if(text){
-    doc.setTextColor(255,255,255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(5.2);
-    doc.text(text, x + 5, y + 6.5, { align:"center" });
-  }
+  doc.setTextColor(255,255,255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6.2);
+  doc.text(text, x + 5, y + 6.7, { align:"center" });
 }
 
 function cfExecInfoCard(doc, x, y, w, title, value, color, icon){
-  cfExecRoundRect(doc, x, y, w, 20, 4, [255,255,255], [220,232,242]);
-  cfExecDrawIconBox(doc, x + 5, y + 5, color, icon || "");
+  cfExecRoundRect(doc, x, y, w, 22, 4, [255,255,255], [220,232,242]);
+  cfExecDrawIconBox(doc, x + 5, y + 6, color, icon);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.5);
+  doc.setFontSize(6.7);
   doc.setTextColor(100,116,139);
-  doc.text(title.toUpperCase(), x + 18, y + 7.2, { maxWidth:w - 20 });
-  doc.setFontSize(9);
+  doc.text(title.toUpperCase(), x + 18, y + 8.3, { maxWidth:w - 20 });
+  doc.setFontSize(9.5);
   doc.setTextColor(11,60,93);
-  doc.text(cfExecSafeText(value), x + 18, y + 15.2, { maxWidth:w - 20 });
+  doc.text(cfExecSafeText(value), x + 18, y + 16.3, { maxWidth:w - 20 });
 }
 
 function cfExecStatCard(doc, x, y, w, value, title, subtitle, color, icon){
-  cfExecRoundRect(doc, x, y, w, 26, 4.5, [255,255,255], [220,232,242]);
+  cfExecRoundRect(doc, x, y, w, 29, 4.5, [255,255,255], [220,232,242]);
   doc.setFillColor(color[0], color[1], color[2]);
-  doc.roundedRect(x, y, w, 2.3, 1.2, 1.2, "F");
-  cfExecDrawIconBox(doc, x + 7, y + 8.5, color, icon || "");
+  doc.roundedRect(x, y, w, 2.6, 1.4, 1.4, "F");
+  cfExecDrawIconBox(doc, x + 8, y + 9.5, color, icon);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(17);
+  doc.setFontSize(18.5);
   doc.setTextColor(color[0], color[1], color[2]);
-  doc.text(String(value), x + w/2 + 10, y + 13.4, { align:"center" });
-  doc.setFontSize(7.3);
+  doc.text(String(value), x + w/2 + 10, y + 14.5, { align:"center" });
+  doc.setFontSize(7.7);
   doc.setTextColor(15,23,42);
-  doc.text(title, x + w/2 + 10, y + 20.3, { align:"center", maxWidth:w - 22 });
+  doc.text(title, x + w/2 + 10, y + 22, { align:"center", maxWidth:w - 22 });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(5.8);
+  doc.setFontSize(6.2);
   doc.setTextColor(71,85,105);
-  doc.text(subtitle, x + w/2 + 10, y + 24.2, { align:"center", maxWidth:w - 22 });
+  doc.text(subtitle, x + w/2 + 10, y + 26.6, { align:"center", maxWidth:w - 22 });
 }
 
 function cfExecProgress(doc, x, y, w, label, percent, color){
-  const barX = x + 36;
-  const barW = w - 54;
+  const barX = x + 34;
+  const barW = w - 52;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.2);
+  doc.setFontSize(7.5);
   doc.setTextColor(15,23,42);
   doc.text(label, x, y + 2.6);
   doc.setFillColor(230,237,246);
-  doc.roundedRect(barX, y, barW, 4.5, 2.2, 2.2, "F");
+  doc.roundedRect(barX, y, barW, 4.7, 2.3, 2.3, "F");
   if(percent > 0){
     doc.setFillColor(color[0], color[1], color[2]);
-    doc.roundedRect(barX, y, Math.max(3, barW * percent / 100), 4.5, 2.2, 2.2, "F");
+    doc.roundedRect(barX, y, Math.max(3, barW * percent / 100), 4.7, 2.3, 2.3, "F");
   }
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.1);
+  doc.setFontSize(7.5);
   doc.setTextColor(color[0], color[1], color[2]);
-  doc.text(`${percent}%`, x + w, y + 3.1, { align:"right" });
+  doc.text(`${percent}%`, x + w, y + 3.2, { align:"right" });
 }
 
 function addExecutiveSummaryPage(doc, logoDataUrl, pageNo){
@@ -1258,216 +1255,166 @@ function addExecutiveSummaryPage(doc, logoDataUrl, pageNo){
   const data = getExecutiveSummaryData();
   const tanggal = new Date().toLocaleDateString("id-ID", { day:"2-digit", month:"long", year:"numeric" });
 
-  const navy = [11,60,93];
-  const blue = [0,105,180];
-  const green = [0,166,81];
-  const red = [224,0,0];
-  const gold = [201,154,54];
-  const orange = [230,142,0];
-  const line = [220,232,242];
-  const pale = [248,252,255];
-
+  // Base
   doc.setFillColor(255,255,255);
   doc.rect(0,0,pageWidth,pageHeight,"F");
-
-  // Dekorasi lembut
   doc.setFillColor(241,248,253);
-  doc.circle(-8, -4, 42, "F");
+  doc.circle(-8, -4, 44, "F");
   doc.setFillColor(253,241,215);
-  doc.circle(pageWidth + 18, pageHeight + 10, 45, "F");
-  doc.setFillColor(...navy);
-  doc.triangle(pageWidth - 25, 0, pageWidth, 0, pageWidth, 24, "F");
+  doc.circle(pageWidth + 18, pageHeight + 10, 48, "F");
+  doc.setFillColor(11,60,93);
+  doc.triangle(pageWidth - 24, 0, pageWidth, 0, pageWidth, 24, "F");
   doc.setFillColor(242,190,84);
-  doc.triangle(pageWidth - 45, 0, pageWidth - 31, 0, pageWidth, 31, "F");
+  doc.triangle(pageWidth - 44, 0, pageWidth - 31, 0, pageWidth, 31, "F");
 
-  // HEADER lebih compact
-  cfExecRoundRect(doc, 10, 7, pageWidth - 20, 23, 5, [255,255,255], line);
+  // Header card
+  cfExecRoundRect(doc, 10, 9, pageWidth - 20, 28, 5, [255,255,255], [220,232,242]);
   if(logoDataUrl){
-    try{ doc.addImage(logoDataUrl, "PNG", 22, 10, 23, 16, undefined, "FAST"); }catch(e){}
+    try{ doc.addImage(logoDataUrl, "PNG", 25, 13, 24, 18, undefined, "FAST"); }catch(e){}
   }
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.setTextColor(...navy);
-  doc.text("EXECUTIVE SUMMARY", pageWidth/2, 17.5, { align:"center" });
+  doc.setFontSize(23);
+  doc.setTextColor(11,60,93);
+  doc.text("EXECUTIVE SUMMARY", pageWidth/2, 20.3, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.1);
+  doc.setFontSize(9.2);
   doc.setTextColor(51,65,85);
-  doc.text("Review Polis Keluarga", pageWidth/2 - 6, 24.5, { align:"right" });
+  doc.text("Review Polis Keluarga", pageWidth/2 - 6, 28, { align:"right" });
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(...blue);
-  doc.text("Cerdas Finansial", pageWidth/2 - 4, 24.5);
-  doc.setFillColor(...gold);
-  doc.roundedRect(pageWidth - 51, 14.3, 32, 5, 2.5, 2.5, "F");
+  doc.setTextColor(0,105,180);
+  doc.text("Cerdas Finansial", pageWidth/2 - 4, 28);
+  doc.setFillColor(201,154,54);
+  doc.roundedRect(pageWidth - 52, 16, 34, 5.2, 2.6, 2.6, "F");
   doc.setTextColor(255,255,255);
-  doc.setFontSize(5);
-  doc.text("CONFIDENTIAL", pageWidth - 35, 17.7, { align:"center" });
+  doc.setFontSize(5.2);
+  doc.text("CONFIDENTIAL", pageWidth - 35, 19.6, { align:"center" });
 
-  // INFO KELUARGA
-  const infoY = 34;
-  const infoGap = 3;
-  const infoW = (pageWidth - 20 - infoGap*4) / 5;
+  // Family info cards - no KG/PS/etc
+  const infoY = 43;
+  const gap = 3;
+  const infoW = (pageWidth - 20 - gap*4) / 5;
   const infoItems = [
-    {title:"Kepala Keluarga", value:data.kepala?.nama || "-", color:navy},
-    {title:"Pasangan", value:data.pasangan?.nama || "-", color:[124,58,237]},
-    {title:"Anak", value:`${data.anak.length} Orang`, color:blue},
-    {title:"Tanggal Review", value:tanggal, color:gold},
-    {title:"Financial Planner", value:"Septino, QWP®, CIS®", color:navy}
+    {title:"Kepala Keluarga", value:data.kepala?.nama || "-", color:[11,60,93], icon:"KK"},
+    {title:"Pasangan", value:data.pasangan?.nama || "-", color:[124,58,237], icon:"P"},
+    {title:"Anak", value:`${data.anak.length} Orang`, color:[0,105,180], icon:"A"},
+    {title:"Tanggal Review", value:tanggal, color:[201,154,54], icon:"T"},
+    {title:"Financial Planner", value:"Septino, QWP®, CIS®", color:[11,60,93], icon:"FP"}
   ];
-  infoItems.forEach((item, i) => {
-    const x = 10 + i*(infoW+infoGap);
-    cfExecRoundRect(doc, x, infoY, infoW, 17, 4, [255,255,255], line);
-    doc.setFillColor(item.color[0], item.color[1], item.color[2]);
-    doc.roundedRect(x + 4, infoY + 4.5, 8, 8, 2, 2, "F");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(5.4);
-    doc.setTextColor(100,116,139);
-    doc.text(item.title.toUpperCase(), x + 16, infoY + 7.0, { maxWidth:infoW - 19 });
-    doc.setFontSize(7.1);
-    doc.setTextColor(11,60,93);
-    const lines = doc.splitTextToSize(cfExecSafeText(item.value), infoW - 19);
-    doc.text(lines.slice(0,2), x + 16, infoY + 13.1, { lineHeightFactor:0.9 });
-  });
+  infoItems.forEach((item, i) => cfExecInfoCard(doc, 10 + i*(infoW+gap), infoY, infoW, item.title, item.value, item.color, item.icon));
 
-  // KPI Cards
-  const statY = 55;
-  const statGap = 3.2;
+  // KPI cards
+  const statY = 72;
+  const statGap = 4;
   const statW = (pageWidth - 20 - statGap*3) / 4;
-  cfExecStatCard(doc, 10, statY, statW, `${data.stats.score}%`, "Skor Kesiapan", "Perlindungan keluarga", navy, "");
-  cfExecStatCard(doc, 10 + (statW+statGap), statY, statW, data.stats.total, "Kebutuhan Polis", "Total kebutuhan", blue, "");
-  cfExecStatCard(doc, 10 + (statW+statGap)*2, statY, statW, data.stats.owned, "Sudah Dimiliki", "Polis tersedia", green, "");
-  cfExecStatCard(doc, 10 + (statW+statGap)*3, statY, statW, data.stats.missing, "Perlu Dilengkapi", "Gap perlindungan", red, "");
+  cfExecStatCard(doc, 10, statY, statW, `${data.stats.score}%`, "Skor Kesiapan", "Perlindungan keluarga", [11,60,93], "S");
+  cfExecStatCard(doc, 10 + (statW+statGap), statY, statW, data.stats.total, "Kebutuhan Polis", "Total kebutuhan", [0,105,180], "P");
+  cfExecStatCard(doc, 10 + (statW+statGap)*2, statY, statW, data.stats.owned, "Sudah Dimiliki", "Polis tersedia", [0,166,81], "OK");
+  cfExecStatCard(doc, 10 + (statW+statGap)*3, statY, statW, data.stats.missing, "Perlu Dilengkapi", "Gap perlindungan", [224,0,0], "!");
 
-  // Panel utama dinaikkan dan diperbesar secukupnya agar semua progress masuk
-  const panelY = 85;
-  const panelH = 61;
+  // Main panels - keep all above bottom conclusion to avoid overlap
+  const panelY = 109;
+  const panelH = 68;
   const leftX = 10;
-  const leftW = 138;
-  const rightX = 155;
+  const leftW = 137;
+  const rightX = 154;
   const rightW = pageWidth - rightX - 10;
 
-  // KONDISI PERLINDUNGAN
-  cfExecRoundRect(doc, leftX, panelY, leftW, panelH, 4, [255,255,255], line);
-  doc.setFillColor(...navy);
-  doc.roundedRect(leftX + 6, panelY + 6, 9, 9, 2, 2, "F");
+  // Protection panel
+  cfExecRoundRect(doc, leftX, panelY, leftW, panelH, 4, [255,255,255], [220,232,242]);
+  cfExecDrawIconBox(doc, leftX + 6, panelY + 7, [11,60,93], "CF");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.6);
-  doc.setTextColor(...navy);
-  doc.text("KONDISI PERLINDUNGAN", leftX + 20, panelY + 12.1);
+  doc.setFontSize(9.6);
+  doc.setTextColor(11,60,93);
+  doc.text("KONDISI PERLINDUNGAN", leftX + 19, panelY + 13.5);
   doc.setDrawColor(226,232,240);
-  doc.line(leftX + 20, panelY + 15.5, leftX + leftW - 8, panelY + 15.5);
-
-  let py = panelY + 25.0;
+  doc.line(leftX + 19, panelY + 17, leftX + leftW - 8, panelY + 17);
+  let py = panelY + 30;
   data.categories.forEach(cat => {
-    const labelX = leftX + 9;
-    const barX = leftX + 52;
-    const barW = leftW - 73;
-    const percentX = leftX + leftW - 8;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(6.7);
-    doc.setTextColor(15,23,42);
-    doc.text(cat.label, labelX, py + 2.5);
-    doc.setFillColor(230,237,246);
-    doc.roundedRect(barX, py, barW, 4.0, 2, 2, "F");
-    if(cat.progress.percent > 0){
-      doc.setFillColor(cat.color[0], cat.color[1], cat.color[2]);
-      doc.roundedRect(barX, py, Math.max(3, barW * cat.progress.percent / 100), 4.0, 2, 2, "F");
-    }
-    doc.setFontSize(6.7);
-    doc.setTextColor(cat.color[0], cat.color[1], cat.color[2]);
-    doc.text(`${cat.progress.percent}%`, percentX, py + 2.9, { align:"right" });
-    py += 8.9;
+    cfExecProgress(doc, leftX + 9, py, leftW - 18, cat.label, cat.progress.percent, cat.color);
+    py += 10.6;
   });
 
-  // TEMUAN UTAMA
-  cfExecRoundRect(doc, rightX, panelY, rightW, panelH, 4, [255,255,255], line);
-  doc.setFillColor(...navy);
-  doc.roundedRect(rightX + 6, panelY + 6, 9, 9, 2, 2, "F");
+  // Findings panel
+  cfExecRoundRect(doc, rightX, panelY, rightW, 38, 4, [255,255,255], [220,232,242]);
+  cfExecDrawIconBox(doc, rightX + 6, panelY + 7, [11,60,93], "!");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.6);
-  doc.setTextColor(...navy);
-  doc.text("TEMUAN UTAMA", rightX + 20, panelY + 12.1);
+  doc.setFontSize(9.6);
+  doc.setTextColor(11,60,93);
+  doc.text("TEMUAN UTAMA", rightX + 19, panelY + 13.5);
   doc.setDrawColor(226,232,240);
-  doc.line(rightX + 20, panelY + 15.5, pageWidth - 17, panelY + 15.5);
-
+  doc.line(rightX + 19, panelY + 17, pageWidth - 17, panelY + 17);
   const findings = data.categories.map(cat => {
-    if(cat.progress.percent >= 80) return { sign:"✓", color:green, text:`${cat.label} keluarga sudah baik.` };
-    if(cat.progress.percent > 0) return { sign:"!", color:orange, text:`${cat.label} masih perlu dilengkapi.` };
-    return { sign:"!", color:orange, text:`${cat.label} belum tersedia.` };
+    if(cat.progress.percent >= 80) return { sign:"✓", color:[0,166,81], text:`${cat.label} keluarga sudah baik.` };
+    if(cat.progress.percent > 0) return { sign:"!", color:[230,142,0], text:`${cat.label} masih perlu dilengkapi.` };
+    return { sign:"!", color:[230,142,0], text:`${cat.label} belum tersedia.` };
   });
-  let fy = panelY + 24.5;
+  let fy = panelY + 26;
   findings.slice(0,5).forEach((f, i) => {
     doc.setFillColor(f.color[0], f.color[1], f.color[2]);
-    doc.circle(rightX + 9, fy - 1.7, 2.1, "F");
+    doc.circle(rightX + 9, fy - 1.7, 2.2, "F");
     doc.setTextColor(255,255,255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(4.2);
-    doc.text(f.sign, rightX + 9, fy - 0.1, { align:"center" });
+    doc.setFontSize(4.5);
+    doc.text(f.sign, rightX + 9, fy, { align:"center" });
     doc.setTextColor(15,23,42);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.45);
-    doc.text(cfExecSafeText(f.text), rightX + 14, fy, { maxWidth:rightW - 22 });
-    if(i < 4){ doc.setDrawColor(226,232,240); doc.line(rightX + 14, fy + 3.2, pageWidth - 16, fy + 3.2); }
-    fy += 7.7;
+    doc.setFontSize(7.15);
+    doc.text(cfExecSafeText(f.text), rightX + 14, fy, { maxWidth:rightW - 21 });
+    if(i < 4){ doc.setDrawColor(226,232,240); doc.line(rightX + 14, fy + 3.1, pageWidth - 16, fy + 3.1); }
+    fy += 6.2;
   });
 
-  // PRIORITAS TERATAS - dinaikkan dan dibuat full width
-  const prY = 151;
-  const prH = 18;
-  cfExecRoundRect(doc, 10, prY, pageWidth - 20, prH, 4, [255,255,255], line);
-  doc.setFillColor(...navy);
-  doc.roundedRect(16, prY + 4.8, 9, 9, 2, 2, "F");
+  // Priorities panel
+  const prY = panelY + 42;
+  cfExecRoundRect(doc, rightX, prY, rightW, 26, 4, [255,255,255], [220,232,242]);
+  cfExecDrawIconBox(doc, rightX + 6, prY + 6.5, [11,60,93], "★");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.4);
-  doc.setTextColor(...navy);
-  doc.text("3 PRIORITAS TERATAS", 30, prY + 10.7);
-
+  doc.setFontSize(9.4);
+  doc.setTextColor(11,60,93);
+  doc.text("3 PRIORITAS TERATAS", rightX + 19, prY + 12.5);
   const priorities = (data.priorities && data.priorities.length ? data.priorities : ["Review Polis Wajib", "Lengkapi Proteksi", "Review Tahunan"]).slice(0,3);
-  const pColors = [red, orange, blue];
-  const pStartX = 82;
-  const pGap = 5;
-  const pW = (pageWidth - pStartX - 18 - pGap*2) / 3;
+  const pW = (rightW - 25) / 3;
+  const pColors = [[224,0,0],[230,142,0],[0,105,180]];
   priorities.forEach((item, i) => {
-    const bx = pStartX + i*(pW + pGap);
-    const by = prY + 4.5;
+    const bx = rightX + 19 + i*(pW + 3);
+    const by = prY + 15.3;
     doc.setFillColor(pColors[i][0], pColors[i][1], pColors[i][2]);
-    doc.roundedRect(bx, by, pW, 9.4, 2.4, 2.4, "F");
+    doc.roundedRect(bx, by, pW, 8, 2.2, 2.2, "F");
     doc.setFillColor(255,255,255);
-    doc.circle(bx + 6, by + 4.7, 2.6, "F");
+    doc.circle(bx + 5, by + 4, 2.6, "F");
     doc.setTextColor(pColors[i][0], pColors[i][1], pColors[i][2]);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(5.2);
-    doc.text(String(i+1), bx + 6, by + 6.4, { align:"center" });
+    doc.setFontSize(5.5);
+    doc.text(String(i+1), bx + 5, by + 5.8, { align:"center" });
     doc.setTextColor(255,255,255);
-    doc.setFontSize(5.8);
-    doc.text(cfExecSafeText(item), bx + 13, by + 6.0, { maxWidth:pW - 15 });
+    doc.setFontSize(6.3);
+    doc.text(cfExecSafeText(item), bx + 11, by + 5.3, { maxWidth:pW - 12 });
   });
 
-  // KESIMPULAN FINANCIAL PLANNER - naik, tidak menempel footer
-  const conclY = 175;
-  const conclH = 18;
-  cfExecRoundRect(doc, 10, conclY, pageWidth - 20, conclH, 4, [245,250,255], line);
-  doc.setFillColor(...navy);
-  doc.roundedRect(16, conclY + 4.8, 8, 8, 2, 2, "F");
+  // Conclusion bottom, no overlap
+  const conclY = 184;
+  cfExecRoundRect(doc, 10, conclY, pageWidth - 20, 15, 4, [245,250,255], [220,232,242]);
+  cfExecDrawIconBox(doc, 16, conclY + 3, [11,60,93], "FP");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.8);
-  doc.setTextColor(...navy);
-  doc.text("KESIMPULAN FINANCIAL PLANNER", 29, conclY + 7.0);
+  doc.setFontSize(7.5);
+  doc.setTextColor(11,60,93);
+  doc.text("KESIMPULAN FINANCIAL PLANNER", 29, conclY + 6.2);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(5.1);
+  doc.setFontSize(6.05);
   doc.setTextColor(30,41,59);
   const conclusion = `Skor kesiapan perlindungan keluarga saat ini ${data.stats.score}%. Fokus utama adalah melengkapi proteksi wajib terlebih dahulu, kemudian menyiapkan dana pendidikan dan dana pensiun secara bertahap.`;
-  doc.text(conclusion, 29, conclY + 11.0, { maxWidth:pageWidth - 102, lineHeightFactor:1.05 });
+  doc.text(conclusion, 29, conclY + 11.2, { maxWidth:pageWidth - 100, lineHeightFactor:1.05 });
   doc.setDrawColor(148,163,184);
-  doc.line(pageWidth - 67, conclY + 3.0, pageWidth - 67, conclY + conclH - 3.0);
+  doc.line(pageWidth - 67, conclY + 3, pageWidth - 67, conclY + 12);
   doc.setFont("helvetica", "bolditalic");
-  doc.setFontSize(7.8);
-  doc.setTextColor(...navy);
-  doc.text("Septino, QWP®, CIS®", pageWidth - 39, conclY + 8.0, { align:"center" });
+  doc.setFontSize(10.5);
+  doc.setTextColor(11,60,93);
+  doc.text("Septino, QWP®, CIS®", pageWidth - 39, conclY + 7.2, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(5);
-  doc.text("Financial Planner", pageWidth - 39, conclY + 13.0, { align:"center" });
+  doc.setFontSize(5.8);
+  doc.text("Financial Planner", pageWidth - 39, conclY + 12, { align:"center" });
 
-  addPdfFooter(doc, pageNo || 2);
+  drawPdfFooter(doc, pageNo || 2);
 }
 
 function addMemberPage(doc, member, logoDataUrl, pageNo){
@@ -1900,6 +1847,280 @@ function addRoadmapPage(doc, logoDataUrl, pageNo){
   addPdfFooter(doc, finalPageNo);
 }
 
+
+
+/* v21: PDF dibuat lebih sederhana: tanpa Executive Summary, tanpa timeline/roadmap, tanpa infografis 12 jenis */
+function drawSimplePdfBackground(doc){
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  doc.setFillColor(248,252,255);
+  doc.rect(0,0,pageWidth,pageHeight,"F");
+  doc.setFillColor(232,242,250);
+  doc.circle(14, 18, 34, "F");
+  doc.setFillColor(246,230,198);
+  doc.circle(pageWidth - 16, pageHeight - 8, 38, "F");
+}
+
+function drawSimplePageTitle(doc, logoDataUrl, title, subtitle){
+  const pageWidth = doc.internal.pageSize.getWidth();
+  drawSimplePdfBackground(doc);
+  addLogoToPdf(doc, logoDataUrl, 14, 9, 32, 22);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.setTextColor(11,60,93);
+  doc.text(title, pageWidth/2, 18, { align:"center" });
+  if(subtitle){
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(71,85,105);
+    doc.text(subtitle, pageWidth/2, 27, { align:"center", maxWidth:220 });
+  }
+}
+
+function drawGapStatCard(doc, x, y, w, title, value, subtitle, color){
+  doc.setFillColor(255,255,255);
+  doc.setDrawColor(220,232,242);
+  doc.roundedRect(x, y, w, 22, 4, 4, "FD");
+  doc.setFillColor(color[0], color[1], color[2]);
+  doc.roundedRect(x, y, 3, 22, 2, 2, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(color[0], color[1], color[2]);
+  doc.text(String(value), x + 9, y + 11);
+  doc.setFontSize(7.2);
+  doc.setTextColor(11,60,93);
+  doc.text(title, x + 27, y + 8.2);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5.8);
+  doc.setTextColor(100,116,139);
+  doc.text(subtitle, x + 27, y + 15.2, { maxWidth:w - 30 });
+}
+
+function drawGapMemberCard(doc, member, items, x, y, w, h){
+  const isPasangan = member.id === "pasangan";
+  const isAnak = String(member.id).startsWith("anak");
+  const theme = isPasangan ? [126,58,164] : (isAnak ? [13,101,183] : [11,60,93]);
+
+  doc.setFillColor(255,255,255);
+  doc.setDrawColor(208,222,235);
+  doc.roundedRect(x, y, w, h, 4, 4, "FD");
+
+  doc.setFillColor(theme[0], theme[1], theme[2]);
+  doc.roundedRect(x, y, w, 17, 4, 4, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(255,255,255);
+  doc.text(safePdfText(member.nama || member.label || "-"), x + 7, y + 7.2, { maxWidth:w - 14 });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.1);
+  doc.setTextColor(235,245,255);
+  doc.text(getMemberRoleLabel(member), x + 7, y + 13.2, { maxWidth:w - 14 });
+
+  let cy = y + 25;
+  if(!items.length){
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.2);
+    doc.setTextColor(46,139,87);
+    doc.text("Polis wajib utama sudah lengkap.", x + 7, cy);
+    return;
+  }
+
+  const shown = items.slice(0,5);
+  shown.forEach((item, idx) => {
+    const color = getRoadmapColor(item);
+    drawTinyIcon(doc, getRoadmapIconType(item), x + 8.5, cy - 1.5, color);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.8);
+    doc.setTextColor(color[0], color[1], color[2]);
+    doc.text(getRoadmapShortTitle(item), x + 15, cy - 2.8, { maxWidth:w - 22 });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(5.6);
+    doc.setTextColor(30,41,59);
+    doc.text(getRoadmapShortReason(item), x + 15, cy + 3.0, { maxWidth:w - 22 });
+    if(idx < shown.length - 1){
+      doc.setDrawColor(226,232,240);
+      doc.line(x + 7, cy + 8.2, x + w - 7, cy + 8.2);
+    }
+    cy += 14.5;
+  });
+
+  if(items.length > shown.length){
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.2);
+    doc.setTextColor(100,116,139);
+    doc.text(`+${items.length - shown.length} kebutuhan lain`, x + 7, y + h - 6);
+  }
+}
+
+function addGapPriorityPage(doc, logoDataUrl, pageNo){
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const stats = getFamilyReviewStats();
+  const allItems = getWajibRecommendationsByFamily(999);
+
+  drawSimplePageTitle(
+    doc,
+    logoDataUrl,
+    "YANG HARUS DILENGKAPI",
+    "Ringkasan kebutuhan polis wajib berdasarkan data keluarga dan hasil review matrix."
+  );
+
+  const statY = 38;
+  const statW = (pageWidth - 30 - 9) / 4;
+  drawGapStatCard(doc, 15, statY, statW, "Skor Kesiapan", `${stats.score}%`, "Kelengkapan proteksi keluarga", [11,60,93]);
+  drawGapStatCard(doc, 15 + (statW + 3), statY, statW, "Total Kebutuhan", stats.total, "Item dalam matrix keluarga", [13,101,183]);
+  drawGapStatCard(doc, 15 + (statW + 3)*2, statY, statW, "Sudah Dimiliki", stats.owned, "Polis tersedia", [0,166,81]);
+  drawGapStatCard(doc, 15 + (statW + 3)*3, statY, statW, "Belum Dimiliki", stats.missing, "Gap perlindungan", [220,0,0]);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(180,0,0);
+  doc.text(`${allItems.length || 0} item polis wajib perlu diprioritaskan`, 15, 73);
+
+  const grouped = state.keluarga
+    .slice()
+    .sort((a,b) => getMemberSortOrder(a) - getMemberSortOrder(b))
+    .map(member => ({ member, items: allItems.filter(item => item.member.id === member.id) }))
+    .filter(group => group.items.length > 0);
+
+  if(!grouped.length){
+    doc.setFillColor(240,253,244);
+    doc.setDrawColor(187,247,208);
+    doc.roundedRect(15, 82, pageWidth - 30, 42, 5, 5, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(22,101,52);
+    doc.text("Seluruh polis wajib utama sudah lengkap.", pageWidth/2, 101, { align:"center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text("Lakukan review berkala setiap tahun agar manfaat polis tetap sesuai kebutuhan keluarga.", pageWidth/2, 111, { align:"center" });
+    addPdfFooter(doc, pageNo);
+    return;
+  }
+
+  let y = 80;
+  const gap = 6;
+  const cardW = (pageWidth - 30 - gap) / 2;
+  grouped.forEach((group, idx) => {
+    const h = Math.min(92, 32 + Math.min(group.items.length,5) * 14.5 + (group.items.length > 5 ? 8 : 0));
+    const col = idx % 2;
+    const x = 15 + col * (cardW + gap);
+    if(col === 0 && idx > 0) y += h + 6;
+
+    if(y + h > pageHeight - 18){
+      addPdfFooter(doc, pageNo + (doc.internal.getNumberOfPages() - pageNo));
+      doc.addPage("a4", "landscape");
+      pageNo++;
+      drawSimplePageTitle(doc, logoDataUrl, "YANG HARUS DILENGKAPI", "Lanjutan daftar kebutuhan polis wajib keluarga.");
+      y = 42;
+    }
+
+    drawGapMemberCard(doc, group.member, group.items, x, y, cardW, h);
+  });
+
+  addPdfFooter(doc, pageNo);
+}
+
+function buildPlannerAnalysisText(){
+  const stats = getFamilyReviewStats();
+  const wajib = getWajibRecommendationsByFamily(999);
+  const anakCount = state.keluarga.filter(m => String(m.id).startsWith("anak")).length;
+  const pasangan = state.keluarga.find(m => m.id === "pasangan");
+  const kepala = state.keluarga.find(m => m.id === "kepala");
+
+  const kondisi = [];
+  kondisi.push(`Data keluarga ${kepala?.nama || "klien"} sudah tersusun dan dapat digunakan sebagai dasar review polis.`);
+  if(stats.missing > 0) kondisi.push(`Masih terdapat ${stats.missing} item perlindungan yang belum dimiliki atau belum tercatat.`);
+  else kondisi.push("Seluruh item perlindungan utama sudah tercatat dalam matrix.");
+  if(pasangan && state.statusPasangan === "kerja") kondisi.push("Pasangan memiliki income, sehingga proteksi income pasangan perlu ikut diperhatikan.");
+  if(anakCount > 0) kondisi.push(`Terdapat ${anakCount} anak sehingga kebutuhan kesehatan anak dan persiapan pendidikan perlu menjadi bagian dari review.`);
+
+  const rekom = [];
+  const hasHealth = wajib.some(i => getRoadmapIconType(i) === "health");
+  const hasCritical = wajib.some(i => getRoadmapIconType(i) === "critical");
+  const hasLife = wajib.some(i => getRoadmapIconType(i) === "life");
+  const hasEducation = wajib.some(i => getRoadmapIconType(i) === "education");
+  if(hasHealth) rekom.push("Lengkapi perlindungan kesehatan untuk anggota keluarga yang belum memiliki perlindungan memadai.");
+  if(hasCritical) rekom.push("Tambahkan proteksi penyakit kritis agar dana keluarga tidak terganggu saat terjadi risiko penyakit serius.");
+  if(hasLife) rekom.push("Pastikan pencari nafkah memiliki uang pertanggungan jiwa yang cukup untuk menjaga biaya hidup keluarga.");
+  if(hasEducation) rekom.push("Mulai persiapkan dana pendidikan anak secara bertahap setelah perlindungan dasar terpenuhi.");
+  if(!rekom.length) rekom.push("Pertahankan perlindungan yang sudah ada dan lakukan review ulang minimal satu kali setahun.");
+
+  const kesimpulan = stats.score < 60
+    ? "Berdasarkan hasil review, kesiapan perlindungan keluarga masih perlu diperkuat. Fokus utama adalah melengkapi polis wajib terlebih dahulu agar keluarga memiliki fondasi perlindungan yang lebih aman."
+    : "Berdasarkan hasil review, perlindungan keluarga sudah mulai terbentuk. Langkah berikutnya adalah menyempurnakan gap yang masih ada dan memastikan manfaat polis tetap sesuai tujuan keuangan keluarga.";
+
+  return { kondisi, rekom, kesimpulan };
+}
+
+function drawAnalysisSection(doc, title, lines, x, y, w){
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(11,60,93);
+  doc.text(title, x, y);
+  doc.setDrawColor(220,228,238);
+  doc.line(x, y + 4, x + w, y + 4);
+  let cy = y + 12;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.2);
+  doc.setTextColor(30,41,59);
+  lines.forEach(line => {
+    doc.setFillColor(0,166,81);
+    doc.circle(x + 2.5, cy - 2, 1.6, "F");
+    const wrapped = doc.splitTextToSize(line, w - 10);
+    doc.text(wrapped, x + 7, cy);
+    cy += Math.max(8, wrapped.length * 4.5 + 3);
+  });
+  return cy;
+}
+
+function addPlannerAnalysisPage(doc, logoDataUrl, pageNo){
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const data = buildPlannerAnalysisText();
+
+  drawSimplePageTitle(
+    doc,
+    logoDataUrl,
+    "ANALISA FINANCIAL PLANNER",
+    "Ringkasan analisa dan rekomendasi berdasarkan hasil Review Polis Cerdas Finansial."
+  );
+
+  const x = 22;
+  const y = 42;
+  const w = pageWidth - 44;
+  doc.setFillColor(255,255,255);
+  doc.setDrawColor(220,232,242);
+  doc.roundedRect(x, y, w, 120, 6, 6, "FD");
+
+  let cy = drawAnalysisSection(doc, "Kondisi Saat Ini", data.kondisi, x + 10, y + 16, w - 20);
+  cy += 4;
+  cy = drawAnalysisSection(doc, "Rekomendasi", data.rekom, x + 10, cy + 4, w - 20);
+
+  doc.setFillColor(239,247,255);
+  doc.setDrawColor(198,218,238);
+  doc.roundedRect(x + 10, 142, w - 20, 32, 4, 4, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.8);
+  doc.setTextColor(11,60,93);
+  doc.text("Kesimpulan", x + 17, 152);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(30,41,59);
+  doc.text(data.kesimpulan, x + 17, 160, { maxWidth: w - 36 });
+
+  doc.setFont("helvetica", "bolditalic");
+  doc.setFontSize(13);
+  doc.setTextColor(11,60,93);
+  doc.text("Septino, QWP®, CIS®", pageWidth - 32, 187, { align:"right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(51,65,85);
+  doc.text("Financial Planner", pageWidth - 32, 194, { align:"right" });
+
+  addPdfFooter(doc, pageNo);
+}
+
 async function exportFamilyPDF(){
   if(!state.keluarga.length){
     showFamilyError("Isi dan simpan data keluarga terlebih dahulu sebelum export PDF.");
@@ -1927,20 +2148,25 @@ async function exportFamilyPDF(){
     const doc = new jsPDF({ orientation:"landscape", unit:"mm", format:"a4", compress:true });
     const logoDataUrl = await getLogoDataUrl();
 
+    let pageNo = 1;
     addCoverPage(doc, logoDataUrl);
 
-    doc.addPage("a4", "landscape");
-    addExecutiveSummaryPage(doc, logoDataUrl, 2);
-
-    let pageNo = 3;
+    // Halaman matrix per anggota keluarga.
     state.keluarga.forEach(member => {
+      pageNo++;
       doc.addPage("a4", "landscape");
       addMemberPage(doc, member, logoDataUrl, pageNo);
-      pageNo++;
     });
 
+    // Ringkasan gap: apa saja yang harus dilengkapi.
+    pageNo++;
     doc.addPage("a4", "landscape");
-    addRoadmapPage(doc, logoDataUrl, pageNo);
+    addGapPriorityPage(doc, logoDataUrl, pageNo);
+
+    // Analisa Financial Planner: tanpa Executive Summary, tanpa timeline, tanpa roadmap, tanpa infografis 12 jenis.
+    pageNo++;
+    doc.addPage("a4", "landscape");
+    addPlannerAnalysisPage(doc, logoDataUrl, pageNo);
 
     doc.save(getPdfFileName());
   }catch(err){
