@@ -175,6 +175,65 @@ function showFamilyError(message){
   }
 }
 
+function renderChildNameInputs(){
+  const box = document.getElementById("childrenNameBox");
+  const statusMenikah = document.getElementById("statusMenikah");
+  const jumlahAnakEl = document.getElementById("jumlahAnak");
+  if(!box || !statusMenikah || !jumlahAnakEl) return;
+
+  const menikah = (statusMenikah.value || "menikah") === "menikah";
+  const jumlahAnak = menikah ? parseInt(jumlahAnakEl.value || "0") : 0;
+
+  if(!menikah || jumlahAnak <= 0){
+    box.innerHTML = "";
+    box.classList.add("d-none");
+    return;
+  }
+
+  const oldValues = {};
+  box.querySelectorAll("input[data-child-index]").forEach(input => {
+    oldValues[input.dataset.childIndex] = input.value;
+  });
+
+  const html = [];
+  html.push(`
+    <div class="children-name-title">
+      <div><i class="bi bi-people-fill"></i> Data Nama Anak</div>
+      <small>Nama anak akan tampil otomatis di Daftar Anggota dan Matrix Polis.</small>
+    </div>
+    <div class="children-name-grid">
+  `);
+
+  for(let i = 1; i <= jumlahAnak; i++){
+    const savedChild = state.keluarga.find(member => member.id === `anak${i}`);
+    const value = oldValues[i] ?? savedChild?.nama ?? "";
+    html.push(`
+      <div class="child-name-field">
+        <label class="form-label"><i class="bi bi-person-fill"></i> Nama Anak ${i}</label>
+        <input
+          type="text"
+          id="namaAnakReview${i}"
+          data-child-index="${i}"
+          class="form-control"
+          value="${escapeHtml(value)}"
+          placeholder="Contoh: Anak ${i}"
+        >
+      </div>
+    `);
+  }
+
+  html.push(`</div>`);
+  box.innerHTML = html.join("");
+  box.classList.remove("d-none");
+
+  box.querySelectorAll("input[data-child-index]").forEach(input => {
+    input.addEventListener("input", () => {
+      setInvalid(input, !String(input.value || "").trim());
+      showFamilyError("");
+    });
+  });
+}
+
 function validateFamilyForm(){
   const namaKepala = document.getElementById("namaKepala");
   const statusMenikah = document.getElementById("statusMenikah");
@@ -188,6 +247,7 @@ function validateFamilyForm(){
     : [namaKepala, statusMenikah];
 
   [namaKepala, statusMenikah, namaPasangan, statusPasangan, jumlahAnak].forEach(field => setInvalid(field, false));
+  document.querySelectorAll("#childrenNameBox input").forEach(field => setInvalid(field, false));
 
   let valid = true;
   fields.forEach(field => {
@@ -196,9 +256,19 @@ function validateFamilyForm(){
     if(empty) valid = false;
   });
 
+  if(menikah){
+    const totalAnak = parseInt(jumlahAnak.value || "0");
+    for(let i = 1; i <= totalAnak; i++){
+      const inputAnak = document.getElementById(`namaAnakReview${i}`);
+      const empty = !String(inputAnak?.value || "").trim();
+      setInvalid(inputAnak, empty);
+      if(empty) valid = false;
+    }
+  }
+
   if(!valid){
     showFamilyError(menikah
-      ? "Data kepala keluarga, pasangan, status pasangan, dan jumlah anak wajib diisi lengkap."
+      ? "Data kepala keluarga, pasangan, jumlah anak, dan nama setiap anak wajib diisi lengkap."
       : "Nama kepala keluarga dan status pernikahan wajib diisi."
     );
     return false;
@@ -225,6 +295,8 @@ function toggleMarriageFields(){
   }else if(document.getElementById("jumlahAnak").value === "0"){
     document.getElementById("jumlahAnak").value = "3";
   }
+
+  renderChildNameInputs();
 }
 
 function simpanKeluarga(){
@@ -245,10 +317,11 @@ function simpanKeluarga(){
     keluarga.push({ id:"pasangan", nama:pasangan, peran:"Pasangan", icon:"bi-person-heart" });
 
     for(let i = 1; i <= jumlahAnak; i++){
-      const oldChild = state.keluarga.find(x => x.id === `anak${i}`);
+      const inputAnak = document.getElementById(`namaAnakReview${i}`);
+      const namaAnak = String(inputAnak?.value || "").trim();
       keluarga.push({
         id:`anak${i}`,
-        nama: oldChild?.nama || `Anak ${i}`,
+        nama: namaAnak || `Anak ${i}`,
         peran:`Anak ${i}`,
         icon:"bi-person-fill"
       });
@@ -286,6 +359,7 @@ function fillFamilyForm(){
   document.getElementById("statusPasangan").value = state.statusPasangan || "kerja";
   document.getElementById("jumlahAnak").value = anakCount || 3;
   toggleMarriageFields();
+  renderChildNameInputs();
 }
 
 function renderFamilyList(){
@@ -579,6 +653,8 @@ function resetReview(){
   document.getElementById("namaPasangan").value = "";
   document.getElementById("statusPasangan").value = "kerja";
   document.getElementById("jumlahAnak").value = "3";
+  const childrenBox = document.getElementById("childrenNameBox");
+  if(childrenBox) childrenBox.innerHTML = "";
   toggleMarriageFields();
   renderAll();
 }
@@ -597,6 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       el.addEventListener("change", () => {
         if(id === "statusMenikah") toggleMarriageFields();
+        if(id === "jumlahAnak") renderChildNameInputs();
         setInvalid(el, !String(el.value || "").trim());
         showFamilyError("");
       });

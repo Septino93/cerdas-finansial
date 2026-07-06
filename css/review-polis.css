@@ -904,3 +904,74 @@ body{margin:0;background:#eef3f8;font-family:Arial,Helvetica,sans-serif;color:#1
     justify-content:center;
   }
 }
+
+
+/* v16: input nama anak dinamis */
+.children-name-box{
+  margin-top:16px;
+  padding-top:16px;
+  border-top:1px solid #e5edf3;
+}
+
+.children-name-box.d-none{
+  display:none!important;
+}
+
+.children-name-title{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:12px;
+}
+
+.children-name-title>div{
+  color:#c90000;
+  font-size:17px;
+  font-weight:900;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.children-name-title small{
+  color:#667085;
+  font-weight:800;
+}
+
+.children-name-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+}
+
+.child-name-field{
+  background:#f8fbfd;
+  border:1px solid #dfe7ee;
+  border-radius:12px;
+  padding:12px;
+}
+
+.child-name-field .form-label{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#0b3c5d;
+  font-weight:900;
+  margin-bottom:7px;
+}
+
+.child-name-field .form-control{
+  background:#fff;
+}
+
+@media(max-width:640px){
+  .children-name-title{
+    display:block;
+  }
+  .children-name-title small{
+    display:block;
+    margin-top:4px;
+  }
+}
