@@ -31,22 +31,30 @@
           <input id="namaKepala" class="form-control" placeholder="Contoh: Budi Santoso" required>
         </div>
 
-        <div class="field-box">
-          <label class="form-label">Nama Pasangan</label>
-          <input id="namaPasangan" class="form-control" placeholder="Contoh: Siti Rahayu" required>
+        <div class="field-box small-field">
+          <label class="form-label">Status Pernikahan</label>
+          <select id="statusMenikah" class="form-select" required>
+            <option value="menikah" selected>Sudah Menikah</option>
+            <option value="belum_menikah">Belum Menikah</option>
+          </select>
         </div>
 
-        <div class="field-box compact-field">
+        <div class="field-box spouse-field">
+          <label class="form-label">Nama Pasangan</label>
+          <input id="namaPasangan" class="form-control" placeholder="Contoh: Siti Rahayu">
+        </div>
+
+        <div class="field-box compact-field spouse-field">
           <label class="form-label">Status Pasangan</label>
-          <select id="statusPasangan" class="form-select" required>
+          <select id="statusPasangan" class="form-select">
             <option value="kerja" selected>Kerja / Ada Income</option>
             <option value="tidak_kerja">Tidak Kerja / Tidak Ada Income</option>
           </select>
         </div>
 
-        <div class="field-box small-field">
+        <div class="field-box small-field spouse-field child-field">
           <label class="form-label">Jumlah Anak</label>
-          <select id="jumlahAnak" class="form-select" required>
+          <select id="jumlahAnak" class="form-select">
             <option value="0">0 Anak</option>
             <option value="1">1 Anak</option>
             <option value="2">2 Anak</option>

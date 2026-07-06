@@ -1,8 +1,9 @@
-const STORAGE_KEY = "cerdasFinansial_reviewPolis_v6";
+const STORAGE_KEY = "cerdasFinansial_reviewPolis_v8";
 
 let state = {
   keluarga: [],
   activeId: null,
+  statusMenikah: "menikah",
   statusPasangan: "kerja",
   polis: {}
 };
@@ -53,6 +54,7 @@ function loadState(){
   if(saved){
     try{ state = JSON.parse(saved); }catch(e){ saveState(); }
   }
+  if(!state.statusMenikah) state.statusMenikah = "menikah";
   if(!state.statusPasangan) state.statusPasangan = "kerja";
 }
 
@@ -155,13 +157,19 @@ function showFamilyError(message){
 
 function validateFamilyForm(){
   const namaKepala = document.getElementById("namaKepala");
+  const statusMenikah = document.getElementById("statusMenikah");
   const namaPasangan = document.getElementById("namaPasangan");
   const statusPasangan = document.getElementById("statusPasangan");
   const jumlahAnak = document.getElementById("jumlahAnak");
 
-  const fields = [namaKepala, namaPasangan, statusPasangan, jumlahAnak];
-  let valid = true;
+  const menikah = (statusMenikah.value || "menikah") === "menikah";
+  const fields = menikah
+    ? [namaKepala, statusMenikah, namaPasangan, statusPasangan, jumlahAnak]
+    : [namaKepala, statusMenikah];
 
+  [namaKepala, statusMenikah, namaPasangan, statusPasangan, jumlahAnak].forEach(field => setInvalid(field, false));
+
+  let valid = true;
   fields.forEach(field => {
     const empty = !String(field.value || "").trim();
     setInvalid(field, empty);
@@ -169,7 +177,10 @@ function validateFamilyForm(){
   });
 
   if(!valid){
-    showFamilyError("Data keluarga wajib diisi lengkap sebelum membuat Insurance Matrix.");
+    showFamilyError(menikah
+      ? "Data kepala keluarga, pasangan, status pasangan, dan jumlah anak wajib diisi lengkap."
+      : "Nama kepala keluarga dan status pernikahan wajib diisi."
+    );
     return false;
   }
 
@@ -177,27 +188,51 @@ function validateFamilyForm(){
   return true;
 }
 
+function toggleMarriageFields(){
+  const statusMenikah = document.getElementById("statusMenikah");
+  if(!statusMenikah) return;
+
+  const menikah = (statusMenikah.value || "menikah") === "menikah";
+  document.querySelectorAll(".spouse-field").forEach(el => {
+    el.classList.toggle("d-none", !menikah);
+  });
+
+  if(!menikah){
+    document.getElementById("namaPasangan").value = "";
+    document.getElementById("statusPasangan").value = "kerja";
+    document.getElementById("jumlahAnak").value = "0";
+    ["namaPasangan", "statusPasangan", "jumlahAnak"].forEach(id => setInvalid(document.getElementById(id), false));
+  }else if(document.getElementById("jumlahAnak").value === "0"){
+    document.getElementById("jumlahAnak").value = "3";
+  }
+}
+
 function simpanKeluarga(){
   if(!validateFamilyForm()) return;
 
   const kepala = document.getElementById("namaKepala").value.trim();
-  const pasangan = document.getElementById("namaPasangan").value.trim();
-  const jumlahAnak = parseInt(document.getElementById("jumlahAnak").value || "0");
-  state.statusPasangan = document.getElementById("statusPasangan").value || "kerja";
+  state.statusMenikah = document.getElementById("statusMenikah").value || "menikah";
+  const menikah = state.statusMenikah === "menikah";
+  const pasangan = menikah ? document.getElementById("namaPasangan").value.trim() : "";
+  const jumlahAnak = menikah ? parseInt(document.getElementById("jumlahAnak").value || "0") : 0;
+  state.statusPasangan = menikah ? (document.getElementById("statusPasangan").value || "kerja") : "kerja";
 
   const keluarga = [
-    { id:"kepala", nama:kepala, peran:"Kepala Keluarga", icon:"bi-person-fill" },
-    { id:"pasangan", nama:pasangan, peran:"Pasangan", icon:"bi-person-heart" }
+    { id:"kepala", nama:kepala, peran: menikah ? "Kepala Keluarga" : "Individu", icon:"bi-person-fill" }
   ];
 
-  for(let i = 1; i <= jumlahAnak; i++){
-    const oldChild = state.keluarga.find(x => x.id === `anak${i}`);
-    keluarga.push({
-      id:`anak${i}`,
-      nama: oldChild?.nama || `Anak ${i}`,
-      peran:`Anak ${i}`,
-      icon:"bi-person-fill"
-    });
+  if(menikah){
+    keluarga.push({ id:"pasangan", nama:pasangan, peran:"Pasangan", icon:"bi-person-heart" });
+
+    for(let i = 1; i <= jumlahAnak; i++){
+      const oldChild = state.keluarga.find(x => x.id === `anak${i}`);
+      keluarga.push({
+        id:`anak${i}`,
+        nama: oldChild?.nama || `Anak ${i}`,
+        peran:`Anak ${i}`,
+        icon:"bi-person-fill"
+      });
+    }
   }
 
   const oldPolis = state.polis || {};
@@ -225,8 +260,10 @@ function fillFamilyForm(){
 
   if(kepala) document.getElementById("namaKepala").value = kepala.nama;
   if(pasangan) document.getElementById("namaPasangan").value = pasangan.nama;
+  document.getElementById("statusMenikah").value = state.statusMenikah || "menikah";
   document.getElementById("statusPasangan").value = state.statusPasangan || "kerja";
   document.getElementById("jumlahAnak").value = anakCount || 3;
+  toggleMarriageFields();
 }
 
 function renderFamilyList(){
@@ -279,7 +316,7 @@ function namaUrutanAnak(nomor){
 
 function getMemberNumber(active){
   if(!active) return "INSURANCE MATRIX";
-  if(active.id === "kepala") return "1. KEPALA KELUARGA";
+  if(active.id === "kepala") return state.statusMenikah === "belum_menikah" ? "1. INDIVIDU" : "1. KEPALA KELUARGA";
   if(active.id === "pasangan") return "2. PASANGAN";
   const nomorAnak = parseInt(active.id.replace("anak", ""));
   return `${nomorAnak}. ANAK ${namaUrutanAnak(nomorAnak)}`;
@@ -399,19 +436,22 @@ function updateCurrentName(value){
 function resetReview(){
   if(!confirm("Reset semua data review polis?")) return;
   localStorage.removeItem(STORAGE_KEY);
-  state = { keluarga: [], activeId: null, statusPasangan:"kerja", polis: {} };
+  state = { keluarga: [], activeId: null, statusMenikah:"menikah", statusPasangan:"kerja", polis: {} };
   document.getElementById("namaKepala").value = "";
+  document.getElementById("statusMenikah").value = "menikah";
   document.getElementById("namaPasangan").value = "";
   document.getElementById("statusPasangan").value = "kerja";
   document.getElementById("jumlahAnak").value = "3";
+  toggleMarriageFields();
   renderAll();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   loadState();
   renderAll();
+  toggleMarriageFields();
 
-  ["namaKepala", "namaPasangan", "statusPasangan", "jumlahAnak"].forEach(id => {
+  ["namaKepala", "statusMenikah", "namaPasangan", "statusPasangan", "jumlahAnak"].forEach(id => {
     const el = document.getElementById(id);
     if(el){
       el.addEventListener("input", () => {
@@ -419,6 +459,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showFamilyError("");
       });
       el.addEventListener("change", () => {
+        if(id === "statusMenikah") toggleMarriageFields();
         setInvalid(el, !String(el.value || "").trim());
         showFamilyError("");
       });
