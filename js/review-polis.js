@@ -582,39 +582,90 @@ function getFamilyReviewStats(){
 }
 
 
-function getPolicyRecommendation(row){
-  if(row.punya === "ya"){
-    return "Pertahankan dan review manfaat/UP secara berkala.";
+function getPolicyPriorityLevel(row){
+  if(row.punya === "ya") return "Sudah Memadai";
+  if(row.warna === "red") return "Prioritas Utama";
+  if(row.warna === "green") return "Prioritas Sekunder";
+  if(row.warna === "yellow") return "Tahap Pengembangan";
+  return "Jangka Panjang";
+}
+
+function getPolicyStatusText(row){
+  if(row.punya === "ya") return "Sudah Dimiliki";
+  return "Belum Dimiliki";
+}
+
+function getPolicyReason(row){
+  const kategori = String(row.kategori || "").toLowerCase();
+  const fungsi = String(row.fungsi || "").toLowerCase();
+
+  if(kategori.includes("kesehatan")){
+    return "Menjaga aset keluarga agar tidak terganggu oleh biaya rumah sakit.";
   }
-  if(row.warna === "red"){
-    return "Prioritas utama untuk dilengkapi.";
+  if(kategori.includes("penyakit kritis")){
+    return "Menjaga income keluarga saat terjadi risiko sakit kritis.";
+  }
+  if(kategori.includes("pendidikan") || fungsi.includes("pendidikan")){
+    return "Mempersiapkan biaya pendidikan anak agar tujuan sekolah/kuliah tetap berjalan.";
+  }
+  if(fungsi.includes("pensiun")){
+    return "Membantu menjaga kesiapan dana dan income keluarga di masa pensiun.";
+  }
+  if(fungsi.includes("hutang")){
+    return "Mencegah hutang menjadi beban keluarga jika terjadi risiko pada pencari nafkah.";
+  }
+  if(fungsi.includes("pemakaman")){
+    return "Menyiapkan biaya akhir agar keluarga tidak terbebani secara mendadak.";
+  }
+  if(fungsi.includes("rawat inap")){
+    return "Memberikan tambahan cashflow saat terjadi rawat inap.";
+  }
+  if(fungsi.includes("cacat")){
+    return "Melindungi income jika terjadi risiko cacat tetap dan total.";
+  }
+  if(fungsi.includes("kecelakaan")){
+    return "Memberikan perlindungan tambahan atas risiko kecelakaan.";
+  }
+  if(fungsi.includes("distribusi") || fungsi.includes("warisan")){
+    return "Membantu perencanaan distribusi aset dan warisan keluarga.";
+  }
+  if(row.warna === "blue"){
+    return "Mendukung tujuan akumulasi dana jangka panjang.";
   }
   if(row.warna === "green"){
-    return "Lengkapi sesuai kebutuhan dan anggaran.";
+    return "Dilengkapi sesuai kebutuhan, kondisi keluarga, dan anggaran.";
   }
-  if(row.warna === "yellow"){
-    return "Pertimbangkan untuk tujuan distribusi kekayaan.";
-  }
-  return "Pertimbangkan untuk tujuan akumulasi dana.";
+  return "Termasuk kebutuhan wajib yang sebaiknya diprioritaskan dalam review polis.";
 }
 
-function getPolicyPriorityLabel(row, index){
-  if(row.punya === "ya") return "Sudah Ada";
-  if(row.warna === "red") return `Prioritas ${index + 1}`;
-  if(row.warna === "green") return "Opsional";
-  if(row.warna === "yellow") return "Distribusi";
-  return "Akumulasi";
+function getPolicyRecommendation(row){
+  const level = getPolicyPriorityLevel(row);
+  if(row.punya === "ya") return "Pertahankan dan review manfaat/UP secara berkala.";
+  if(level === "Prioritas Utama") return "Prioritas utama untuk dilengkapi.";
+  if(level === "Prioritas Sekunder") return "Lengkapi setelah kebutuhan wajib utama terpenuhi.";
+  if(level === "Tahap Pengembangan") return "Dipertimbangkan setelah proteksi dasar keluarga cukup.";
+  return "Dipertimbangkan untuk tujuan jangka panjang.";
 }
 
-function getFamilyPolicyRoadmap(limit = 12){
+function getMemberSortOrder(member){
+  if(member.id === "kepala") return 1;
+  if(member.id === "pasangan") return 2;
+  if(String(member.id).startsWith("anak")){
+    const n = parseInt(String(member.id).replace("anak", "")) || 0;
+    return 10 + n;
+  }
+  return 99;
+}
+
+function getFamilyPolicyRoadmap(limit = 999){
   const rows = [];
 
   state.keluarga.forEach(member => {
     syncMatrixWithTemplate(member.id);
     const matrix = state.polis[member.id] || [];
 
-    matrix.forEach(row => {
-      rows.push({ member, row });
+    matrix.forEach((row, rowIndex) => {
+      rows.push({ member, row, rowIndex });
     });
   });
 
@@ -623,18 +674,17 @@ function getFamilyPolicyRoadmap(limit = 12){
   return rows
     .filter(item => item.row.punya !== "ya")
     .sort((a,b) => {
+      const ma = getMemberSortOrder(a.member);
+      const mb = getMemberSortOrder(b.member);
+      if(ma !== mb) return ma - mb;
+
       const pa = priorityOrder[a.row.warna] || 9;
       const pb = priorityOrder[b.row.warna] || 9;
       if(pa !== pb) return pa - pb;
-      return String(a.member.nama).localeCompare(String(b.member.nama));
+
+      return (a.rowIndex || 0) - (b.rowIndex || 0);
     })
     .slice(0, limit);
-}
-
-function getImplementationStage(index){
-  if(index < 3) return "Tahap 1\n0–3 bulan";
-  if(index < 6) return "Tahap 2\n3–6 bulan";
-  return "Tahap 3\n6–12 bulan";
 }
 
 function getCTAStatus(score){
@@ -680,13 +730,13 @@ function renderCTA(){
   if(ctaPriority) ctaPriority.textContent = stats.wajibMissing;
 
   if(list){
-    const roadmap = getFamilyPolicyRoadmap(6);
+    const roadmap = getFamilyPolicyRoadmap(8);
 
     if(roadmap.length){
-      list.innerHTML = roadmap.map((item, idx) => `
+      list.innerHTML = roadmap.map((item) => `
         <li>
-          <strong>${idx + 1}. ${item.member.nama}</strong> — ${item.row.kategori}<br>
-          <small>${item.row.fungsi} • ${getPolicyRecommendation(item.row)}</small>
+          <strong>${item.member.nama}</strong> — ${item.row.kategori}<br>
+          <small>${item.row.fungsi} • ${getPolicyPriorityLevel(item.row)} • ${getPolicyReason(item.row)}</small>
         </li>
       `).join("");
     }else{
@@ -1082,7 +1132,7 @@ function addCTAPage(doc, logoDataUrl, pageNo){
   const pageHeight = doc.internal.pageSize.getHeight();
   const stats = getFamilyReviewStats();
   const status = getCTAStatus(stats.score);
-  const roadmap = getFamilyPolicyRoadmap(12);
+  const roadmap = getFamilyPolicyRoadmap(999);
 
   doc.setFillColor(248,252,255);
   doc.rect(0,0,pageWidth,pageHeight,"F");
@@ -1163,33 +1213,32 @@ function addCTAPage(doc, logoDataUrl, pageNo){
   doc.setTextColor(11,60,93);
   doc.text("Polis Keluarga yang Perlu Diprioritaskan", 18, 116);
 
-  const tableBody = roadmap.length ? roadmap.map((item, idx) => [
-    getImplementationStage(idx),
+  const tableBody = roadmap.length ? roadmap.map(item => [
     safePdfText(item.member.nama),
-    safePdfText(`${item.row.kategori}\n${item.row.fungsi}`),
-    "Belum Ada",
-    safePdfText(getPolicyPriorityLabel(item.row, idx)),
-    safePdfText(getPolicyRecommendation(item.row))
+    safePdfText(`${item.row.kategori}
+${item.row.fungsi}`),
+    safePdfText(getPolicyStatusText(item.row)),
+    safePdfText(getPolicyPriorityLevel(item.row)),
+    safePdfText(getPolicyReason(item.row))
   ]) : [[
-    "Review Tahunan",
     "Keluarga",
     "Semua item matrix",
-    "Sudah Ada",
-    "Monitoring",
+    "Sudah Dimiliki",
+    "Monitoring Tahunan",
     "Pertahankan polis keluarga dan review manfaat minimal setahun sekali."
   ]];
 
   doc.autoTable({
     startY: 121,
-    head: [["Tahap", "Anggota", "Kebutuhan Polis", "Status", "Prioritas", "Rekomendasi"]],
+    head: [["Anggota", "Kebutuhan Polis", "Status", "Tingkat Prioritas", "Alasan"]],
     body: tableBody,
     theme:"grid",
     margin:{left:18,right:18},
     tableWidth: pageWidth - 36,
     styles:{
       font:"helvetica",
-      fontSize:6.8,
-      cellPadding:2.4,
+      fontSize:6.6,
+      cellPadding:2.2,
       textColor:[51,65,85],
       lineColor:[220,232,242],
       lineWidth:.25,
@@ -1202,17 +1251,16 @@ function addCTAPage(doc, logoDataUrl, pageNo){
       halign:"center"
     },
     columnStyles:{
-      0:{cellWidth:26, fontStyle:"bold", halign:"center"},
-      1:{cellWidth:32, fontStyle:"bold"},
-      2:{cellWidth:62, fontStyle:"bold"},
-      3:{cellWidth:24, halign:"center", fontStyle:"bold"},
-      4:{cellWidth:28, halign:"center", fontStyle:"bold"},
-      5:{cellWidth: pageWidth - 36 - 26 - 32 - 62 - 24 - 28}
+      0:{cellWidth:30, fontStyle:"bold"},
+      1:{cellWidth:62, fontStyle:"bold"},
+      2:{cellWidth:28, halign:"center", fontStyle:"bold"},
+      3:{cellWidth:34, halign:"center", fontStyle:"bold"},
+      4:{cellWidth: pageWidth - 36 - 30 - 62 - 28 - 34}
     },
     didParseCell:function(data){
-      if(data.section === "body" && data.column.index === 3){
+      if(data.section === "body" && data.column.index === 2){
         const txt = String(data.cell.raw || "");
-        if(txt === "Belum Ada"){
+        if(txt.includes("Belum")){
           data.cell.styles.textColor = [190,0,0];
           data.cell.styles.fillColor = [255,240,240];
         }else{
@@ -1220,11 +1268,20 @@ function addCTAPage(doc, logoDataUrl, pageNo){
           data.cell.styles.fillColor = [232,247,238];
         }
       }
-      if(data.section === "body" && data.column.index === 4){
+      if(data.section === "body" && data.column.index === 3){
         const txt = String(data.cell.raw || "");
-        if(txt.includes("Prioritas")){
+        if(txt.includes("Utama")){
           data.cell.styles.textColor = [180,0,0];
           data.cell.styles.fillColor = [255,246,230];
+        }else if(txt.includes("Sekunder")){
+          data.cell.styles.textColor = [13,101,183];
+          data.cell.styles.fillColor = [239,248,255];
+        }else if(txt.includes("Pengembangan")){
+          data.cell.styles.textColor = [150,92,0];
+          data.cell.styles.fillColor = [255,250,230];
+        }else{
+          data.cell.styles.textColor = [71,85,105];
+          data.cell.styles.fillColor = [248,250,252];
         }
       }
     }
