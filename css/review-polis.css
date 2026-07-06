@@ -629,3 +629,278 @@ body{margin:0;background:#eef3f8;font-family:Arial,Helvetica,sans-serif;color:#1
   cursor:wait;
   transform:none!important;
 }
+
+/* v15: Review Polis CTA */
+.review-cta-section{
+  margin:28px auto 60px;
+  max-width:1460px;
+  padding:0 16px;
+}
+
+.cta-score-card{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:28px;
+  background:linear-gradient(135deg,#0b3c5d,#1274bd);
+  color:#fff;
+  border-radius:28px;
+  padding:34px;
+  box-shadow:0 20px 50px rgba(11,60,93,.22);
+  overflow:hidden;
+  position:relative;
+}
+
+.cta-score-card::after{
+  content:"";
+  position:absolute;
+  right:-80px;
+  top:-80px;
+  width:260px;
+  height:260px;
+  border-radius:50%;
+  background:rgba(255,255,255,.12);
+}
+
+.cta-score-left{
+  position:relative;
+  z-index:2;
+  flex:1;
+}
+
+.cta-eyebrow{
+  display:inline-flex;
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.22);
+  padding:7px 12px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:13px;
+  margin-bottom:12px;
+}
+
+.cta-score-left h2{
+  margin:0 0 8px;
+  font-size:34px;
+  font-weight:900;
+}
+
+.cta-score-left p{
+  margin:0 0 18px;
+  opacity:.92;
+  font-size:17px;
+  max-width:850px;
+}
+
+.cta-progress{
+  width:100%;
+  height:14px;
+  background:rgba(255,255,255,.22);
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.cta-progress-bar{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#f7c948,#2ed573);
+  transition:.35s ease;
+}
+
+.cta-score-circle{
+  position:relative;
+  z-index:2;
+  width:132px;
+  height:132px;
+  border-radius:50%;
+  background:#fff;
+  color:#0b3c5d;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:34px;
+  font-weight:900;
+  box-shadow:0 14px 30px rgba(0,0,0,.18);
+  flex-shrink:0;
+}
+
+.cta-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-top:18px;
+}
+
+.cta-panel{
+  background:#fff;
+  border:1px solid #dce8f2;
+  border-radius:24px;
+  padding:24px;
+  box-shadow:0 12px 32px rgba(16,24,40,.07);
+}
+
+.cta-panel h3{
+  margin:0 0 18px;
+  color:#0b3c5d;
+  font-size:22px;
+  font-weight:900;
+}
+
+.cta-panel h3 i{
+  color:#2e8b57;
+  margin-right:8px;
+}
+
+.cta-metrics{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.cta-metrics div{
+  border:1px solid #e4edf5;
+  border-radius:18px;
+  padding:18px;
+  background:#f8fbfd;
+}
+
+.cta-metrics span{
+  display:block;
+  color:#667085;
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:6px;
+}
+
+.cta-metrics strong{
+  color:#0b3c5d;
+  font-size:30px;
+  font-weight:900;
+}
+
+.cta-recommendation-list{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:10px;
+}
+
+.cta-recommendation-list li{
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  color:#7c2d12;
+  border-radius:14px;
+  padding:12px 14px;
+  font-weight:800;
+}
+
+.planner-cta-card{
+  margin-top:18px;
+  background:#fff;
+  border:1px solid #dce8f2;
+  border-radius:28px;
+  padding:26px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:22px;
+  box-shadow:0 16px 40px rgba(16,24,40,.08);
+}
+
+.planner-profile-mini{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+
+.planner-avatar-mini{
+  width:76px;
+  height:76px;
+  border-radius:22px;
+  background:linear-gradient(135deg,#0b3c5d,#1274bd);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  font-weight:900;
+  flex-shrink:0;
+}
+
+.planner-profile-mini h3{
+  margin:0 0 6px;
+  color:#0b3c5d;
+  font-weight:900;
+}
+
+.planner-profile-mini p{
+  margin:0 0 6px;
+  color:#667085;
+  font-weight:700;
+}
+
+.planner-profile-mini strong{
+  color:#2e8b57;
+  font-weight:900;
+}
+
+.cta-action-buttons{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.btn-whatsapp,
+.btn-export-pdf,
+.btn-dashboard{
+  border:0;
+  text-decoration:none;
+  border-radius:15px;
+  padding:13px 18px;
+  font-weight:900;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  white-space:nowrap;
+}
+
+.btn-whatsapp{
+  background:#25d366;
+  color:#fff;
+}
+
+@media(max-width:900px){
+  .cta-score-card,
+  .planner-cta-card,
+  .planner-profile-mini{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .cta-grid,
+  .cta-metrics{
+    grid-template-columns:1fr;
+  }
+
+  .cta-score-circle{
+    width:105px;
+    height:105px;
+    font-size:28px;
+  }
+
+  .cta-score-left h2{
+    font-size:28px;
+  }
+
+  .cta-action-buttons{
+    justify-content:flex-start;
+    width:100%;
+  }
+
+  .cta-action-buttons > *{
+    width:100%;
+    justify-content:center;
+  }
+}
