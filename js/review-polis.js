@@ -1194,59 +1194,62 @@ function cfExecRoundRect(doc, x, y, w, h, r, fill, stroke){
 function cfExecDrawIconBox(doc, x, y, color, text){
   doc.setFillColor(color[0], color[1], color[2]);
   doc.roundedRect(x, y, 10, 10, 2.2, 2.2, "F");
-  doc.setTextColor(255,255,255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.2);
-  doc.text(text, x + 5, y + 6.7, { align:"center" });
+  // Biarkan kotak icon bersih tanpa huruf KG/PS/AK/TG/FP agar tampilan PDF lebih rapi.
+  if(text){
+    doc.setTextColor(255,255,255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(5.2);
+    doc.text(text, x + 5, y + 6.5, { align:"center" });
+  }
 }
 
 function cfExecInfoCard(doc, x, y, w, title, value, color, icon){
-  cfExecRoundRect(doc, x, y, w, 22, 4, [255,255,255], [220,232,242]);
-  cfExecDrawIconBox(doc, x + 5, y + 6, color, icon);
+  cfExecRoundRect(doc, x, y, w, 20, 4, [255,255,255], [220,232,242]);
+  cfExecDrawIconBox(doc, x + 5, y + 5, color, icon || "");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.7);
+  doc.setFontSize(6.5);
   doc.setTextColor(100,116,139);
-  doc.text(title.toUpperCase(), x + 18, y + 8.3, { maxWidth:w - 20 });
-  doc.setFontSize(9.5);
+  doc.text(title.toUpperCase(), x + 18, y + 7.2, { maxWidth:w - 20 });
+  doc.setFontSize(9);
   doc.setTextColor(11,60,93);
-  doc.text(cfExecSafeText(value), x + 18, y + 16.3, { maxWidth:w - 20 });
+  doc.text(cfExecSafeText(value), x + 18, y + 15.2, { maxWidth:w - 20 });
 }
 
 function cfExecStatCard(doc, x, y, w, value, title, subtitle, color, icon){
-  cfExecRoundRect(doc, x, y, w, 29, 4.5, [255,255,255], [220,232,242]);
+  cfExecRoundRect(doc, x, y, w, 26, 4.5, [255,255,255], [220,232,242]);
   doc.setFillColor(color[0], color[1], color[2]);
-  doc.roundedRect(x, y, w, 2.6, 1.4, 1.4, "F");
-  cfExecDrawIconBox(doc, x + 8, y + 9.5, color, icon);
+  doc.roundedRect(x, y, w, 2.3, 1.2, 1.2, "F");
+  cfExecDrawIconBox(doc, x + 7, y + 8.5, color, icon || "");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18.5);
+  doc.setFontSize(17);
   doc.setTextColor(color[0], color[1], color[2]);
-  doc.text(String(value), x + w/2 + 10, y + 14.5, { align:"center" });
-  doc.setFontSize(7.7);
+  doc.text(String(value), x + w/2 + 10, y + 13.4, { align:"center" });
+  doc.setFontSize(7.3);
   doc.setTextColor(15,23,42);
-  doc.text(title, x + w/2 + 10, y + 22, { align:"center", maxWidth:w - 22 });
+  doc.text(title, x + w/2 + 10, y + 20.3, { align:"center", maxWidth:w - 22 });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.2);
+  doc.setFontSize(5.8);
   doc.setTextColor(71,85,105);
-  doc.text(subtitle, x + w/2 + 10, y + 26.6, { align:"center", maxWidth:w - 22 });
+  doc.text(subtitle, x + w/2 + 10, y + 24.2, { align:"center", maxWidth:w - 22 });
 }
 
 function cfExecProgress(doc, x, y, w, label, percent, color){
-  const barX = x + 34;
-  const barW = w - 52;
+  const barX = x + 36;
+  const barW = w - 54;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7.2);
   doc.setTextColor(15,23,42);
   doc.text(label, x, y + 2.6);
   doc.setFillColor(230,237,246);
-  doc.roundedRect(barX, y, barW, 4.7, 2.3, 2.3, "F");
+  doc.roundedRect(barX, y, barW, 4.5, 2.2, 2.2, "F");
   if(percent > 0){
     doc.setFillColor(color[0], color[1], color[2]);
-    doc.roundedRect(barX, y, Math.max(3, barW * percent / 100), 4.7, 2.3, 2.3, "F");
+    doc.roundedRect(barX, y, Math.max(3, barW * percent / 100), 4.5, 2.2, 2.2, "F");
   }
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7.1);
   doc.setTextColor(color[0], color[1], color[2]);
-  doc.text(`${percent}%`, x + w, y + 3.2, { align:"right" });
+  doc.text(`${percent}%`, x + w, y + 3.1, { align:"right" });
 }
 
 function addExecutiveSummaryPage(doc, logoDataUrl, pageNo){
@@ -1255,7 +1258,6 @@ function addExecutiveSummaryPage(doc, logoDataUrl, pageNo){
   const data = getExecutiveSummaryData();
   const tanggal = new Date().toLocaleDateString("id-ID", { day:"2-digit", month:"long", year:"numeric" });
 
-  // Base
   doc.setFillColor(255,255,255);
   doc.rect(0,0,pageWidth,pageHeight,"F");
   doc.setFillColor(241,248,253);
@@ -1267,80 +1269,79 @@ function addExecutiveSummaryPage(doc, logoDataUrl, pageNo){
   doc.setFillColor(242,190,84);
   doc.triangle(pageWidth - 44, 0, pageWidth - 31, 0, pageWidth, 31, "F");
 
-  // Header card
-  cfExecRoundRect(doc, 10, 9, pageWidth - 20, 28, 5, [255,255,255], [220,232,242]);
+  // Header bersih
+  cfExecRoundRect(doc, 10, 8, pageWidth - 20, 27, 5, [255,255,255], [220,232,242]);
   if(logoDataUrl){
-    try{ doc.addImage(logoDataUrl, "PNG", 25, 13, 24, 18, undefined, "FAST"); }catch(e){}
+    try{ doc.addImage(logoDataUrl, "PNG", 24, 12, 24, 18, undefined, "FAST"); }catch(e){}
   }
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(23);
+  doc.setFontSize(22);
   doc.setTextColor(11,60,93);
-  doc.text("EXECUTIVE SUMMARY", pageWidth/2, 20.3, { align:"center" });
+  doc.text("EXECUTIVE SUMMARY", pageWidth/2, 19.7, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9.2);
+  doc.setFontSize(8.8);
   doc.setTextColor(51,65,85);
-  doc.text("Review Polis Keluarga", pageWidth/2 - 6, 28, { align:"right" });
+  doc.text("Review Polis Keluarga", pageWidth/2 - 6, 27.2, { align:"right" });
   doc.setFont("helvetica", "bold");
   doc.setTextColor(0,105,180);
-  doc.text("Cerdas Finansial", pageWidth/2 - 4, 28);
+  doc.text("Cerdas Finansial", pageWidth/2 - 4, 27.2);
   doc.setFillColor(201,154,54);
-  doc.roundedRect(pageWidth - 52, 16, 34, 5.2, 2.6, 2.6, "F");
+  doc.roundedRect(pageWidth - 52, 16, 34, 5, 2.5, 2.5, "F");
   doc.setTextColor(255,255,255);
-  doc.setFontSize(5.2);
-  doc.text("CONFIDENTIAL", pageWidth - 35, 19.6, { align:"center" });
+  doc.setFontSize(5);
+  doc.text("CONFIDENTIAL", pageWidth - 35, 19.4, { align:"center" });
 
-  // Family info cards - no KG/PS/etc
-  const infoY = 43;
-  const gap = 3;
-  const infoW = (pageWidth - 20 - gap*4) / 5;
+  // Info keluarga: 5 kartu bersih tanpa huruf icon
+  const infoY = 42;
+  const infoGap = 2.6;
+  const infoW = (pageWidth - 20 - infoGap*4) / 5;
   const infoItems = [
-    {title:"Kepala Keluarga", value:data.kepala?.nama || "-", color:[11,60,93], icon:"KK"},
-    {title:"Pasangan", value:data.pasangan?.nama || "-", color:[124,58,237], icon:"P"},
-    {title:"Anak", value:`${data.anak.length} Orang`, color:[0,105,180], icon:"A"},
-    {title:"Tanggal Review", value:tanggal, color:[201,154,54], icon:"T"},
-    {title:"Financial Planner", value:"Septino, QWP®, CIS®", color:[11,60,93], icon:"FP"}
+    {title:"Kepala Keluarga", value:data.kepala?.nama || "-", color:[11,60,93]},
+    {title:"Pasangan", value:data.pasangan?.nama || "-", color:[124,58,237]},
+    {title:"Anak", value:`${data.anak.length} Orang`, color:[0,105,180]},
+    {title:"Tanggal Review", value:tanggal, color:[201,154,54]},
+    {title:"Financial Planner", value:"Septino, QWP®, CIS®", color:[11,60,93]}
   ];
-  infoItems.forEach((item, i) => cfExecInfoCard(doc, 10 + i*(infoW+gap), infoY, infoW, item.title, item.value, item.color, item.icon));
+  infoItems.forEach((item, i) => cfExecInfoCard(doc, 10 + i*(infoW+infoGap), infoY, infoW, item.title, item.value, item.color, ""));
 
   // KPI cards
-  const statY = 72;
-  const statGap = 4;
+  const statY = 68;
+  const statGap = 3.2;
   const statW = (pageWidth - 20 - statGap*3) / 4;
-  cfExecStatCard(doc, 10, statY, statW, `${data.stats.score}%`, "Skor Kesiapan", "Perlindungan keluarga", [11,60,93], "S");
-  cfExecStatCard(doc, 10 + (statW+statGap), statY, statW, data.stats.total, "Kebutuhan Polis", "Total kebutuhan", [0,105,180], "P");
-  cfExecStatCard(doc, 10 + (statW+statGap)*2, statY, statW, data.stats.owned, "Sudah Dimiliki", "Polis tersedia", [0,166,81], "OK");
-  cfExecStatCard(doc, 10 + (statW+statGap)*3, statY, statW, data.stats.missing, "Perlu Dilengkapi", "Gap perlindungan", [224,0,0], "!");
+  cfExecStatCard(doc, 10, statY, statW, `${data.stats.score}%`, "Skor Kesiapan", "Perlindungan keluarga", [11,60,93], "");
+  cfExecStatCard(doc, 10 + (statW+statGap), statY, statW, data.stats.total, "Kebutuhan Polis", "Total kebutuhan", [0,105,180], "");
+  cfExecStatCard(doc, 10 + (statW+statGap)*2, statY, statW, data.stats.owned, "Sudah Dimiliki", "Polis tersedia", [0,166,81], "");
+  cfExecStatCard(doc, 10 + (statW+statGap)*3, statY, statW, data.stats.missing, "Perlu Dilengkapi", "Gap perlindungan", [224,0,0], "");
 
-  // Main panels - keep all above bottom conclusion to avoid overlap
-  const panelY = 109;
-  const panelH = 68;
+  // Panels: dibuat lebih pendek agar tidak tertimpa footer/kesimpulan
+  const panelY = 102;
   const leftX = 10;
   const leftW = 137;
   const rightX = 154;
   const rightW = pageWidth - rightX - 10;
 
-  // Protection panel
-  cfExecRoundRect(doc, leftX, panelY, leftW, panelH, 4, [255,255,255], [220,232,242]);
-  cfExecDrawIconBox(doc, leftX + 6, panelY + 7, [11,60,93], "CF");
+  // Kondisi perlindungan
+  cfExecRoundRect(doc, leftX, panelY, leftW, 66, 4, [255,255,255], [220,232,242]);
+  cfExecDrawIconBox(doc, leftX + 6, panelY + 7, [11,60,93], "");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.6);
+  doc.setFontSize(9.4);
   doc.setTextColor(11,60,93);
-  doc.text("KONDISI PERLINDUNGAN", leftX + 19, panelY + 13.5);
+  doc.text("KONDISI PERLINDUNGAN", leftX + 19, panelY + 13.3);
   doc.setDrawColor(226,232,240);
   doc.line(leftX + 19, panelY + 17, leftX + leftW - 8, panelY + 17);
   let py = panelY + 30;
   data.categories.forEach(cat => {
     cfExecProgress(doc, leftX + 9, py, leftW - 18, cat.label, cat.progress.percent, cat.color);
-    py += 10.6;
+    py += 10.2;
   });
 
-  // Findings panel
-  cfExecRoundRect(doc, rightX, panelY, rightW, 38, 4, [255,255,255], [220,232,242]);
-  cfExecDrawIconBox(doc, rightX + 6, panelY + 7, [11,60,93], "!");
+  // Temuan utama
+  cfExecRoundRect(doc, rightX, panelY, rightW, 47, 4, [255,255,255], [220,232,242]);
+  cfExecDrawIconBox(doc, rightX + 6, panelY + 7, [11,60,93], "");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.6);
+  doc.setFontSize(9.4);
   doc.setTextColor(11,60,93);
-  doc.text("TEMUAN UTAMA", rightX + 19, panelY + 13.5);
+  doc.text("TEMUAN UTAMA", rightX + 19, panelY + 13.3);
   doc.setDrawColor(226,232,240);
   doc.line(rightX + 19, panelY + 17, pageWidth - 17, panelY + 17);
   const findings = data.categories.map(cat => {
@@ -1348,71 +1349,71 @@ function addExecutiveSummaryPage(doc, logoDataUrl, pageNo){
     if(cat.progress.percent > 0) return { sign:"!", color:[230,142,0], text:`${cat.label} masih perlu dilengkapi.` };
     return { sign:"!", color:[230,142,0], text:`${cat.label} belum tersedia.` };
   });
-  let fy = panelY + 26;
+  let fy = panelY + 25.5;
   findings.slice(0,5).forEach((f, i) => {
     doc.setFillColor(f.color[0], f.color[1], f.color[2]);
-    doc.circle(rightX + 9, fy - 1.7, 2.2, "F");
+    doc.circle(rightX + 9, fy - 1.7, 2.1, "F");
     doc.setTextColor(255,255,255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(4.5);
+    doc.setFontSize(4.3);
     doc.text(f.sign, rightX + 9, fy, { align:"center" });
     doc.setTextColor(15,23,42);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.15);
+    doc.setFontSize(6.9);
     doc.text(cfExecSafeText(f.text), rightX + 14, fy, { maxWidth:rightW - 21 });
-    if(i < 4){ doc.setDrawColor(226,232,240); doc.line(rightX + 14, fy + 3.1, pageWidth - 16, fy + 3.1); }
-    fy += 6.2;
+    if(i < 4){ doc.setDrawColor(226,232,240); doc.line(rightX + 14, fy + 3, pageWidth - 16, fy + 3); }
+    fy += 7;
   });
 
-  // Priorities panel
-  const prY = panelY + 42;
-  cfExecRoundRect(doc, rightX, prY, rightW, 26, 4, [255,255,255], [220,232,242]);
-  cfExecDrawIconBox(doc, rightX + 6, prY + 6.5, [11,60,93], "★");
+  // Prioritas
+  const prY = 153;
+  cfExecRoundRect(doc, rightX, prY, rightW, 23, 4, [255,255,255], [220,232,242]);
+  cfExecDrawIconBox(doc, rightX + 6, prY + 6.2, [11,60,93], "");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.4);
+  doc.setFontSize(9);
   doc.setTextColor(11,60,93);
-  doc.text("3 PRIORITAS TERATAS", rightX + 19, prY + 12.5);
+  doc.text("3 PRIORITAS TERATAS", rightX + 19, prY + 11.8);
   const priorities = (data.priorities && data.priorities.length ? data.priorities : ["Review Polis Wajib", "Lengkapi Proteksi", "Review Tahunan"]).slice(0,3);
   const pW = (rightW - 25) / 3;
   const pColors = [[224,0,0],[230,142,0],[0,105,180]];
   priorities.forEach((item, i) => {
     const bx = rightX + 19 + i*(pW + 3);
-    const by = prY + 15.3;
+    const by = prY + 14.3;
     doc.setFillColor(pColors[i][0], pColors[i][1], pColors[i][2]);
-    doc.roundedRect(bx, by, pW, 8, 2.2, 2.2, "F");
+    doc.roundedRect(bx, by, pW, 7.5, 2.1, 2.1, "F");
     doc.setFillColor(255,255,255);
-    doc.circle(bx + 5, by + 4, 2.6, "F");
+    doc.circle(bx + 5, by + 3.75, 2.4, "F");
     doc.setTextColor(pColors[i][0], pColors[i][1], pColors[i][2]);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(5.5);
-    doc.text(String(i+1), bx + 5, by + 5.8, { align:"center" });
+    doc.setFontSize(5.2);
+    doc.text(String(i+1), bx + 5, by + 5.4, { align:"center" });
     doc.setTextColor(255,255,255);
-    doc.setFontSize(6.3);
-    doc.text(cfExecSafeText(item), bx + 11, by + 5.3, { maxWidth:pW - 12 });
+    doc.setFontSize(5.8);
+    doc.text(cfExecSafeText(item), bx + 10.5, by + 5, { maxWidth:pW - 11 });
   });
 
-  // Conclusion bottom, no overlap
-  const conclY = 184;
-  cfExecRoundRect(doc, 10, conclY, pageWidth - 20, 15, 4, [245,250,255], [220,232,242]);
-  cfExecDrawIconBox(doc, 16, conclY + 3, [11,60,93], "FP");
+  // Kesimpulan di bawah, dibuat lebih rendah dan pendek agar tidak menimpa panel
+  const conclY = 181;
+  cfExecRoundRect(doc, 10, conclY, pageWidth - 20, 17, 4, [245,250,255], [220,232,242]);
+  cfExecDrawIconBox(doc, 16, conclY + 3.5, [11,60,93], "");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7.4);
   doc.setTextColor(11,60,93);
-  doc.text("KESIMPULAN FINANCIAL PLANNER", 29, conclY + 6.2);
+  doc.text("KESIMPULAN FINANCIAL PLANNER", 29, conclY + 6.4);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.05);
+  doc.setFontSize(5.85);
   doc.setTextColor(30,41,59);
   const conclusion = `Skor kesiapan perlindungan keluarga saat ini ${data.stats.score}%. Fokus utama adalah melengkapi proteksi wajib terlebih dahulu, kemudian menyiapkan dana pendidikan dan dana pensiun secara bertahap.`;
-  doc.text(conclusion, 29, conclY + 11.2, { maxWidth:pageWidth - 100, lineHeightFactor:1.05 });
+  doc.text(conclusion, 29, conclY + 11.2, { maxWidth:pageWidth - 105, lineHeightFactor:1.05 });
   doc.setDrawColor(148,163,184);
-  doc.line(pageWidth - 67, conclY + 3, pageWidth - 67, conclY + 12);
+  doc.line(pageWidth - 67, conclY + 3, pageWidth - 67, conclY + 14);
   doc.setFont("helvetica", "bolditalic");
-  doc.setFontSize(10.5);
+  doc.setFontSize(10);
   doc.setTextColor(11,60,93);
-  doc.text("Septino, QWP®, CIS®", pageWidth - 39, conclY + 7.2, { align:"center" });
+  doc.text("Septino, QWP®, CIS®", pageWidth - 39, conclY + 7.3, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(5.8);
-  doc.text("Financial Planner", pageWidth - 39, conclY + 12, { align:"center" });
+  doc.setFontSize(5.6);
+  doc.text("Financial Planner", pageWidth - 39, conclY + 12.3, { align:"center" });
 
   addPdfFooter(doc, pageNo || 2);
 }
