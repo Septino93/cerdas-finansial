@@ -1,4 +1,4 @@
-const STORAGE_KEY = "cerdasFinansial_reviewPolis_v5";
+const STORAGE_KEY = "cerdasFinansial_reviewPolis_v6";
 
 let state = {
   keluarga: [],
@@ -136,9 +136,52 @@ function syncMatrixWithTemplate(memberId){
   });
 }
 
+function setInvalid(el, isInvalid){
+  if(!el) return;
+  el.classList.toggle("input-invalid", isInvalid);
+}
+
+function showFamilyError(message){
+  const box = document.getElementById("familyError");
+  if(!box) return;
+  if(message){
+    box.textContent = message;
+    box.classList.remove("d-none");
+  }else{
+    box.textContent = "";
+    box.classList.add("d-none");
+  }
+}
+
+function validateFamilyForm(){
+  const namaKepala = document.getElementById("namaKepala");
+  const namaPasangan = document.getElementById("namaPasangan");
+  const statusPasangan = document.getElementById("statusPasangan");
+  const jumlahAnak = document.getElementById("jumlahAnak");
+
+  const fields = [namaKepala, namaPasangan, statusPasangan, jumlahAnak];
+  let valid = true;
+
+  fields.forEach(field => {
+    const empty = !String(field.value || "").trim();
+    setInvalid(field, empty);
+    if(empty) valid = false;
+  });
+
+  if(!valid){
+    showFamilyError("Data keluarga wajib diisi lengkap sebelum membuat Insurance Matrix.");
+    return false;
+  }
+
+  showFamilyError("");
+  return true;
+}
+
 function simpanKeluarga(){
-  const kepala = document.getElementById("namaKepala").value.trim() || "Kepala Keluarga";
-  const pasangan = document.getElementById("namaPasangan").value.trim() || "Pasangan";
+  if(!validateFamilyForm()) return;
+
+  const kepala = document.getElementById("namaKepala").value.trim();
+  const pasangan = document.getElementById("namaPasangan").value.trim();
   const jumlahAnak = parseInt(document.getElementById("jumlahAnak").value || "0");
   state.statusPasangan = document.getElementById("statusPasangan").value || "kerja";
 
@@ -283,17 +326,28 @@ function renderMatrix(){
   `).join("");
 }
 
+function getCategorySummary(matrix, warna){
+  const rows = matrix.filter(row => row.warna === warna);
+  const owned = rows.filter(row => row.punya === "ya").length;
+  const total = rows.length;
+  const percent = total ? Math.round((owned / total) * 100) : 0;
+  return { owned, total, percent };
+}
+
+function setSummaryCard(id, textId, summary){
+  const main = document.getElementById(id);
+  const text = document.getElementById(textId);
+  if(main) main.textContent = `${summary.owned}/${summary.total}`;
+  if(text) text.textContent = `${summary.percent}% terpenuhi`;
+}
+
 function renderSummary(){
   const matrix = getActiveMatrix();
-  const total = matrix.length;
-  const owned = matrix.filter(x => x.punya === "ya").length;
-  const none = total - owned;
-  const score = total ? Math.round((owned / total) * 100) : 0;
 
-  document.getElementById("sumTotal").textContent = total;
-  document.getElementById("sumOwned").textContent = owned;
-  document.getElementById("sumNone").textContent = none;
-  document.getElementById("sumScore").textContent = `${score}%`;
+  setSummaryCard("sumWajib", "sumWajibText", getCategorySummary(matrix, "red"));
+  setSummaryCard("sumKebutuhan", "sumKebutuhanText", getCategorySummary(matrix, "green"));
+  setSummaryCard("sumDistribusi", "sumDistribusiText", getCategorySummary(matrix, "yellow"));
+  setSummaryCard("sumAkumulasi", "sumAkumulasiText", getCategorySummary(matrix, "blue"));
 }
 
 function openModal(index){
@@ -356,4 +410,18 @@ function resetReview(){
 document.addEventListener("DOMContentLoaded", () => {
   loadState();
   renderAll();
+
+  ["namaKepala", "namaPasangan", "statusPasangan", "jumlahAnak"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){
+      el.addEventListener("input", () => {
+        setInvalid(el, !String(el.value || "").trim());
+        showFamilyError("");
+      });
+      el.addEventListener("change", () => {
+        setInvalid(el, !String(el.value || "").trim());
+        showFamilyError("");
+      });
+    }
+  });
 });

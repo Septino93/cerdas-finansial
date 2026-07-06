@@ -23,19 +23,19 @@
       <section class="side-card">
         <h2><i class="bi bi-people-fill"></i> Data Keluarga</h2>
         <label class="form-label">Nama Kepala Keluarga</label>
-        <input id="namaKepala" class="form-control" placeholder="Contoh: Budi Santoso">
+        <input id="namaKepala" class="form-control" placeholder="Contoh: Budi Santoso" required>
 
         <label class="form-label mt-3">Nama Pasangan</label>
-        <input id="namaPasangan" class="form-control" placeholder="Contoh: Siti Rahayu">
+        <input id="namaPasangan" class="form-control" placeholder="Contoh: Siti Rahayu" required>
 
         <label class="form-label mt-3">Status Pasangan</label>
-        <select id="statusPasangan" class="form-select">
+        <select id="statusPasangan" class="form-select" required>
           <option value="kerja" selected>Kerja / Ada Income</option>
           <option value="tidak_kerja">Tidak Kerja / Tidak Ada Income</option>
         </select>
 
         <label class="form-label mt-3">Jumlah Anak</label>
-        <select id="jumlahAnak" class="form-select">
+        <select id="jumlahAnak" class="form-select" required>
           <option value="0">0 Anak</option>
           <option value="1">1 Anak</option>
           <option value="2">2 Anak</option>
@@ -44,6 +44,7 @@
           <option value="5">5 Anak</option>
         </select>
 
+        <div id="familyError" class="family-error d-none"></div>
         <button class="btn-save w-100 mt-3" onclick="simpanKeluarga()"><i class="bi bi-save2"></i> Simpan Data Keluarga</button>
         <button class="btn-reset w-100 mt-2" onclick="resetReview()"><i class="bi bi-arrow-clockwise"></i> Reset Review</button>
       </section>
@@ -83,15 +84,15 @@
           <div class="matrix-title">INSURANCE<br>MATRIX</div>
 
           <div class="brand-logo">
-            <img src="../assets/logo-cerdas-finansial.png" alt="Cerdas Finansial">
+            <img src="../asset/logo-cerdas-finansial.png" alt="Cerdas Finansial">
           </div>
         </div>
 
-        <div class="summary-row">
-          <div><span>Total Kategori</span><strong id="sumTotal">0</strong></div>
-          <div><span>Sudah Punya</span><strong id="sumOwned">0</strong></div>
-          <div><span>Belum Punya</span><strong id="sumNone">0</strong></div>
-          <div><span>Skor Review</span><strong id="sumScore">0%</strong></div>
+        <div class="summary-row summary-category-row">
+          <div class="summary-card wajib"><span>Wajib Dimiliki</span><strong id="sumWajib">0/0</strong><small id="sumWajibText">Sudah punya</small></div>
+          <div class="summary-card kebutuhan"><span>Sesuai Kebutuhan</span><strong id="sumKebutuhan">0/0</strong><small id="sumKebutuhanText">Sudah punya</small></div>
+          <div class="summary-card distribusi"><span>Distribusi Kekayaan</span><strong id="sumDistribusi">0/0</strong><small id="sumDistribusiText">Sudah punya</small></div>
+          <div class="summary-card akumulasi"><span>Fungsi Akumulasi</span><strong id="sumAkumulasi">0/0</strong><small id="sumAkumulasiText">Sudah punya</small></div>
         </div>
 
         <div class="table-wrap">
