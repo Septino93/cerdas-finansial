@@ -271,7 +271,7 @@ function exportPDF(){
         doc.text(lines,x,y);
         return y + lines.length*lineH;
     }
-    function logo(x,y,s=1){
+  function logo(x,y,s=1){
     try{
         if(CF_LOGO_IMG && CF_LOGO_IMG.complete && CF_LOGO_IMG.naturalWidth > 0){
             doc.addImage(CF_LOGO_IMG,'PNG',x,y,12*s,12*s);
@@ -289,8 +289,6 @@ function exportPDF(){
     doc.line(x+3.5*s,y+6*s,x+8.5*s,y+6*s);
     doc.line(x+6*s,y+3.5*s,x+6*s,y+8.5*s);
 }
-}
-    }
     function header(page){
         fill(C.white); doc.rect(0,0,W,24,'F');
         line(0,24,W,24,C.line,.35);
