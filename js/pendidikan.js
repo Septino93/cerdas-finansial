@@ -514,3 +514,38 @@ function exportPDF(){
 }
 
 function resetForm(){simulasiForm.reset();tahunSekarang.value=new Date().getFullYear();document.querySelector('input[name="strategiInvestasi"][value="0.04"]').checked=true;updatePeriode();kosongkan();}
+
+// FIX AUTO INPUT TARGET PENDIDIKAN
+document.addEventListener("DOMContentLoaded", function () {
+  const target = document.getElementById("targetPendidikan");
+  const usiaMasukInput = document.getElementById("usiaMasuk");
+  const lamaStudiInput = document.getElementById("lamaStudi");
+
+  const dataTarget = {
+    sd: { usia: 6, lama: 6 },
+    smp: { usia: 12, lama: 3 },
+    sma: { usia: 15, lama: 3 },
+    s1dn: { usia: 18, lama: 4 },
+    s1ln: { usia: 18, lama: 4 },
+    kedokteran: { usia: 18, lama: 6 },
+    s2dn: { usia: 22, lama: 2 },
+    s2ln: { usia: 22, lama: 2 }
+  };
+
+  if (!target || !usiaMasukInput || !lamaStudiInput) return;
+
+  target.addEventListener("change", function () {
+    const pilih = dataTarget[target.value];
+
+    if (pilih) {
+      usiaMasukInput.value = pilih.usia;
+      lamaStudiInput.value = pilih.lama;
+    }
+
+    usiaMasukInput.dispatchEvent(new Event("input", { bubbles: true }));
+    lamaStudiInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+    if (typeof updatePeriode === "function") updatePeriode();
+    if (typeof hitung === "function") hitung();
+  });
+});
