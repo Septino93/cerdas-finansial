@@ -1,4 +1,4 @@
-const STORAGE_KEY = "cerdasFinansial_reviewPolis_v8";
+const STORAGE_KEY = "cerdasFinansial_reviewPolis_v9";
 
 let state = {
   keluarga: [],
@@ -24,6 +24,13 @@ const matrixKepalaAfterEducation = [
   { kategori: "ASURANSI JIWA", fungsi: "BIAYA DISTRIBUSI ASET", warna: "yellow" },
   { kategori: "ASURANSI JIWA", fungsi: "WARISAN", warna: "yellow" },
   { kategori: "ASURANSI DANA PENSIUN", fungsi: "PERSIAPAN INCOME MASA PENSIUN", warna: "blue" }
+];
+
+
+const matrixIndividuBelumMenikah = [
+  { kategori: "ASURANSI KESEHATAN", fungsi: "PROTEKSI ASET", warna: "red" },
+  { kategori: "ASURANSI PENYAKIT KRITIS", fungsi: "PROTEKSI INCOME", warna: "red" },
+  { kategori: "ASURANSI JIWA", fungsi: "BIAYA PEMAKAMAN", warna: "red" }
 ];
 
 const matrixPasanganTidakKerja = [
@@ -82,6 +89,10 @@ function getMatrixKepalaTemplate(){
 }
 
 function getMatrixTemplate(memberId = state.activeId){
+  if(memberId === "kepala" && state.statusMenikah === "belum_menikah"){
+    return matrixIndividuBelumMenikah;
+  }
+
   if(memberId && memberId.startsWith("anak")){
     const nomorAnak = parseInt(memberId.replace("anak", ""));
     return matrixAnak.map((row, index) => {
