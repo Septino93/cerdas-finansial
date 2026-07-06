@@ -2135,90 +2135,98 @@ function drawAnalysisSection(doc, title, lines, x, y, w){
 
 function addPlannerAnalysisPage(doc, logoDataUrl, pageNo){
   const pageWidth = doc.internal.pageSize.getWidth();
-  const data = buildPlannerAnalysisText();
-  const stats = getFamilyReviewStats();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 22;
+  const x = margin;
+  const w = pageWidth - margin * 2;
 
+  // Halaman terakhir dibuat sederhana: hanya kesimpulan singkat + CTA WhatsApp.
   drawSimplePageTitle(
     doc,
     logoDataUrl,
     "ANALISA FINANCIAL PLANNER",
-    "Ringkasan analisa dan rekomendasi berdasarkan hasil Review Polis Cerdas Finansial."
+    "Kesimpulan singkat berdasarkan hasil Review Polis Cerdas Finansial."
   );
 
-  const margin = 18;
-  const x = margin;
-  const w = pageWidth - margin * 2;
+  const cardY = 42;
+  const cardH = 126;
 
-  // Ringkasan angka singkat
-  const topY = 39;
-  const miniW = (w - 9) / 4;
-  drawGapStatCard(doc, x, topY, miniW, "Skor Kesiapan", `${stats.score}%`, "Kelengkapan proteksi", [11,60,93]);
-  drawGapStatCard(doc, x + (miniW + 3), topY, miniW, "Total Kebutuhan", stats.total, "Item matrix", [13,101,183]);
-  drawGapStatCard(doc, x + (miniW + 3)*2, topY, miniW, "Sudah Dimiliki", stats.owned, "Polis tersedia", [0,166,81]);
-  drawGapStatCard(doc, x + (miniW + 3)*3, topY, miniW, "Belum Dimiliki", stats.missing, "Gap perlindungan", [220,0,0]);
+  // Main card
+  doc.setFillColor(255,255,255);
+  doc.setDrawColor(210,224,238);
+  doc.roundedRect(x, cardY, w, cardH, 8, 8, "FD");
 
-  // Panel utama dibuat 2 kolom agar penuh dan rapi.
-  const panelY = 69;
-  const panelH = 74;
-  const gap = 8;
-  const colW = (w - gap) / 2;
+  // Accent bar
+  doc.setFillColor(11,60,93);
+  doc.roundedRect(x, cardY, 7, cardH, 8, 8, "F");
 
-  function drawPanel(title, lines, px, py, pw, ph, accent){
-    doc.setFillColor(255,255,255);
-    doc.setDrawColor(220,232,242);
-    doc.roundedRect(px, py, pw, ph, 5, 5, "FD");
-    doc.setFillColor(accent[0], accent[1], accent[2]);
-    doc.roundedRect(px + 6, py + 7, 9, 9, 2, 2, "F");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(11,60,93);
-    doc.text(title, px + 19, py + 13.5);
-    doc.setDrawColor(226,232,240);
-    doc.line(px + 19, py + 18, px + pw - 9, py + 18);
+  // Title
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.setTextColor(11,60,93);
+  doc.text("Hasil Review Polis", x + 18, cardY + 20);
 
-    let cy = py + 28;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.6);
-    doc.setTextColor(30,41,59);
-    lines.forEach((line) => {
-      doc.setFillColor(accent[0], accent[1], accent[2]);
-      doc.circle(px + 11, cy - 2.1, 1.6, "F");
-      const wrapped = doc.splitTextToSize(line, pw - 28);
-      doc.text(wrapped, px + 17, cy);
-      cy += Math.max(9, wrapped.length * 4.2 + 3);
-    });
-  }
+  doc.setDrawColor(225,232,240);
+  doc.line(x + 18, cardY + 27, x + w - 18, cardY + 27);
 
-  drawPanel("Kondisi Saat Ini", data.kondisi, x, panelY, colW, panelH, [11,60,93]);
-  drawPanel("Rekomendasi", data.rekom, x + colW + gap, panelY, colW, panelH, [0,166,81]);
+  // Short conclusion
+  const conclusion = "Laporan ini merupakan hasil analisis awal berdasarkan data yang telah diinput. Hasil review ini dapat digunakan sebagai referensi untuk melihat kondisi perlindungan keluarga saat ini.";
 
-  // Kesimpulan dibuat lebih lega dan tidak menempel footer.
-  const conclY = 151;
-  const conclH = 34;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10.2);
+  doc.setTextColor(30,41,59);
+  doc.text(doc.splitTextToSize(conclusion, w - 36), x + 18, cardY + 42);
+
+  // CTA section
+  const ctaY = cardY + 70;
   doc.setFillColor(239,247,255);
   doc.setDrawColor(198,218,238);
-  doc.roundedRect(x, conclY, w, conclH, 5, 5, "FD");
-  doc.setFillColor(11,60,93);
-  doc.roundedRect(x + 7, conclY + 7, 9, 9, 2, 2, "F");
+  doc.roundedRect(x + 18, ctaY, w - 36, 40, 6, 6, "FD");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(11,60,93);
+  doc.text("Butuh Penjelasan Lebih Detail?", x + 32, ctaY + 13);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.8);
+  doc.setTextColor(51,65,85);
+  doc.text(
+    doc.splitTextToSize("Silakan hubungi Financial Planner melalui WhatsApp untuk mendapatkan penjelasan dan rekomendasi yang lebih sesuai dengan kondisi keluarga.", w - 108),
+    x + 32,
+    ctaY + 24
+  );
+
+  // WhatsApp button-like block
+  const waX = x + w - 76;
+  const waY = ctaY + 9;
+  const waW = 46;
+  const waH = 22;
+  doc.setFillColor(0,166,81);
+  doc.roundedRect(waX, waY, waW, waH, 5, 5, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
-  doc.setTextColor(11,60,93);
-  doc.text("Kesimpulan Financial Planner", x + 21, conclY + 13.5);
+  doc.setTextColor(255,255,255);
+  doc.text("WhatsApp", waX + waW/2, waY + 9, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.6);
-  doc.setTextColor(30,41,59);
-  doc.text(data.kesimpulan, x + 21, conclY + 23, { maxWidth: w - 92 });
+  doc.setFontSize(7.3);
+  doc.text("0811-6946-999", waX + waW/2, waY + 16.5, { align:"center" });
 
-  doc.setDrawColor(148,163,184);
-  doc.line(pageWidth - 76, conclY + 8, pageWidth - 76, conclY + conclH - 8);
+  // Add clickable link if supported by jsPDF viewer.
+  try{
+    doc.link(waX, waY, waW, waH, { url:"https://wa.me/628116946999" });
+  }catch(e){}
+
+  // Signature
+  const sigY = cardY + cardH + 12;
   doc.setFont("helvetica", "bolditalic");
-  doc.setFontSize(12);
+  doc.setFontSize(13);
   doc.setTextColor(11,60,93);
-  doc.text("Septino, QWP®, CIS®", pageWidth - 28, conclY + 15, { align:"right" });
+  doc.text("Septino, QWP®, CIS®", pageWidth/2, sigY, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.2);
-  doc.setTextColor(51,65,85);
-  doc.text("Financial Planner", pageWidth - 28, conclY + 24, { align:"right" });
+  doc.setFontSize(8.5);
+  doc.setTextColor(71,85,105);
+  doc.text("Financial Planner", pageWidth/2, sigY + 7, { align:"center" });
 
   addPdfFooter(doc, pageNo);
 }
@@ -2260,12 +2268,8 @@ async function exportFamilyPDF(){
       addMemberPage(doc, member, logoDataUrl, pageNo);
     });
 
-    // Ringkasan gap: apa saja yang harus dilengkapi.
-    pageNo++;
-    doc.addPage("a4", "landscape");
-    pageNo = addGapPriorityPage(doc, logoDataUrl, pageNo);
-
-    // Analisa Financial Planner: tanpa Executive Summary, tanpa timeline, tanpa roadmap, tanpa infografis 12 jenis.
+    // Halaman penutup: Analisa Financial Planner + CTA WhatsApp.
+    // Halaman Yang Harus Dilengkapi / Executive Summary / Timeline / Roadmap / Infografis dihapus agar PDF lebih singkat.
     pageNo++;
     doc.addPage("a4", "landscape");
     addPlannerAnalysisPage(doc, logoDataUrl, pageNo);
