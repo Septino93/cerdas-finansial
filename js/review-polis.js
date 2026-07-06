@@ -1414,7 +1414,7 @@ function addExecutiveSummaryPage(doc, logoDataUrl, pageNo){
   doc.setFontSize(5.8);
   doc.text("Financial Planner", pageWidth - 39, conclY + 12, { align:"center" });
 
-  drawPdfFooter(doc, pageNo || 2);
+  addPdfFooter(doc, pageNo || 2);
 }
 
 function addMemberPage(doc, member, logoDataUrl, pageNo){
