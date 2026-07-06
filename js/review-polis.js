@@ -78,6 +78,33 @@ function saveState(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
+function hitungUsia(tanggalLahir){
+  if(!tanggalLahir) return "";
+  const lahir = new Date(tanggalLahir + "T00:00:00");
+  if(Number.isNaN(lahir.getTime())) return "";
+
+  const hariIni = new Date();
+  let tahun = hariIni.getFullYear() - lahir.getFullYear();
+  let bulan = hariIni.getMonth() - lahir.getMonth();
+
+  if(hariIni.getDate() < lahir.getDate()) bulan--;
+  if(bulan < 0){
+    tahun--;
+    bulan += 12;
+  }
+
+  if(tahun <= 0){
+    return bulan <= 0 ? "0 Bulan" : `${bulan} Bulan`;
+  }
+
+  return bulan > 0 ? `${tahun} Tahun ${bulan} Bulan` : `${tahun} Tahun`;
+}
+
+function memberAgeText(member){
+  const usia = hitungUsia(member?.tglLahir);
+  return usia ? `<small>${usia}</small>` : "";
+}
+
 function getJumlahAnak(){
   return state.keluarga.filter(member => member.id.startsWith("anak")).length || 0;
 }
@@ -190,34 +217,48 @@ function renderChildNameInputs(){
     return;
   }
 
-  const oldValues = {};
-  box.querySelectorAll("input[data-child-index]").forEach(input => {
-    oldValues[input.dataset.childIndex] = input.value;
+  const old = {};
+  box.querySelectorAll("[data-child-index]").forEach(input => {
+    const idx = input.dataset.childIndex;
+    old[idx] = old[idx] || {};
+    old[idx][input.dataset.childField] = input.value;
   });
 
   const html = [];
   html.push(`
     <div class="children-name-title">
-      <div><i class="bi bi-people-fill"></i> Data Nama Anak</div>
-      <small>Nama anak akan tampil otomatis di Daftar Anggota dan Matrix Polis.</small>
+      <div><i class="bi bi-people-fill"></i> Data Anak</div>
+      <small>Nama, tanggal lahir, dan jenis kelamin anak akan dipakai otomatis di semua modul.</small>
     </div>
-    <div class="children-name-grid">
+    <div class="children-name-grid children-detail-grid">
   `);
 
   for(let i = 1; i <= jumlahAnak; i++){
-    const savedChild = state.keluarga.find(member => member.id === `anak${i}`);
-    const value = oldValues[i] ?? savedChild?.nama ?? "";
+    const savedChild = state.keluarga.find(member => member.id === `anak${i}`) || {};
+    const nama = old[i]?.nama ?? savedChild.nama ?? "";
+    const tgl = old[i]?.tglLahir ?? savedChild.tglLahir ?? "";
+    const jk = old[i]?.jenisKelamin ?? savedChild.jenisKelamin ?? "laki";
+
     html.push(`
-      <div class="child-name-field">
-        <label class="form-label"><i class="bi bi-person-fill"></i> Nama Anak ${i}</label>
-        <input
-          type="text"
-          id="namaAnakReview${i}"
-          data-child-index="${i}"
-          class="form-control"
-          value="${escapeHtml(value)}"
-          placeholder="Contoh: Anak ${i}"
-        >
+      <div class="child-detail-card">
+        <div class="child-card-title"><i class="bi bi-person-heart"></i> Anak ${i}</div>
+        <div class="child-fields">
+          <div class="child-name-field">
+            <label class="form-label">Nama Anak ${i}</label>
+            <input type="text" id="namaAnakReview${i}" data-child-index="${i}" data-child-field="nama" class="form-control" value="${escapeHtml(nama)}" placeholder="Contoh: Rae">
+          </div>
+          <div class="child-name-field">
+            <label class="form-label">Tanggal Lahir</label>
+            <input type="date" id="tglLahirAnakReview${i}" data-child-index="${i}" data-child-field="tglLahir" class="form-control" value="${escapeHtml(tgl)}">
+          </div>
+          <div class="child-name-field">
+            <label class="form-label">Jenis Kelamin</label>
+            <select id="jenisKelaminAnakReview${i}" data-child-index="${i}" data-child-field="jenisKelamin" class="form-select">
+              <option value="laki" ${jk === "laki" ? "selected" : ""}>Laki-laki</option>
+              <option value="perempuan" ${jk === "perempuan" ? "selected" : ""}>Perempuan</option>
+            </select>
+          </div>
+        </div>
       </div>
     `);
   }
@@ -226,8 +267,12 @@ function renderChildNameInputs(){
   box.innerHTML = html.join("");
   box.classList.remove("d-none");
 
-  box.querySelectorAll("input[data-child-index]").forEach(input => {
+  box.querySelectorAll("input[data-child-index], select[data-child-index]").forEach(input => {
     input.addEventListener("input", () => {
+      setInvalid(input, !String(input.value || "").trim());
+      showFamilyError("");
+    });
+    input.addEventListener("change", () => {
       setInvalid(input, !String(input.value || "").trim());
       showFamilyError("");
     });
@@ -236,18 +281,20 @@ function renderChildNameInputs(){
 
 function validateFamilyForm(){
   const namaKepala = document.getElementById("namaKepala");
+  const tglLahirKepala = document.getElementById("tglLahirKepala");
   const statusMenikah = document.getElementById("statusMenikah");
   const namaPasangan = document.getElementById("namaPasangan");
+  const tglLahirPasangan = document.getElementById("tglLahirPasangan");
   const statusPasangan = document.getElementById("statusPasangan");
   const jumlahAnak = document.getElementById("jumlahAnak");
 
   const menikah = (statusMenikah.value || "menikah") === "menikah";
   const fields = menikah
-    ? [namaKepala, statusMenikah, namaPasangan, statusPasangan, jumlahAnak]
-    : [namaKepala, statusMenikah];
+    ? [namaKepala, tglLahirKepala, statusMenikah, namaPasangan, tglLahirPasangan, statusPasangan, jumlahAnak]
+    : [namaKepala, tglLahirKepala, statusMenikah];
 
-  [namaKepala, statusMenikah, namaPasangan, statusPasangan, jumlahAnak].forEach(field => setInvalid(field, false));
-  document.querySelectorAll("#childrenNameBox input").forEach(field => setInvalid(field, false));
+  [namaKepala, tglLahirKepala, statusMenikah, namaPasangan, tglLahirPasangan, statusPasangan, jumlahAnak].forEach(field => setInvalid(field, false));
+  document.querySelectorAll("#childrenNameBox input, #childrenNameBox select").forEach(field => setInvalid(field, false));
 
   let valid = true;
   fields.forEach(field => {
@@ -260,16 +307,20 @@ function validateFamilyForm(){
     const totalAnak = parseInt(jumlahAnak.value || "0");
     for(let i = 1; i <= totalAnak; i++){
       const inputAnak = document.getElementById(`namaAnakReview${i}`);
-      const empty = !String(inputAnak?.value || "").trim();
-      setInvalid(inputAnak, empty);
-      if(empty) valid = false;
+      const tglAnak = document.getElementById(`tglLahirAnakReview${i}`);
+      const jkAnak = document.getElementById(`jenisKelaminAnakReview${i}`);
+      [inputAnak, tglAnak, jkAnak].forEach(field => {
+        const empty = !String(field?.value || "").trim();
+        setInvalid(field, empty);
+        if(empty) valid = false;
+      });
     }
   }
 
   if(!valid){
     showFamilyError(menikah
-      ? "Data kepala keluarga, pasangan, jumlah anak, dan nama setiap anak wajib diisi lengkap."
-      : "Nama kepala keluarga dan status pernikahan wajib diisi."
+      ? "Data kepala keluarga, pasangan, jumlah anak, nama anak, tanggal lahir anak, dan jenis kelamin wajib diisi lengkap."
+      : "Nama kepala keluarga, tanggal lahir, dan status pernikahan wajib diisi."
     );
     return false;
   }
@@ -289,9 +340,10 @@ function toggleMarriageFields(){
 
   if(!menikah){
     document.getElementById("namaPasangan").value = "";
+    document.getElementById("tglLahirPasangan").value = "";
     document.getElementById("statusPasangan").value = "kerja";
     document.getElementById("jumlahAnak").value = "0";
-    ["namaPasangan", "statusPasangan", "jumlahAnak"].forEach(id => setInvalid(document.getElementById(id), false));
+    ["namaPasangan", "tglLahirPasangan", "statusPasangan", "jumlahAnak"].forEach(id => setInvalid(document.getElementById(id), false));
   }else if(document.getElementById("jumlahAnak").value === "0"){
     document.getElementById("jumlahAnak").value = "3";
   }
@@ -303,27 +355,34 @@ function simpanKeluarga(){
   if(!validateFamilyForm()) return;
 
   const kepala = document.getElementById("namaKepala").value.trim();
+  const tglLahirKepala = document.getElementById("tglLahirKepala").value;
   state.statusMenikah = document.getElementById("statusMenikah").value || "menikah";
   const menikah = state.statusMenikah === "menikah";
   const pasangan = menikah ? document.getElementById("namaPasangan").value.trim() : "";
+  const tglLahirPasangan = menikah ? document.getElementById("tglLahirPasangan").value : "";
   const jumlahAnak = menikah ? parseInt(document.getElementById("jumlahAnak").value || "0") : 0;
   state.statusPasangan = menikah ? (document.getElementById("statusPasangan").value || "kerja") : "kerja";
 
   const keluarga = [
-    { id:"kepala", nama:kepala, peran: menikah ? "Kepala Keluarga" : "Individu", icon:"bi-person-fill" }
+    { id:"kepala", nama:kepala, tglLahir:tglLahirKepala, jenisKelamin:"laki", peran: menikah ? "Kepala Keluarga" : "Individu", icon:"bi-person-fill" }
   ];
 
   if(menikah){
-    keluarga.push({ id:"pasangan", nama:pasangan, peran:"Pasangan", icon:"bi-person-heart" });
+    keluarga.push({ id:"pasangan", nama:pasangan, tglLahir:tglLahirPasangan, jenisKelamin:"perempuan", peran:"Pasangan", icon:"bi-person-heart" });
 
     for(let i = 1; i <= jumlahAnak; i++){
       const inputAnak = document.getElementById(`namaAnakReview${i}`);
+      const tglAnak = document.getElementById(`tglLahirAnakReview${i}`);
+      const jkAnak = document.getElementById(`jenisKelaminAnakReview${i}`);
       const namaAnak = String(inputAnak?.value || "").trim();
+      const jenisKelamin = String(jkAnak?.value || "laki");
       keluarga.push({
         id:`anak${i}`,
         nama: namaAnak || `Anak ${i}`,
+        tglLahir: String(tglAnak?.value || ""),
+        jenisKelamin,
         peran:`Anak ${i}`,
-        icon:"bi-person-fill"
+        icon: jenisKelamin === "perempuan" ? "bi-person-fill" : "bi-person-fill"
       });
     }
   }
@@ -353,8 +412,14 @@ function fillFamilyForm(){
   const pasangan = state.keluarga.find(x => x.id === "pasangan");
   const anakCount = state.keluarga.filter(x => x.id.startsWith("anak")).length;
 
-  if(kepala) document.getElementById("namaKepala").value = kepala.nama;
-  if(pasangan) document.getElementById("namaPasangan").value = pasangan.nama;
+  if(kepala){
+    document.getElementById("namaKepala").value = kepala.nama || "";
+    document.getElementById("tglLahirKepala").value = kepala.tglLahir || "";
+  }
+  if(pasangan){
+    document.getElementById("namaPasangan").value = pasangan.nama || "";
+    document.getElementById("tglLahirPasangan").value = pasangan.tglLahir || "";
+  }
   document.getElementById("statusMenikah").value = state.statusMenikah || "menikah";
   document.getElementById("statusPasangan").value = state.statusPasangan || "kerja";
   document.getElementById("jumlahAnak").value = anakCount || 3;
@@ -371,6 +436,7 @@ function renderFamilyList(){
   }
 
   list.innerHTML = state.keluarga.map((member, index) => {
+    const ageInfo = memberAgeText(member);
     const statusInfo = member.id === "pasangan"
       ? `<small>${state.statusPasangan === "kerja" ? "Kerja / Ada income" : "Tidak kerja / tidak ada income"}</small>`
       : "";
@@ -381,6 +447,7 @@ function renderFamilyList(){
         <div>
           <h4>${index + 1}. ${member.peran}</h4>
           <p>${member.nama}</p>
+          ${ageInfo}
           ${statusInfo}
         </div>
       </div>
@@ -649,8 +716,10 @@ function resetReview(){
   localStorage.removeItem(STORAGE_KEY);
   state = { keluarga: [], activeId: null, statusMenikah:"menikah", statusPasangan:"kerja", polis: {} };
   document.getElementById("namaKepala").value = "";
+  document.getElementById("tglLahirKepala").value = "";
   document.getElementById("statusMenikah").value = "menikah";
   document.getElementById("namaPasangan").value = "";
+  document.getElementById("tglLahirPasangan").value = "";
   document.getElementById("statusPasangan").value = "kerja";
   document.getElementById("jumlahAnak").value = "3";
   const childrenBox = document.getElementById("childrenNameBox");
@@ -664,7 +733,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderAll();
   toggleMarriageFields();
 
-  ["namaKepala", "statusMenikah", "namaPasangan", "statusPasangan", "jumlahAnak"].forEach(id => {
+  ["namaKepala", "tglLahirKepala", "statusMenikah", "namaPasangan", "tglLahirPasangan", "statusPasangan", "jumlahAnak"].forEach(id => {
     const el = document.getElementById(id);
     if(el){
       el.addEventListener("input", () => {
