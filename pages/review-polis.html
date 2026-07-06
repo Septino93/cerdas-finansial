@@ -18,68 +18,96 @@
   </header>
 
   <main class="review-page-full">
-    <section class="family-top-card">
+    <section class="family-top-card family-v2-card">
       <div class="family-top-title">
         <h2><i class="bi bi-people-fill"></i> Data Keluarga</h2>
         <p>Isi data keluarga terlebih dahulu, lalu pilih anggota untuk review polis.</p>
       </div>
 
-      <div class="family-form-row">
-        <div class="field-box">
-          <label class="form-label">Nama Kepala Keluarga</label>
-          <input id="namaKepala" class="form-control" placeholder="Contoh: Budi Santoso" required>
+      <div class="family-stack-v2">
+        <div class="family-person-row kepala-row">
+          <div class="person-row-label">
+            <div class="person-row-icon red"><i class="bi bi-person-fill"></i></div>
+            <div>
+              <h3>Kepala Keluarga</h3>
+              <small>Data utama keluarga</small>
+            </div>
+          </div>
+          <div class="person-row-fields">
+            <div class="field-box">
+              <label class="form-label">Nama Kepala Keluarga</label>
+              <input id="namaKepala" class="form-control" placeholder="Contoh: Budi Santoso" required>
+            </div>
+            <div class="field-box">
+              <label class="form-label">Tanggal Lahir</label>
+              <input id="tglLahirKepala" type="date" class="form-control" required>
+            </div>
+            <div class="field-box">
+              <label class="form-label">Status Pernikahan</label>
+              <select id="statusMenikah" class="form-select" required>
+                <option value="menikah" selected>Sudah Menikah</option>
+                <option value="belum_menikah">Belum Menikah</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div class="field-box small-field">
-          <label class="form-label">Tanggal Lahir Kepala</label>
-          <input id="tglLahirKepala" type="date" class="form-control" required>
+        <div class="family-person-row spouse-field pasangan-row">
+          <div class="person-row-label">
+            <div class="person-row-icon blue"><i class="bi bi-person-heart"></i></div>
+            <div>
+              <h3>Pasangan</h3>
+              <small>Data pasangan</small>
+            </div>
+          </div>
+          <div class="person-row-fields">
+            <div class="field-box">
+              <label class="form-label">Nama Pasangan</label>
+              <input id="namaPasangan" class="form-control" placeholder="Contoh: Siti Rahayu">
+            </div>
+            <div class="field-box">
+              <label class="form-label">Tanggal Lahir</label>
+              <input id="tglLahirPasangan" type="date" class="form-control">
+            </div>
+            <div class="field-box">
+              <label class="form-label">Status Pasangan</label>
+              <select id="statusPasangan" class="form-select">
+                <option value="kerja" selected>Kerja / Ada Income</option>
+                <option value="tidak_kerja">Tidak Kerja / Tidak Ada Income</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div class="field-box small-field">
-          <label class="form-label">Status Pernikahan</label>
-          <select id="statusMenikah" class="form-select" required>
-            <option value="menikah" selected>Sudah Menikah</option>
-            <option value="belum_menikah">Belum Menikah</option>
-          </select>
-        </div>
-
-        <div class="field-box spouse-field">
-          <label class="form-label">Nama Pasangan</label>
-          <input id="namaPasangan" class="form-control" placeholder="Contoh: Siti Rahayu">
-        </div>
-
-        <div class="field-box small-field spouse-field">
-          <label class="form-label">Tanggal Lahir Pasangan</label>
-          <input id="tglLahirPasangan" type="date" class="form-control">
-        </div>
-
-        <div class="field-box compact-field spouse-field">
-          <label class="form-label">Status Pasangan</label>
-          <select id="statusPasangan" class="form-select">
-            <option value="kerja" selected>Kerja / Ada Income</option>
-            <option value="tidak_kerja">Tidak Kerja / Tidak Ada Income</option>
-          </select>
-        </div>
-
-        <div class="field-box small-field spouse-field child-field">
-          <label class="form-label">Jumlah Anak</label>
-          <select id="jumlahAnak" class="form-select">
-            <option value="0">0 Anak</option>
-            <option value="1">1 Anak</option>
-            <option value="2">2 Anak</option>
-            <option value="3" selected>3 Anak</option>
-            <option value="4">4 Anak</option>
-            <option value="5">5 Anak</option>
-          </select>
-        </div>
-
-        <div class="family-actions">
-          <button class="btn-save" onclick="simpanKeluarga()"><i class="bi bi-save2"></i> Simpan</button>
-          <button class="btn-reset" onclick="resetReview()"><i class="bi bi-arrow-clockwise"></i> Reset</button>
+        <div class="family-person-row spouse-field child-field anak-count-row">
+          <div class="person-row-label">
+            <div class="person-row-icon green"><i class="bi bi-people-fill"></i></div>
+            <div>
+              <h3>Anak</h3>
+              <small>Jumlah anak dalam keluarga</small>
+            </div>
+          </div>
+          <div class="person-row-fields anak-control-fields">
+            <div class="field-box">
+              <label class="form-label">Jumlah Anak</label>
+              <select id="jumlahAnak" class="form-select">
+                <option value="0">0 Anak</option>
+                <option value="1">1 Anak</option>
+                <option value="2">2 Anak</option>
+                <option value="3" selected>3 Anak</option>
+                <option value="4">4 Anak</option>
+                <option value="5">5 Anak</option>
+              </select>
+            </div>
+            <div class="family-actions">
+              <button class="btn-save" onclick="simpanKeluarga()"><i class="bi bi-save2"></i> Simpan</button>
+              <button class="btn-reset" onclick="resetReview()"><i class="bi bi-arrow-clockwise"></i> Reset</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div id="childrenNameBox" class="children-name-box"></div>
+      <div id="childrenNameBox" class="children-name-box children-row-mode"></div>
 
       <div id="familyError" class="family-error d-none"></div>
     </section>

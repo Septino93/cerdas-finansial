@@ -1024,31 +1024,255 @@ body{margin:0;background:#eef3f8;font-family:Arial,Helvetica,sans-serif;color:#1
   }
 }
 
-/* FIX: Data Anak tidak menutupi Daftar Anggota */
-.family-top-card{
-  position:relative !important;
-  top:auto !important;
-  z-index:1 !important;
+/* =========================================================
+   V2 DATA KELUARGA: 1 ORANG = 1 BARIS
+   ========================================================= */
+.family-v2-card{
+  position:relative!important;
+  top:auto!important;
+  z-index:1!important;
+}
+
+.family-stack-v2{
+  display:grid;
+  gap:14px;
+}
+
+.family-person-row{
+  display:grid;
+  grid-template-columns:250px 1fr;
+  gap:18px;
+  align-items:center;
+  padding:16px;
+  border:1px solid #e4edf5;
+  border-radius:16px;
+  background:linear-gradient(135deg,#ffffff,#fbfdff);
+}
+
+.person-row-label{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.person-row-icon{
+  width:48px;
+  height:48px;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:24px;
+  flex-shrink:0;
+  box-shadow:0 10px 22px rgba(16,24,40,.10);
+}
+
+.person-row-icon.red{background:linear-gradient(135deg,#c90000,#e80000);}
+.person-row-icon.blue{background:linear-gradient(135deg,#0b3c5d,#1976d2);}
+.person-row-icon.green{background:linear-gradient(135deg,#008d43,#00b85a);}
+
+.person-row-label h3{
+  margin:0;
+  color:#0b3c5d;
+  font-size:18px;
+  font-weight:900;
+}
+
+.person-row-label small{
+  display:block;
+  margin-top:2px;
+  color:#667085;
+  font-size:12px;
+  font-weight:800;
+}
+
+.person-row-fields{
+  display:grid;
+  grid-template-columns:1.25fr .9fr 1.05fr;
+  gap:12px;
+  align-items:end;
+}
+
+.anak-control-fields{
+  grid-template-columns:260px auto;
+  justify-content:start;
+  align-items:end;
+}
+
+.family-actions{
+  display:flex!important;
+  gap:10px!important;
+  align-items:end!important;
+}
+
+.family-actions .btn-save,
+.family-actions .btn-reset{
+  height:52px!important;
+  padding:0 20px!important;
+  border-radius:10px!important;
+}
+
+/* Hilangkan aturan lama yang membuat form jadi grid sempit */
+.family-form-row{
+  display:block!important;
+}
+
+/* Data anak: 1 anak = 1 baris penuh */
+.children-name-box{
+  position:relative!important;
+  z-index:1!important;
+  margin-top:18px!important;
+  padding-top:18px!important;
+  border-top:1px solid #e5edf3!important;
+}
+
+.children-name-title{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:flex-end!important;
+  gap:14px!important;
+  margin-bottom:12px!important;
+}
+
+.children-name-title > div{
+  color:#c90000!important;
+  font-size:20px!important;
+  font-weight:900!important;
+  text-transform:uppercase!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:9px!important;
+}
+
+.children-name-title small{
+  color:#667085!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  text-align:right!important;
+}
+
+.children-name-grid,
+.children-detail-grid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:12px!important;
+}
+
+.child-detail-card{
+  display:grid!important;
+  grid-template-columns:220px 1fr!important;
+  gap:16px!important;
+  align-items:center!important;
+  background:#fff!important;
+  border:1px solid #dfe9f2!important;
+  border-radius:16px!important;
+  padding:16px!important;
+  box-shadow:0 8px 22px rgba(16,24,40,.05)!important;
+}
+
+.child-card-title{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  color:#0b3c5d!important;
+  font-size:18px!important;
+  font-weight:900!important;
+  text-transform:uppercase!important;
+}
+
+.child-card-title i{
+  width:42px!important;
+  height:42px!important;
+  border-radius:14px!important;
+  background:#e8f8ef!important;
+  color:#00a651!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-size:22px!important;
+}
+
+.child-fields{
+  display:grid!important;
+  grid-template-columns:1.4fr 1fr 1.1fr!important;
+  gap:12px!important;
+  align-items:end!important;
+}
+
+.child-name-field{
+  background:#f8fbfd!important;
+  border:1px solid #e3ecf4!important;
+  border-radius:12px!important;
+  padding:12px!important;
+}
+
+.child-name-field .form-label{
+  color:#0b3c5d!important;
+  font-weight:900!important;
+  margin-bottom:6px!important;
+  font-size:13px!important;
+}
+
+.child-name-field .form-control,
+.child-name-field .form-select{
+  width:100%!important;
+  min-height:50px!important;
+  font-size:15px!important;
+  font-weight:800!important;
+  border-radius:10px!important;
+  padding:10px 12px!important;
+}
+
+.child-name-field .form-select{
+  min-width:145px!important;
 }
 
 .member-top-card{
-  position:relative !important;
-  z-index:1 !important;
-  margin-top:18px !important;
+  position:relative!important;
+  z-index:1!important;
+  margin-top:18px!important;
 }
 
-#anakFields,
-.children-fields,
-.data-anak-section,
-#anakContainer{
-  position:relative !important;
-  z-index:1 !important;
-  margin-top:22px !important;
-  padding-top:18px !important;
-  border-top:1px solid #e5edf3 !important;
+@media(max-width:1200px){
+  .family-person-row{
+    grid-template-columns:1fr;
+  }
+  .person-row-fields{
+    grid-template-columns:1fr 1fr;
+  }
+  .anak-control-fields{
+    grid-template-columns:1fr;
+  }
+  .child-detail-card{
+    grid-template-columns:1fr!important;
+  }
+  .child-fields{
+    grid-template-columns:1fr 1fr!important;
+  }
 }
 
-.family-list-horizontal{
-  position:relative !important;
-  z-index:1 !important;
+@media(max-width:700px){
+  .family-person-row{
+    padding:14px;
+  }
+  .person-row-fields,
+  .child-fields{
+    grid-template-columns:1fr!important;
+  }
+  .family-actions{
+    flex-direction:column!important;
+  }
+  .family-actions .btn-save,
+  .family-actions .btn-reset{
+    width:100%!important;
+  }
+  .children-name-title{
+    display:block!important;
+  }
+  .children-name-title small{
+    display:block!important;
+    text-align:left!important;
+    margin-top:6px!important;
+  }
 }
