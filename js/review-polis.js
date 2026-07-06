@@ -600,13 +600,16 @@ function getPolicyReason(row){
   const fungsi = String(row.fungsi || "").toLowerCase();
 
   if(kategori.includes("kesehatan")){
-    return "Menjaga aset keluarga agar tidak terganggu oleh biaya rumah sakit.";
+    return "Melindungi aset keluarga dari risiko biaya rumah sakit.";
   }
   if(kategori.includes("penyakit kritis")){
-    return "Menjaga income keluarga saat terjadi risiko sakit kritis.";
+    return "Menjaga stabilitas keuangan saat terjadi penyakit serius.";
   }
   if(kategori.includes("pendidikan") || fungsi.includes("pendidikan")){
-    return "Mempersiapkan biaya pendidikan anak agar tujuan sekolah/kuliah tetap berjalan.";
+    return "Mempersiapkan biaya pendidikan anak agar tujuan pendidikan tetap berjalan.";
+  }
+  if(kategori.includes("jiwa") && fungsi.includes("income")){
+    return "Melindungi biaya hidup keluarga jika pencari nafkah meninggal dunia.";
   }
   if(fungsi.includes("pensiun")){
     return "Membantu menjaga kesiapan dana dan income keluarga di masa pensiun.";
@@ -617,25 +620,7 @@ function getPolicyReason(row){
   if(fungsi.includes("pemakaman")){
     return "Menyiapkan biaya akhir agar keluarga tidak terbebani secara mendadak.";
   }
-  if(fungsi.includes("rawat inap")){
-    return "Memberikan tambahan cashflow saat terjadi rawat inap.";
-  }
-  if(fungsi.includes("cacat")){
-    return "Melindungi income jika terjadi risiko cacat tetap dan total.";
-  }
-  if(fungsi.includes("kecelakaan")){
-    return "Memberikan perlindungan tambahan atas risiko kecelakaan.";
-  }
-  if(fungsi.includes("distribusi") || fungsi.includes("warisan")){
-    return "Membantu perencanaan distribusi aset dan warisan keluarga.";
-  }
-  if(row.warna === "blue"){
-    return "Mendukung tujuan akumulasi dana jangka panjang.";
-  }
-  if(row.warna === "green"){
-    return "Dilengkapi sesuai kebutuhan, kondisi keluarga, dan anggaran.";
-  }
-  return "Termasuk kebutuhan wajib yang sebaiknya diprioritaskan dalam review polis.";
+  return "Termasuk perlindungan wajib yang perlu diprioritaskan sesuai kondisi keluarga.";
 }
 
 function getPolicyRecommendation(row){
@@ -657,34 +642,84 @@ function getMemberSortOrder(member){
   return 99;
 }
 
-function getFamilyPolicyRoadmap(limit = 999){
+function findPolicyRow(memberId, kategori, fungsi){
+  syncMatrixWithTemplate(memberId);
+  const matrix = state.polis[memberId] || [];
+  const k = String(kategori || "").toLowerCase();
+  const f = String(fungsi || "").toLowerCase();
+
+  return matrix.find(row =>
+    String(row.kategori || "").toLowerCase() === k &&
+    String(row.fungsi || "").toLowerCase() === f
+  );
+}
+
+function buildRequiredRecommendation(member, kategori, fungsi, alasan, urutan){
+  const row = findPolicyRow(member.id, kategori, fungsi) || {
+    kategori,
+    fungsi,
+    warna:"red",
+    punya:"tidak"
+  };
+
+  return {
+    member,
+    row,
+    urutan,
+    alasan: alasan || getPolicyReason(row),
+    prioritas: "Prioritas Utama"
+  };
+}
+
+function getWajibRecommendationsByFamily(limit = 999){
   const rows = [];
+  const anakMembers = state.keluarga.filter(member => String(member.id).startsWith("anak"));
 
   state.keluarga.forEach(member => {
-    syncMatrixWithTemplate(member.id);
-    const matrix = state.polis[member.id] || [];
+    if(member.id === "kepala"){
+      rows.push(buildRequiredRecommendation(member, "ASURANSI KESEHATAN", "PROTEKSI ASET", "Melindungi aset keluarga dari risiko biaya rumah sakit.", 1));
+      rows.push(buildRequiredRecommendation(member, "ASURANSI PENYAKIT KRITIS", "PROTEKSI INCOME", "Menjaga stabilitas keuangan saat kepala keluarga terkena penyakit serius.", 2));
+      rows.push(buildRequiredRecommendation(member, "ASURANSI JIWA", "PROTEKSI INCOME", "Melindungi biaya hidup keluarga jika pencari nafkah utama meninggal dunia.", 3));
 
-    matrix.forEach((row, rowIndex) => {
-      rows.push({ member, row, rowIndex });
-    });
+      anakMembers.forEach((anak, index) => {
+        rows.push(buildRequiredRecommendation(
+          member,
+          "ASURANSI PENDIDIKAN ANAK",
+          `PENDIDIKAN ANAK ${index + 1}`,
+          `Menyiapkan dana pendidikan untuk ${anak.nama || `Anak ${index + 1}`}.`,
+          10 + index
+        ));
+      });
+    }
+
+    if(member.id === "pasangan"){
+      rows.push(buildRequiredRecommendation(member, "ASURANSI KESEHATAN", "PROTEKSI ASET", "Melindungi aset keluarga dari risiko biaya rumah sakit pasangan.", 4));
+      rows.push(buildRequiredRecommendation(member, "ASURANSI PENYAKIT KRITIS", "PROTEKSI INCOME", "Menjaga dana keluarga saat pasangan mengalami penyakit serius.", 5));
+
+      if(state.statusPasangan === "kerja"){
+        rows.push(buildRequiredRecommendation(member, "ASURANSI JIWA", "PROTEKSI INCOME", "Karena pasangan memiliki income yang ikut berkontribusi pada keluarga.", 6));
+      }
+    }
+
+    if(String(member.id).startsWith("anak")){
+      rows.push(buildRequiredRecommendation(member, "ASURANSI KESEHATAN", "PROTEKSI ASET", "Melindungi keluarga dari risiko biaya rumah sakit anak.", 7));
+    }
   });
-
-  const priorityOrder = { red:1, green:2, yellow:3, blue:4 };
 
   return rows
     .filter(item => item.row.punya !== "ya")
     .sort((a,b) => {
-      const ma = getMemberSortOrder(a.member);
-      const mb = getMemberSortOrder(b.member);
-      if(ma !== mb) return ma - mb;
-
-      const pa = priorityOrder[a.row.warna] || 9;
-      const pb = priorityOrder[b.row.warna] || 9;
+      const pa = a.urutan || 99;
+      const pb = b.urutan || 99;
       if(pa !== pb) return pa - pb;
-
-      return (a.rowIndex || 0) - (b.rowIndex || 0);
+      return getMemberSortOrder(a.member) - getMemberSortOrder(b.member);
     })
     .slice(0, limit);
+}
+
+// Nama lama tetap diarahkan ke rekomendasi wajib agar bagian website lama tidak error.
+function getFamilyPolicyRoadmap(limit = 999){
+  return getWajibRecommendationsByFamily(limit);
 }
 
 function getCTAStatus(score){
@@ -893,6 +928,83 @@ async function getLogoDataUrl(){
     img.onerror = () => resolve(null);
     img.src = "../asset/logo-cerdas-finansial.png";
   });
+}
+
+async function getImageDataUrl(src){
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try{
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      }catch(err){
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+function addInsuranceFunctionImage(doc, imageDataUrl, pageNo, startY = 68){
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  doc.setFillColor(248,252,255);
+  doc.rect(0,0,pageWidth,pageHeight,"F");
+  doc.setFillColor(235,244,250);
+  doc.circle(18, 20, 36, "F");
+  doc.setFillColor(245,231,204);
+  doc.circle(pageWidth - 18, pageHeight - 12, 42, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(15);
+  doc.setTextColor(11,60,93);
+  doc.text("12 JENIS ASURANSI & FUNGSINYA", pageWidth/2, 18, { align:"center" });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(71,85,105);
+  doc.text("Gunakan panduan ini sebagai referensi umum saat menyusun perlindungan keluarga.", pageWidth/2, 26, { align:"center" });
+
+  if(imageDataUrl){
+    try{
+      doc.addImage(imageDataUrl, "PNG", 16, startY - 30, pageWidth - 32, 135, undefined, "FAST");
+    }catch(err){
+      doc.setTextColor(190,0,0);
+      doc.text("Gambar panduan asuransi belum berhasil dimuat.", pageWidth/2, 80, { align:"center" });
+    }
+  }else{
+    doc.setTextColor(190,0,0);
+    doc.text("Gambar panduan asuransi belum berhasil dimuat.", pageWidth/2, 80, { align:"center" });
+  }
+
+  const ctaX = 18, ctaY = 184, ctaW = pageWidth - 36, ctaH = 16;
+  doc.setFillColor(11,60,93);
+  doc.setDrawColor(11,60,93);
+  doc.roundedRect(ctaX, ctaY, ctaW, ctaH, 4, 4, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.6);
+  doc.setTextColor(255,255,255);
+  doc.text("Butuh Review Polis Lebih Detail?", ctaX + 7, ctaY + 6);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.4);
+  doc.setTextColor(225,239,249);
+  doc.text("Diskusikan prioritas polis wajib, UP, limit kesehatan, dan strategi perbaikan bersama Financial Planner.", ctaX + 7, ctaY + 11, { maxWidth: 175 });
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.4);
+  doc.setTextColor(255,255,255);
+  doc.text("Septino, QWP®, CIS®", ctaX + ctaW - 7, ctaY + 6, { align:"right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.4);
+  doc.text("WhatsApp: 0811-6946-999", ctaX + ctaW - 7, ctaY + 11, { align:"right" });
+
+  addPdfFooter(doc, pageNo);
 }
 
 function addPdfFooter(doc, pageNo){
@@ -1127,12 +1239,11 @@ function addMemberPage(doc, member, logoDataUrl, pageNo){
 }
 
 
-function addCTAPage(doc, logoDataUrl, pageNo){
+function addCTAPage(doc, logoDataUrl, pageNo, insuranceImageDataUrl){
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const stats = getFamilyReviewStats();
-  const status = getCTAStatus(stats.score);
-  const roadmap = getFamilyPolicyRoadmap(999);
+  const rekomendasiWajib = getWajibRecommendationsByFamily(999);
 
   doc.setFillColor(248,252,255);
   doc.rect(0,0,pageWidth,pageHeight,"F");
@@ -1144,101 +1255,75 @@ function addCTAPage(doc, logoDataUrl, pageNo){
   addLogoToPdf(doc, logoDataUrl, 10, 8, 38, 22);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.setTextColor(180,0,0);
-  doc.text("ROADMAP PERLINDUNGAN KELUARGA", pageWidth/2, 20, { align:"center" });
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
+  doc.setFontSize(18);
   doc.setTextColor(11,60,93);
-  doc.text(safePdfText(status.title), pageWidth/2, 31, { align:"center" });
+  doc.text("REKOMENDASI POLIS WAJIB SEBAGAI PRIORITAS", pageWidth/2, 19, { align:"center" });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(71,85,105);
-  doc.text(safePdfText(status.desc), pageWidth/2, 39, { align:"center", maxWidth: pageWidth - 58 });
+  doc.text("Rekomendasi berikut disusun berdasarkan data keluarga dan item polis wajib yang belum dimiliki.", pageWidth/2, 28, { align:"center", maxWidth: pageWidth - 60 });
 
-  const scoreX = 18, scoreY = 50, scoreW = 58, scoreH = 54;
+  const summaryX = 18, summaryY = 38, summaryW = pageWidth - 36, summaryH = 30;
   doc.setFillColor(255,255,255);
   doc.setDrawColor(220,232,242);
-  doc.roundedRect(scoreX, scoreY, scoreW, scoreH, 5, 5, "FD");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(100,116,139);
-  doc.text("SKOR KESIAPAN", scoreX + scoreW/2, scoreY + 11, { align:"center" });
-  doc.setFontSize(25);
-  doc.setTextColor(46,139,87);
-  doc.text(`${stats.score}%`, scoreX + scoreW/2, scoreY + 30, { align:"center" });
-  doc.setFillColor(226,232,240);
-  doc.roundedRect(scoreX + 9, scoreY + 39, scoreW - 18, 4, 2, 2, "F");
-  doc.setFillColor(46,139,87);
-  doc.roundedRect(scoreX + 9, scoreY + 39, (scoreW - 18) * stats.score / 100, 4, 2, 2, "F");
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.8);
-  doc.setTextColor(100,116,139);
-  doc.text("Semakin tinggi skor, semakin lengkap proteksi keluarga.", scoreX + scoreW/2, scoreY + 48, { align:"center", maxWidth: scoreW - 10 });
+  doc.roundedRect(summaryX, summaryY, summaryW, summaryH, 5, 5, "FD");
 
-  const gapX = 84, gapY = 50, gapW = pageWidth - 102, gapH = 54;
-  doc.setFillColor(255,255,255);
-  doc.setDrawColor(220,232,242);
-  doc.roundedRect(gapX, gapY, gapW, gapH, 5, 5, "FD");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(11,60,93);
-  doc.text("Ringkasan GAP Keluarga", gapX + 6, gapY + 11);
-
-  const statCards = [
+  const wajibText = rekomendasiWajib.length ? `${rekomendasiWajib.length} item wajib perlu diprioritaskan` : "Semua polis wajib sudah dimiliki";
+  const summaryItems = [
+    ["Skor Kesiapan", `${stats.score}%`, [46,139,87]],
     ["Sudah Punya", String(stats.owned), [46,139,87]],
     ["Belum Punya", String(stats.missing), [190,0,0]],
-    ["Prioritas Wajib", String(stats.wajibMissing), [224,0,0]],
-    ["Total Item", String(stats.total), [11,60,93]]
+    ["Polis Wajib Prioritas", String(rekomendasiWajib.length), [224,0,0]]
   ];
-  const cW = (gapW - 18) / 4;
-  statCards.forEach((c, i) => {
-    const x = gapX + 6 + i * cW;
+
+  const cardW = (summaryW - 18) / 4;
+  summaryItems.forEach((item, i) => {
+    const x = summaryX + 6 + i * cardW;
     doc.setFillColor(248,250,252);
     doc.setDrawColor(226,232,240);
-    doc.roundedRect(x, gapY + 18, cW - 4, 27, 3, 3, "FD");
+    doc.roundedRect(x, summaryY + 6, cardW - 4, 18, 3, 3, "FD");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(6.8);
+    doc.setFontSize(6.5);
     doc.setTextColor(100,116,139);
-    doc.text(c[0], x + (cW - 4)/2, gapY + 27, { align:"center" });
-    doc.setFontSize(15);
-    doc.setTextColor(c[2][0], c[2][1], c[2][2]);
-    doc.text(c[1], x + (cW - 4)/2, gapY + 39, { align:"center" });
+    doc.text(item[0], x + (cardW - 4)/2, summaryY + 12, { align:"center" });
+    doc.setFontSize(11.5);
+    doc.setTextColor(item[2][0], item[2][1], item[2][2]);
+    doc.text(item[1], x + (cardW - 4)/2, summaryY + 21, { align:"center" });
   });
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.setTextColor(11,60,93);
-  doc.text("Polis Keluarga yang Perlu Diprioritaskan", 18, 116);
+  doc.setFontSize(10);
+  doc.setTextColor(180,0,0);
+  doc.text(wajibText, 18, 78);
 
-  const tableBody = roadmap.length ? roadmap.map(item => [
+  const tableBody = rekomendasiWajib.length ? rekomendasiWajib.map((item, index) => [
+    String(index + 1),
     safePdfText(item.member.nama),
-    safePdfText(`${item.row.kategori}
-${item.row.fungsi}`),
+    safePdfText(`${item.row.kategori}\n${item.row.fungsi}`),
     safePdfText(getPolicyStatusText(item.row)),
-    safePdfText(getPolicyPriorityLevel(item.row)),
-    safePdfText(getPolicyReason(item.row))
+    safePdfText(item.prioritas || "Prioritas Utama"),
+    safePdfText(item.alasan || getPolicyReason(item.row))
   ]) : [[
+    "-",
     "Keluarga",
-    "Semua item matrix",
+    "Polis wajib utama",
     "Sudah Dimiliki",
     "Monitoring Tahunan",
-    "Pertahankan polis keluarga dan review manfaat minimal setahun sekali."
+    "Pertahankan polis yang sudah ada dan review manfaat minimal setahun sekali."
   ]];
 
   doc.autoTable({
-    startY: 121,
-    head: [["Anggota", "Kebutuhan Polis", "Status", "Tingkat Prioritas", "Alasan"]],
+    startY: 83,
+    head: [["No", "Anggota", "Rekomendasi Polis Wajib", "Status", "Tingkat Prioritas", "Alasan"]],
     body: tableBody,
     theme:"grid",
     margin:{left:18,right:18},
     tableWidth: pageWidth - 36,
     styles:{
       font:"helvetica",
-      fontSize:6.6,
-      cellPadding:2.2,
+      fontSize:6.4,
+      cellPadding:2.1,
       textColor:[51,65,85],
       lineColor:[220,232,242],
       lineWidth:.25,
@@ -1251,14 +1336,15 @@ ${item.row.fungsi}`),
       halign:"center"
     },
     columnStyles:{
-      0:{cellWidth:30, fontStyle:"bold"},
-      1:{cellWidth:62, fontStyle:"bold"},
-      2:{cellWidth:28, halign:"center", fontStyle:"bold"},
-      3:{cellWidth:34, halign:"center", fontStyle:"bold"},
-      4:{cellWidth: pageWidth - 36 - 30 - 62 - 28 - 34}
+      0:{cellWidth:10, halign:"center", fontStyle:"bold"},
+      1:{cellWidth:28, fontStyle:"bold"},
+      2:{cellWidth:56, fontStyle:"bold"},
+      3:{cellWidth:27, halign:"center", fontStyle:"bold"},
+      4:{cellWidth:32, halign:"center", fontStyle:"bold"},
+      5:{cellWidth: pageWidth - 36 - 10 - 28 - 56 - 27 - 32}
     },
     didParseCell:function(data){
-      if(data.section === "body" && data.column.index === 2){
+      if(data.section === "body" && data.column.index === 3){
         const txt = String(data.cell.raw || "");
         if(txt.includes("Belum")){
           data.cell.styles.textColor = [190,0,0];
@@ -1268,66 +1354,32 @@ ${item.row.fungsi}`),
           data.cell.styles.fillColor = [232,247,238];
         }
       }
-      if(data.section === "body" && data.column.index === 3){
-        const txt = String(data.cell.raw || "");
-        if(txt.includes("Utama")){
-          data.cell.styles.textColor = [180,0,0];
-          data.cell.styles.fillColor = [255,246,230];
-        }else if(txt.includes("Sekunder")){
-          data.cell.styles.textColor = [13,101,183];
-          data.cell.styles.fillColor = [239,248,255];
-        }else if(txt.includes("Pengembangan")){
-          data.cell.styles.textColor = [150,92,0];
-          data.cell.styles.fillColor = [255,250,230];
-        }else{
-          data.cell.styles.textColor = [71,85,105];
-          data.cell.styles.fillColor = [248,250,252];
-        }
+      if(data.section === "body" && data.column.index === 4){
+        data.cell.styles.textColor = [180,0,0];
+        data.cell.styles.fillColor = [255,246,230];
       }
     }
   });
 
-  const nextY = Math.min((doc.lastAutoTable?.finalY || 168) + 8, 176);
+  const afterTableY = doc.lastAutoTable?.finalY || 122;
+  const infoY = Math.min(afterTableY + 6, 164);
   doc.setFillColor(255,250,242);
   doc.setDrawColor(255,205,150);
-  doc.roundedRect(18, nextY, pageWidth - 36, 15, 4, 4, "FD");
+  doc.roundedRect(18, infoY, pageWidth - 36, 16, 4, 4, "FD");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setTextColor(180,0,0);
-  doc.text("Langkah Berikutnya", 24, nextY + 6);
+  doc.text("Catatan Prioritas", 24, infoY + 6);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.2);
+  doc.setFontSize(6.8);
   doc.setTextColor(71,85,105);
-  doc.text("Gunakan roadmap ini untuk menentukan urutan perbaikan polis keluarga berdasarkan risiko terbesar, kebutuhan wajib, dan kemampuan anggaran.", 68, nextY + 6, { maxWidth: pageWidth - 92 });
-  doc.text("Prioritas akhir tetap perlu disesuaikan dengan kondisi kesehatan, cashflow, tujuan keuangan, dan polis yang sudah berjalan.", 68, nextY + 11, { maxWidth: pageWidth - 92 });
-
-  // CTA bawah halaman
-  const ctaX = 18, ctaY = 193, ctaW = pageWidth - 36, ctaH = 13;
-  doc.setFillColor(11,60,93);
-  doc.setDrawColor(11,60,93);
-  doc.roundedRect(ctaX, ctaY, ctaW, ctaH, 4, 4, "FD");
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.6);
-  doc.setTextColor(255,255,255);
-  doc.text("Butuh Review Polis Lebih Detail?", ctaX + 7, ctaY + 5.2);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.4);
-  doc.setTextColor(225,239,249);
-  doc.text("Diskusikan gap polis, UP, limit kesehatan, dan strategi perbaikan bersama Financial Planner.", ctaX + 7, ctaY + 9.8, { maxWidth: 170 });
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.4);
-  doc.setTextColor(255,255,255);
-  doc.text("Septino, QWP®, CIS®", ctaX + ctaW - 7, ctaY + 5.2, { align:"right" });
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.4);
-  doc.setTextColor(225,239,249);
-  doc.text("WhatsApp: 0811-6946-999", ctaX + ctaW - 7, ctaY + 9.8, { align:"right" });
+  doc.text("Prioritas utama berfokus pada polis wajib: kesehatan, penyakit kritis, proteksi income, dan pendidikan anak sesuai data keluarga.", 68, infoY + 6, { maxWidth: pageWidth - 92 });
+  doc.text("Item non-wajib seperti distribusi kekayaan, akumulasi, atau kebutuhan tambahan tetap dapat dipertimbangkan setelah proteksi wajib lebih aman.", 68, infoY + 11, { maxWidth: pageWidth - 92 });
 
   addPdfFooter(doc, pageNo);
+
+  doc.addPage("a4", "landscape");
+  addInsuranceFunctionImage(doc, insuranceImageDataUrl, pageNo + 1, 62);
 }
 
 async function exportFamilyPDF(){
@@ -1356,6 +1408,7 @@ async function exportFamilyPDF(){
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation:"landscape", unit:"mm", format:"a4", compress:true });
     const logoDataUrl = await getLogoDataUrl();
+    const insuranceImageDataUrl = await getImageDataUrl("../asset/asuransi-fungsi-landscape.png");
 
     addCoverPage(doc, logoDataUrl);
     let pageNo = 2;
@@ -1366,7 +1419,7 @@ async function exportFamilyPDF(){
     });
 
     doc.addPage("a4", "landscape");
-    addCTAPage(doc, logoDataUrl, pageNo);
+    addCTAPage(doc, logoDataUrl, pageNo, insuranceImageDataUrl);
 
     doc.save(getPdfFileName());
   }catch(err){
