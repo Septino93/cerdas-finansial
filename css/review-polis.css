@@ -1023,3 +1023,32 @@ body{margin:0;background:#eef3f8;font-family:Arial,Helvetica,sans-serif;color:#1
     grid-template-columns:1fr;
   }
 }
+
+/* FIX: Data Anak tidak menutupi Daftar Anggota */
+.family-top-card{
+  position:relative !important;
+  top:auto !important;
+  z-index:1 !important;
+}
+
+.member-top-card{
+  position:relative !important;
+  z-index:1 !important;
+  margin-top:18px !important;
+}
+
+#anakFields,
+.children-fields,
+.data-anak-section,
+#anakContainer{
+  position:relative !important;
+  z-index:1 !important;
+  margin-top:22px !important;
+  padding-top:18px !important;
+  border-top:1px solid #e5edf3 !important;
+}
+
+.family-list-horizontal{
+  position:relative !important;
+  z-index:1 !important;
+}
