@@ -1,165 +1,225 @@
-const STORAGE_KEY = "cerdas_finansial_review_polis_v1";
-let activeMember = "kepala";
-let state = loadState();
-
-const presets = {
-  kepala: {
-    title: "1. KEPALA KELUARGA", theme: "red", icon:"bi-person-fill", label:"Kepala Keluarga",
-    rows: [
-      ["red","Asuransi Kesehatan","Proteksi Aset"],
-      ["red","Asuransi Penyakit Kritis","Proteksi Income"],
-      ["red","Asuransi Jiwa","Proteksi Income"],
-      ["red","Asuransi Pendidikan Anak","Pendidikan Anak 1"],
-      ["red","Asuransi Pendidikan Anak","Pendidikan Anak 2"],
-      ["red","Asuransi Pendidikan Anak","Pendidikan Anak 3"],
-      ["red","Asuransi Jiwa","Dana Pensiun Pasangan"],
-      ["red","Asuransi Jiwa","Pelunasan Hutang"],
-      ["red","Asuransi Jiwa","Biaya Pemakaman"],
-      ["green","Asuransi Santunan Harian Rawat Inap","Proteksi Income"],
-      ["green","Asuransi Cacat Tetap & Total","Proteksi Income"],
-      ["green","Asuransi Kecelakaan","Proteksi Income"],
-      ["yellow","Asuransi Jiwa","Biaya Distribusi Aset"],
-      ["yellow","Asuransi Jiwa","Warisan"],
-      ["blue","Asuransi Dana Pensiun","Persiapan Income Masa Pensiun"]
-    ]
-  },
-  pasangan: {
-    title: "2. PASANGAN", theme: "teal", icon:"bi-person-heart", label:"Pasangan",
-    rows: [
-      ["red","Asuransi Kesehatan","Proteksi Aset"],
-      ["red","Asuransi Penyakit Kritis","Proteksi Income"],
-      ["green","Asuransi Jiwa","Proteksi Income"],
-      ["green","Asuransi Jiwa","Pendidikan Anak"],
-      ["green","Asuransi Jiwa","Dana Pensiun Pasangan"],
-      ["green","Asuransi Jiwa","Pelunasan Hutang"],
-      ["green","Asuransi Jiwa","Biaya Pemakaman"],
-      ["green","Asuransi Santunan Harian Rawat Inap","Proteksi Income"],
-      ["green","Asuransi Cacat Tetap & Total","Proteksi Income"],
-      ["green","Asuransi Kecelakaan","Proteksi Income"],
-      ["yellow","Asuransi Jiwa","Biaya Distribusi Aset"],
-      ["yellow","Asuransi Jiwa","Warisan"],
-      ["blue","Asuransi Dana Pensiun","Persiapan Income Masa Pensiun"]
-    ]
-  },
-  anak1: childPreset("1. ANAK PERTAMA", "green", "Anak Pertama"),
-  anak2: childPreset("2. ANAK KEDUA", "blue", "Anak Kedua"),
-  anak3: childPreset("3. ANAK KETIGA", "purple", "Anak Ketiga")
+const STORAGE_KEY = "cerdasFinansial_reviewPolis";
+let state = {
+  keluarga: [],
+  activeId: null,
+  polis: {}
 };
 
-function childPreset(title, theme, label){
-  return {title, theme, icon:"bi-emoji-smile", label, rows:[
-    ["red","Asuransi Kesehatan","Proteksi Aset"],
-    ["green","Asuransi Penyakit Kritis","Proteksi Income"],
-    ["green","Asuransi Jiwa", title.includes("PERTAMA") ? "Biaya Distribusi Aset" : "Proteksi Income"],
-    ["blue","Asuransi Dana Pendidikan","Akumulasi Dana Pendidikan"]
-  ]};
+const matrixTemplate = [
+  { kategori: "Asuransi Jiwa", fungsi: "Menjaga income keluarga jika pencari nafkah meninggal dunia", warna: "red" },
+  { kategori: "Asuransi Penyakit Kritis", fungsi: "Menjaga income dan biaya hidup saat terkena penyakit kritis", warna: "red" },
+  { kategori: "Asuransi Kesehatan", fungsi: "Menanggung biaya rumah sakit dan perawatan medis", warna: "red" },
+  { kategori: "Asuransi Kecelakaan", fungsi: "Perlindungan risiko cacat atau meninggal akibat kecelakaan", warna: "green" },
+  { kategori: "Dana Pendidikan", fungsi: "Menyiapkan biaya pendidikan anak", warna: "blue" },
+  { kategori: "Dana Pensiun", fungsi: "Menyiapkan penghasilan saat usia pensiun", warna: "blue" },
+  { kategori: "Warisan / Legacy", fungsi: "Distribusi kekayaan kepada keluarga atau ahli waris", warna: "yellow" },
+  { kategori: "Investasi / Unit Link", fungsi: "Akumulasi dana jangka menengah dan panjang", warna: "blue" }
+];
+
+function loadState() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    state = JSON.parse(saved);
+  }
 }
 
-function defaultMember(key){
-  return { name:"", policies: presets[key].rows.map(r=>({ punya:false, brand:"", produk:"", manfaat:"", premi:"", masa:"", catatan:"" })) };
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
-function defaultState(){
-  const s = { family:{kepala:"", pasangan:"", jumlahAnak:3}, members:{} };
-  Object.keys(presets).forEach(k=>s.members[k]=defaultMember(k));
-  return s;
-}
-function loadState(){
-  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState(); }catch(e){ return defaultState(); }
-}
-function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-function money(v){ return v || ""; }
 
-function init(){
-  document.getElementById("namaKepala").value = state.family.kepala || "";
-  document.getElementById("namaPasangan").value = state.family.pasangan || "";
-  document.getElementById("jumlahAnak").value = state.family.jumlahAnak || 3;
+function simpanKeluarga() {
+  const kepala = document.getElementById("namaKepala").value.trim() || "Kepala Keluarga";
+  const pasangan = document.getElementById("namaPasangan").value.trim() || "Pasangan";
+  const jumlahAnak = parseInt(document.getElementById("jumlahAnak").value || "0");
+
+  const keluarga = [
+    { id: "kepala", nama: kepala, peran: "Kepala Keluarga", icon: "bi-person-fill" },
+    { id: "pasangan", nama: pasangan, peran: "Pasangan", icon: "bi-person-heart" }
+  ];
+
+  for (let i = 1; i <= jumlahAnak; i++) {
+    keluarga.push({
+      id: `anak${i}`,
+      nama: `Anak ${i}`,
+      peran: `Anak ke-${i}`,
+      icon: "bi-person"
+    });
+  }
+
+  state.keluarga = keluarga;
+  state.activeId = "kepala";
+
+  keluarga.forEach(member => {
+    if (!state.polis[member.id]) {
+      state.polis[member.id] = createEmptyMatrix();
+    }
+  });
+
+  saveState();
+  renderAll();
+}
+
+function createEmptyMatrix() {
+  return matrixTemplate.map(item => ({
+    ...item,
+    punya: "tidak",
+    brand: "",
+    produk: "",
+    manfaat: "",
+    premi: "",
+    masa: "",
+    catatan: ""
+  }));
+}
+
+function renderAll() {
   renderFamilyGrid();
   renderMatrix();
+  renderSummary();
+  fillFamilyForm();
 }
 
-function simpanKeluarga(){
-  state.family.kepala = document.getElementById("namaKepala").value.trim();
-  state.family.pasangan = document.getElementById("namaPasangan").value.trim();
-  state.family.jumlahAnak = Number(document.getElementById("jumlahAnak").value || 3);
-  if(!state.members.kepala.name && state.family.kepala) state.members.kepala.name = state.family.kepala;
-  if(!state.members.pasangan.name && state.family.pasangan) state.members.pasangan.name = state.family.pasangan;
-  saveState(); renderFamilyGrid(); renderMatrix();
+function fillFamilyForm() {
+  const kepala = state.keluarga.find(x => x.id === "kepala");
+  const pasangan = state.keluarga.find(x => x.id === "pasangan");
+  const anakCount = state.keluarga.filter(x => x.id.startsWith("anak")).length;
+
+  if (kepala) document.getElementById("namaKepala").value = kepala.nama;
+  if (pasangan) document.getElementById("namaPasangan").value = pasangan.nama;
+  if (anakCount) document.getElementById("jumlahAnak").value = anakCount;
 }
 
-function renderFamilyGrid(){
+function renderFamilyGrid() {
   const grid = document.getElementById("familyGrid");
-  const keys = ["kepala","pasangan"];
-  for(let i=1;i<=Number(state.family.jumlahAnak||3);i++) keys.push("anak"+i);
-  grid.innerHTML = keys.map(k=>{
-    const p=presets[k];
-    const name = state.members[k]?.name || suggestedName(k);
-    return `<div class="family-card ${activeMember===k?'active':''}" onclick="selectMember('${k}')">
-      <i class="bi ${p.icon}"></i><h5>${p.label}</h5><p>${name || 'Belum diisi'}</p>
-    </div>`;
-  }).join("");
-}
-function suggestedName(k){
-  if(k==="kepala") return state.family.kepala;
-  if(k==="pasangan") return state.family.pasangan;
-  return "";
-}
-function selectMember(key){ activeMember=key; if(!state.members[key]) state.members[key]=defaultMember(key); renderFamilyGrid(); renderMatrix(); }
-function updateCurrentName(value){ state.members[activeMember].name=value; saveState(); renderFamilyGrid(); }
 
-function renderMatrix(){
-  const preset = presets[activeMember];
-  if(!state.members[activeMember]) state.members[activeMember]=defaultMember(activeMember);
-  document.getElementById("matrixTitle").textContent = preset.title + " - INSURANCE MATRIX";
-  document.getElementById("matrixTitle").style.color = themeColor(preset.theme);
-  document.getElementById("matrixName").value = state.members[activeMember].name || suggestedName(activeMember) || "";
+  if (!state.keluarga.length) {
+    grid.innerHTML = `
+      <div class="small-muted">
+        Belum ada data keluarga. Isi nama keluarga lalu klik <strong>Simpan Data Keluarga</strong>.
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = state.keluarga.map(member => `
+    <div class="family-card ${member.id === state.activeId ? "active" : ""}" onclick="selectMember('${member.id}')">
+      <i class="bi ${member.icon}"></i>
+      <h5>${member.nama}</h5>
+      <p>${member.peran}</p>
+    </div>
+  `).join("");
+}
+
+function selectMember(id) {
+  state.activeId = id;
+  saveState();
+  renderAll();
+}
+
+function getActiveMember() {
+  return state.keluarga.find(x => x.id === state.activeId);
+}
+
+function getActiveMatrix() {
+  if (!state.activeId) return [];
+  if (!state.polis[state.activeId]) {
+    state.polis[state.activeId] = createEmptyMatrix();
+  }
+  return state.polis[state.activeId];
+}
+
+function renderMatrix() {
   const body = document.getElementById("matrixBody");
-  body.innerHTML = preset.rows.map((row,i)=>{
-    const policy = state.members[activeMember].policies[i] || {};
-    const punya = !!policy.punya;
-    return `<tr>
-      <td class="status-cell"><div class="status-band ${row[0]}"></div></td>
-      <td class="row-no">${i+1}</td>
-      <td class="row-category">${row[1]}</td>
-      <td class="row-function">${row[2]}</td>
-      <td>${punya ? (policy.brand||'-') : ''}</td>
-      <td>${punya ? (policy.produk||'-') : ''}</td>
-      <td>${punya ? (policy.manfaat||'-') : ''}</td>
-      <td class="check-cell">${punya ? '' : '<span class="status-pill pill-none">Tidak Punya</span>'}</td>
-      <td>${policy.catatan||''}</td>
-      <td class="check-cell"><button class="edit-btn" onclick="openModal(${i})"><i class="bi bi-pencil-square"></i> Edit</button></td>
-    </tr>`;
-  }).join("");
-  updateSummary();
+  const active = getActiveMember();
+
+  if (!active) {
+    document.getElementById("matrixName").value = "";
+    document.getElementById("matrixTitle").textContent = "INSURANCE MATRIX";
+    body.innerHTML = `
+      <tr>
+        <td colspan="10" class="text-center text-muted py-4">
+          Silakan simpan data keluarga terlebih dahulu.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  document.getElementById("matrixName").value = active.nama;
+  document.getElementById("matrixTitle").textContent = `INSURANCE MATRIX - ${active.peran.toUpperCase()}`;
+
+  const matrix = getActiveMatrix();
+
+  body.innerHTML = matrix.map((row, index) => `
+    <tr>
+      <td class="status-cell"><div class="status-band ${row.warna}"></div></td>
+      <td class="row-no">${index + 1}</td>
+      <td class="row-category">${row.kategori}</td>
+      <td class="row-function">${row.fungsi}</td>
+      <td>${row.punya === "ya" ? row.brand || "-" : "-"}</td>
+      <td>${row.punya === "ya" ? row.produk || "-" : "-"}</td>
+      <td>${row.punya === "ya" ? row.manfaat || "-" : "-"}</td>
+      <td class="check-cell">
+        ${
+          row.punya === "ya"
+            ? `<span class="status-pill pill-owned"><i class="bi bi-check-circle"></i> Sudah</span>`
+            : `<span class="status-pill pill-none"><i class="bi bi-x-circle"></i> Belum</span>`
+        }
+      </td>
+      <td>
+        ${row.catatan || ""}
+        ${row.premi ? `<div class="small-muted mt-1">Premi: ${row.premi}</div>` : ""}
+        ${row.masa ? `<div class="small-muted">Masa: ${row.masa}</div>` : ""}
+      </td>
+      <td>
+        <button class="edit-btn" onclick="openModal(${index})">
+          <i class="bi bi-pencil-square"></i> Edit
+        </button>
+      </td>
+    </tr>
+  `).join("");
 }
-function themeColor(theme){ return {red:'#b60000',teal:'#006f73',blue:'#084b8a',green:'#087b32',purple:'#6b2a8f'}[theme] || '#0b3c5d'; }
-function updateSummary(){
-  const policies = state.members[activeMember].policies;
-  const total = presets[activeMember].rows.length;
-  const owned = policies.filter(p=>p.punya).length;
-  document.getElementById("sumTotal").textContent=total;
-  document.getElementById("sumOwned").textContent=owned;
-  document.getElementById("sumNone").textContent=total-owned;
-  document.getElementById("sumScore").textContent=Math.round((owned/total)*100)+"%";
+
+function renderSummary() {
+  const matrix = getActiveMatrix();
+  const total = matrix.length;
+  const owned = matrix.filter(x => x.punya === "ya").length;
+  const none = total - owned;
+  const score = total ? Math.round((owned / total) * 100) : 0;
+
+  document.getElementById("sumTotal").textContent = total;
+  document.getElementById("sumOwned").textContent = owned;
+  document.getElementById("sumNone").textContent = none;
+  document.getElementById("sumScore").textContent = `${score}%`;
 }
-function openModal(index){
-  const row = presets[activeMember].rows[index];
-  const p = state.members[activeMember].policies[index] || {};
-  document.getElementById("modalTitle").textContent = `${row[1]} - ${row[2]}`;
-  document.getElementById("editIndex").value=index;
-  document.getElementById("editPunya").value=p.punya?'ya':'tidak';
-  document.getElementById("editBrand").value=p.brand||'';
-  document.getElementById("editProduk").value=p.produk||'';
-  document.getElementById("editManfaat").value=p.manfaat||'';
-  document.getElementById("editPremi").value=p.premi||'';
-  document.getElementById("editMasa").value=p.masa||'';
-  document.getElementById("editCatatan").value=p.catatan||'';
-  document.getElementById("editModal").style.display='flex';
+
+function openModal(index) {
+  const row = getActiveMatrix()[index];
+
+  document.getElementById("editIndex").value = index;
+  document.getElementById("modalTitle").textContent = `Edit ${row.kategori}`;
+  document.getElementById("editPunya").value = row.punya;
+  document.getElementById("editBrand").value = row.brand;
+  document.getElementById("editProduk").value = row.produk;
+  document.getElementById("editManfaat").value = row.manfaat;
+  document.getElementById("editPremi").value = row.premi;
+  document.getElementById("editMasa").value = row.masa;
+  document.getElementById("editCatatan").value = row.catatan;
+
+  document.getElementById("editModal").style.display = "flex";
 }
-function closeModal(){ document.getElementById("editModal").style.display='none'; }
-function savePolicy(){
-  const i = Number(document.getElementById("editIndex").value);
-  state.members[activeMember].policies[i] = {
-    punya: document.getElementById("editPunya").value === 'ya',
+
+function closeModal() {
+  document.getElementById("editModal").style.display = "none";
+}
+
+function savePolicy() {
+  const index = parseInt(document.getElementById("editIndex").value);
+  const matrix = getActiveMatrix();
+
+  matrix[index] = {
+    ...matrix[index],
+    punya: document.getElementById("editPunya").value,
     brand: document.getElementById("editBrand").value.trim(),
     produk: document.getElementById("editProduk").value.trim(),
     manfaat: document.getElementById("editManfaat").value.trim(),
@@ -167,10 +227,40 @@ function savePolicy(){
     masa: document.getElementById("editMasa").value.trim(),
     catatan: document.getElementById("editCatatan").value.trim()
   };
-  saveState(); closeModal(); renderMatrix();
-}
-function resetReview(){
-  if(confirm('Reset semua data Review Polis?')){ localStorage.removeItem(STORAGE_KEY); state=defaultState(); activeMember='kepala'; init(); }
+
+  saveState();
+  closeModal();
+  renderAll();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+function updateCurrentName(value) {
+  const active = getActiveMember();
+  if (!active) return;
+
+  active.nama = value.trim() || active.peran;
+  saveState();
+  renderFamilyGrid();
+}
+
+function resetReview() {
+  const yakin = confirm("Reset semua data review polis?");
+  if (!yakin) return;
+
+  localStorage.removeItem(STORAGE_KEY);
+  state = {
+    keluarga: [],
+    activeId: null,
+    polis: {}
+  };
+
+  document.getElementById("namaKepala").value = "";
+  document.getElementById("namaPasangan").value = "";
+  document.getElementById("jumlahAnak").value = "3";
+
+  renderAll();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadState();
+  renderAll();
+});
