@@ -1,4 +1,4 @@
-const STORAGE_KEY = "cerdasFinansial_reviewPolis_v9";
+const STORAGE_KEY = "cerdasFinansial_reviewPolis_v10";
 
 let state = {
   keluarga: [],
@@ -30,7 +30,16 @@ const matrixKepalaAfterEducation = [
 const matrixIndividuBelumMenikah = [
   { kategori: "ASURANSI KESEHATAN", fungsi: "PROTEKSI ASET", warna: "red" },
   { kategori: "ASURANSI PENYAKIT KRITIS", fungsi: "PROTEKSI INCOME", warna: "red" },
-  { kategori: "ASURANSI JIWA", fungsi: "BIAYA PEMAKAMAN", warna: "red" }
+  { kategori: "ASURANSI JIWA", fungsi: "PROTEKSI INCOME", warna: "green" },
+  { kategori: "ASURANSI JIWA", fungsi: "DANA PENSIUN", warna: "green" },
+  { kategori: "ASURANSI JIWA", fungsi: "PELUNASAN HUTANG", warna: "green" },
+  { kategori: "ASURANSI JIWA", fungsi: "BIAYA PEMAKAMAN", warna: "red" },
+  { kategori: "ASURANSI SANTUNAN HARIAN RAWAT INAP", fungsi: "PROTEKSI INCOME", warna: "green" },
+  { kategori: "ASURANSI CACAT TETAP & TOTAL", fungsi: "PROTEKSI INCOME", warna: "green" },
+  { kategori: "ASURANSI KECELAKAAN", fungsi: "PROTEKSI INCOME", warna: "green" },
+  { kategori: "ASURANSI JIWA", fungsi: "BIAYA DISTRIBUSI ASET", warna: "yellow" },
+  { kategori: "ASURANSI JIWA", fungsi: "WARISAN", warna: "yellow" },
+  { kategori: "ASURANSI DANA PENSIUN", fungsi: "PERSIAPAN INCOME MASA PENSIUN", warna: "blue" }
 ];
 
 const matrixPasanganTidakKerja = [
