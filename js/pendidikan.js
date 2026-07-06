@@ -195,7 +195,7 @@ function readiness(d){
 }
 
 function konsultasiWhatsApp(){if(!last)return;let d=last,msg=`Halo Pak Septino,\n\nSaya baru menggunakan aplikasi Cerdas Finansial dan ingin berkonsultasi mengenai hasil simulasi dana pendidikan.\n\nNama Anak: ${d.namaAnak}\nTarget Pendidikan: ${d.targetLabel}\nDana Dibutuhkan: ${rupiah(d.target)}\nDana Saat Ini: ${rupiah(d.danaAda)}\nKekurangan Dana: ${rupiah(d.kurang)}\nEstimasi Setoran: ${rupiah(d.setor)} / bulan\nPeriode Persiapan: ${formatTahun(d.periode)}\n\nMohon dibantu membuatkan strategi yang sesuai. Terima kasih.`;window.open(`https://wa.me/${FP.whatsapp}?text=${encodeURIComponent(msg)}`,'_blank');}function konsultasiEmail(){let subject='Konsultasi Dana Pendidikan';location.href=`mailto:${FP.email}?subject=${encodeURIComponent(subject)}`;}function konsultasiInstagram(){window.open(FP.instagram,'_blank');}
-async function exportPDF(){
+function exportPDF(){
     if(!last){
         alert('Lengkapi data terlebih dahulu.');
         return;
@@ -203,270 +203,260 @@ async function exportPDF(){
 
     const { jsPDF } = window.jspdf;
     const d = last;
-    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
 
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
     const M = 12;
-    const CONTENT_BOTTOM = H - 22;
     const today = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
-    const totalPages = 2;
 
     const C = {
-        navy:[5,44,80], navy2:[10,66,112], gold:[199,154,59], goldSoft:[255,248,230],
-        green:[46,139,87], greenSoft:[240,249,244], red:[194,47,52], redSoft:[255,242,242],
-        ink:[20,31,48], muted:[88,102,124], line:[216,228,240], soft:[248,251,254], white:[255,255,255]
+        navy:[8,47,83],
+        navy2:[5,36,64],
+        gold:[202,151,46],
+        gold2:[236,184,70],
+        green:[46,139,87],
+        red:[194,45,48],
+        ink:[19,35,57],
+        muted:[87,103,126],
+        line:[214,226,238],
+        soft:[248,251,253],
+        softBlue:[241,247,252],
+        softGold:[255,248,231],
+        softGreen:[237,248,241],
+        white:[255,255,255]
     };
 
-    const logoUrlCandidates = ['../asset/logo-cerdas-finansial.png','asset/logo-cerdas-finansial.png','../assets/logo-cerdas-finansial.png','assets/logo-cerdas-finansial.png'];
-    let logoData = null;
-    for (const url of logoUrlCandidates) {
-        try { logoData = await imageToDataURL(url); if (logoData) break; } catch(e) {}
-    }
-
-    function imageToDataURL(url){
-        return new Promise((resolve,reject)=>{
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.naturalWidth || img.width;
-                canvas.height = img.naturalHeight || img.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img,0,0);
-                resolve(canvas.toDataURL('image/png'));
-            };
-            img.onerror = reject;
-            img.src = url;
-        });
-    }
-
-    function setFont(size=9, style='normal', color=C.ink){
-        doc.setFont('helvetica', style);
+    function cleanName(txt){ return String(txt||'Simulasi').replace(/[^a-z0-9_\-]+/gi,'_'); }
+    function safe(v){ return v || '-'; }
+    function pctInflasi(){ return (d.inflasi*100).toFixed(1).replace('.0','') + '% / tahun'; }
+    function bulanPeriode(){ return Math.round((d.periode || 0) * 12); }
+    function periodeText(){ return `${formatTahun(d.periode)} (${bulanPeriode()} Bulan)`; }
+    function font(size=9,style='normal',color=C.ink){
+        doc.setFont('helvetica',style);
         doc.setFontSize(size);
         doc.setTextColor(...color);
     }
     function fill(c){ doc.setFillColor(...c); }
     function stroke(c){ doc.setDrawColor(...c); }
     function line(x1,y1,x2,y2,c=C.line,w=.25){ stroke(c); doc.setLineWidth(w); doc.line(x1,y1,x2,y2); }
-    function card(x,y,w,h,bg=C.white,border=C.line,r=5){ fill(bg); stroke(border); doc.setLineWidth(.25); doc.roundedRect(x,y,w,h,r,r,'FD'); }
-    function wrap(text,x,y,w,size=7.4,lineH=3.7,color=C.ink,style='normal'){
-        setFont(size,style,color);
-        const lines = doc.splitTextToSize(String(text||''),w);
+    function round(x,y,w,h,r=4,fillColor=C.white,lineColor=C.line){
+        fill(fillColor); stroke(lineColor); doc.setLineWidth(.35); doc.roundedRect(x,y,w,h,r,r,'FD');
+    }
+    function wrap(text,x,y,w,size=8,lineH=4,color=C.ink,style='normal'){
+        font(size,style,color);
+        const lines=doc.splitTextToSize(String(text),w);
         doc.text(lines,x,y);
-        return y + (lines.length * lineH);
+        return y + lines.length*lineH;
     }
-    function safe(v){ return v || '-'; }
-    function cleanName(txt){ return String(txt||'Simulasi').replace(/[^a-z0-9_\-]+/gi,'_'); }
-    function pctInflasi(){ return (d.inflasi*100).toFixed(1).replace('.0','') + '% / tahun'; }
-    function periodeFull(){
-        const bulan = Math.round((d.periode || 0) * 12);
-        return `${formatTahun(d.periode)} (${bulan} Bulan)`;
+    function fitText(text,x,y,w,maxSize=13,minSize=7,color=C.ink,style='bold',align='left'){
+        let size=maxSize;
+        doc.setFont('helvetica',style);
+        while(size>minSize && doc.getTextWidth(String(text))>w){ size-=.4; doc.setFontSize(size); }
+        font(size,style,color);
+        doc.text(String(text),x,y,{align});
     }
-    function logoMark(x,y,w=32){
-        if(logoData){
-            doc.addImage(logoData,'PNG',x,y,w,w*.48,undefined,'FAST');
-        }else{
-            setFont(14,'bold',C.navy); doc.text('CF',x,y+8);
-            setFont(8,'bold',C.navy); doc.text('CERDAS',x+14,y+5);
-            setFont(8,'bold',C.gold); doc.text('FINANSIAL',x+14,y+10);
-        }
+    function iconCircle(x,y,r=6,color=C.navy,txt=''){
+        fill(color); doc.circle(x,y,r,'F');
+        if(txt){ font(8,'bold',C.white); doc.text(txt,x,y+2.5,{align:'center'}); }
+    }
+    function logoMark(x,y,s=1){
+        // Simple CF mark, vector-based supaya tajam di PDF.
+        stroke(C.navy); doc.setLineWidth(1.8*s); doc.arc(x+8*s,y+8*s,7*s,110,295,'S');
+        fill(C.gold); doc.roundedRect(x+8*s,y+4*s,9*s,3.2*s,1.5*s,1.5*s,'F');
+        fill(C.gold); doc.roundedRect(x+8*s,y+7.2*s,8*s,3*s,1.2*s,1.2*s,'F');
+        fill(C.gold); doc.roundedRect(x+8*s,y+4*s,3.2*s,13*s,1.5*s,1.5*s,'F');
+        fill(C.navy); doc.rect(x+14*s,y+12*s,1.6*s,4*s,'F');
+        fill(C.navy); doc.rect(x+16.4*s,y+10*s,1.6*s,6*s,'F');
+        fill(C.navy); doc.rect(x+18.8*s,y+8*s,1.6*s,8*s,'F');
+        stroke(C.gold); doc.setLineWidth(.9*s); doc.line(x+8*s,y+17*s,x+21*s,y+12*s);
     }
     function header(title,subtitle,page){
-        fill(C.white); doc.rect(0,0,W,31,'F');
-        logoMark(M,8,38);
-        setFont(12.5,'bold',C.navy); doc.text(title,M+52,13);
-        setFont(8.3,'normal',C.ink); doc.text(subtitle,M+52,20);
-        setFont(6.8,'bold',C.muted); doc.text('Tanggal Simulasi',W-M-42,11);
-        setFont(7.4,'bold',C.navy); doc.text(today,W-M,18,{align:'right'});
-        line(M,29,W-M,29,C.gold,.55);
+        fill(C.white); doc.rect(0,0,W,34,'F');
+        logoMark(M,7,1.15);
+        font(10,'bold',C.navy); doc.text('CERDAS',M+28,15);
+        font(10,'bold',C.gold); doc.text('FINANSIAL',M+28,22);
+        font(14,'bold',C.navy); doc.text(title,84,15);
+        font(8.4,'normal',C.ink); doc.text(subtitle,84,23);
+        if(page===1){
+            font(7.5,'bold',C.navy); doc.text('Tanggal Simulasi',W-M-48,13);
+            font(8,'bold',C.ink); doc.text(today,W-M-48,21);
+        }
+        line(M,31,W-M,31,C.gold,.55);
     }
     function footer(page){
-        const fy = H - 17;
-        line(M,fy,W-M,fy,C.gold,.45);
-        setFont(6.6,'bold',C.navy); doc.text('Disusun oleh:',M,fy+5);
-        setFont(7.0,'bold',C.navy); doc.text('Septino, QWP®, CIS®',M,fy+10);
-        setFont(6.0,'normal',C.muted); doc.text('Financial Planner & Insurance Consultant',M,fy+14);
-        setFont(6.6,'normal',C.ink); doc.text('WA 0811-6946-999',77,fy+8);
-        doc.text('septinogao@gmail.com',120,fy+8);
-        doc.text('@septino.gao',164,fy+8);
-        setFont(6.8,'bold',C.navy); doc.text(`Halaman ${page} dari ${totalPages}`,W-M,fy+10,{align:'right'});
+        const y=199;
+        line(M,y,W-M,y,C.gold,.35);
+        font(6.8,'bold',C.navy); doc.text('Disusun oleh:',M,y+6);
+        font(7.4,'bold',C.ink); doc.text('Septino, QWP®, CIS®',M,y+11);
+        font(6.4,'normal',C.muted); doc.text('Financial Planner & Insurance Consultant',M,y+15.5);
+        font(6.8,'normal',C.ink); doc.text('WA 0811-6946-999',92,y+10);
+        doc.text('septinogao@gmail.com',142,y+10);
+        doc.text('@septino.gao',205,y+10);
+        round(W-M-25,y+5,25,9,3,C.softGold,[245,215,150]);
+        font(6.8,'bold',C.navy); doc.text(`Halaman ${page} dari 2`,W-M-12.5,y+11,{align:'center'});
     }
-    function sectionTitle(text,x,y,icon=''){
-        if(icon){ fill(C.navy); doc.circle(x+3,y-3,4.3,'F'); setFont(7,'bold',C.white); doc.text(icon,x+3,y-.7,{align:'center'}); x += 11; }
-        setFont(9.5,'bold',C.navy); doc.text(text,x,y);
-        fill(C.gold); doc.roundedRect(x,y+2.7,16,1.1,.55,.55,'F');
+    function sectionTitle(x,y,title){
+        font(10,'bold',C.navy); doc.text(title,x,y);
+        fill(C.gold); doc.roundedRect(x,y+2,18,1.4,.7,.7,'F');
     }
-    function miniLabel(text,x,y,color=C.muted){ setFont(6.4,'bold',color); doc.text(String(text).toUpperCase(),x,y); }
-    function statCard(x,y,w,h,label,value,note,color=C.navy,bg=C.white){
-        card(x,y,w,h,bg,C.line,4.5);
-        fill(color); doc.circle(x+w/2,y+10,6.8,'F');
-        setFont(7,'bold',C.white); doc.text(iconLetter(label),x+w/2,y+12.4,{align:'center'});
-        miniLabel(label,x+w/2,y+24,C.navy); // centered via manual below cannot with miniLabel
-        setFont(6.8,'bold',C.navy); doc.text(doc.splitTextToSize(label.toUpperCase(),w-12),x+w/2,y+22,{align:'center'});
-        setFont(10.4,'bold',color); doc.text(String(value),x+w/2,y+35,{align:'center',maxWidth:w-8});
-        if(note) wrap(note,x+6,y+43,w-12,6.4,3.2,C.ink);
-    }
-    function iconLetter(label){
-        label=String(label).toLowerCase();
-        if(label.includes('setoran')||label.includes('per bulan')) return 'Rp';
-        if(label.includes('dana yang sudah')) return '✓';
-        if(label.includes('kekurangan')) return '!';
-        if(label.includes('waktu')) return 'T';
-        return '•';
-    }
-    function checklist(x,y,items,color=C.gold,lineH=8.1){
-        items.forEach((txt,i)=>{
-            const yy=y+i*lineH;
-            fill(color); doc.circle(x,yy-2.4,2.6,'F');
-            stroke(C.white); doc.setLineWidth(.55); doc.line(x-1.2,yy-2.4,x-.25,yy-1.2); doc.line(x-.25,yy-1.2,x+1.4,yy-4.0);
-            wrap(txt,x+7,yy,78,6.7,3.2,C.ink);
+    function dataTable(x,y,w,h){
+        round(x,y,w,h,4,C.white,C.line);
+        fill(C.navy); doc.roundedRect(x,y-6,42,11,3,3,'F');
+        iconCircle(x+7,y-.8,4.2,C.navy,'');
+        font(8,'bold',C.white); doc.text('DATA ANAK',x+15,y+1.5);
+        const rows=[
+            ['Nama Anak', safe(d.namaAnak)],
+            ['Usia Saat Ini', `${d.usiaAnak} tahun`],
+            ['Target Pendidikan', d.targetLabel],
+            ['Estimasi Biaya Saat Ini', rupiah(d.biaya)],
+            ['Inflasi Pendidikan', pctInflasi()],
+            ['Hasil Investasi', d.strategi]
+        ];
+        let yy=y+13;
+        rows.forEach(([a,b])=>{
+            font(7.2,'normal',C.ink); doc.text(a,x+8,yy);
+            font(7.2,'bold',C.navy); doc.text(':',x+w*.48,yy);
+            doc.text(String(b),x+w*.53,yy,{maxWidth:w*.4});
+            yy+=6.5;
         });
     }
-    function donut(cx,cy,r,percent){
-        stroke(C.line); doc.setLineWidth(10); doc.circle(cx,cy,r,'S');
+    function bigNeedCard(x,y,w,h){
+        round(x,y,w,h,6,C.navy2,C.navy2);
+        iconCircle(x+w/2,y+12,8,C.gold,'');
+        font(6.8,'bold',C.white); doc.text('EDU',x+w/2,y+14.3,{align:'center'});
+        font(10,'bold',C.white); doc.text('KEBUTUHAN DANA',x+w/2,y+28,{align:'center'});
+        font(10,'bold',C.white); doc.text(`SAAT USIA ${d.usiaMasuk} TAHUN`,x+w/2,y+37,{align:'center'});
+        line(x+26,y+45,x+w-26,y+45,C.gold,.55);
+        fitText(rupiah(d.target),x+w/2,y+60,w-18,17,10,C.gold,'bold','center');
+        font(7.2,'normal',C.white); doc.text('Estimasi kebutuhan saat target pendidikan dimulai.',x+w/2,y+70,{align:'center',maxWidth:w-22});
+    }
+    function summaryCard(x,y,w,h,label,value,note,color,iconTxt){
+        round(x,y,w,h,4,C.white,C.line);
+        fill(color); doc.roundedRect(x,y,w,2.7,1.3,1.3,'F');
+        iconCircle(x+w/2,y+12,7,color,iconTxt);
+        font(7.2,'bold',C.navy); doc.text(label,x+w/2,y+24,{align:'center',maxWidth:w-8});
+        fitText(value,x+w/2,y+35,w-8,11,7,color,'bold','center');
+        wrap(note,x+6,y+44,w-12,6.3,3.5,C.ink);
+    }
+    function donut(x,y,r,percent){
+        const cx=x+r, cy=y+r;
+        stroke([216,226,236]); doc.setLineWidth(10); doc.circle(cx,cy,r-5,'S');
         stroke(C.gold); doc.setLineWidth(10);
-        const end=-90+percent*3.6;
-        let lastP=null;
-        for(let a=-90; a<=end; a+=2.5){
+        let prev=null,end=-90+percent*3.6;
+        for(let a=-90;a<=end;a+=3){
             const rad=a*Math.PI/180;
-            const p=[cx+r*Math.cos(rad), cy+r*Math.sin(rad)];
-            if(lastP) doc.line(lastP[0],lastP[1],p[0],p[1]);
-            lastP=p;
+            const p=[cx+(r-5)*Math.cos(rad),cy+(r-5)*Math.sin(rad)];
+            if(prev) doc.line(prev[0],prev[1],p[0],p[1]);
+            prev=p;
         }
-        setFont(11,'bold',C.navy); doc.text(Math.round(percent)+'%',cx,cy+3.5,{align:'center'});
-        setFont(5.8,'normal',C.muted); doc.text('Dana terkumpul',cx,cy+9,{align:'center'});
+        fill(C.white); doc.circle(cx,cy,r-12,'F');
+        font(14,'bold',C.navy); doc.text(`${Math.round(percent)}%`,cx,cy+2,{align:'center'});
+        font(5.8,'normal',C.muted); doc.text('Dana Terkumpul',cx,cy+8,{align:'center'});
     }
-    function infoBox(x,y,w,text){
-        card(x,y,w,17,C.soft,C.line,4);
-        fill(C.navy); doc.circle(x+8,y+8.5,5.3,'F');
-        setFont(8,'bold',C.white); doc.text('i',x+8,y+11,{align:'center'});
-        wrap(text,x+18,y+7.3,w-24,6.8,3.4,C.ink);
+    function noteChecklist(x,y,w,h){
+        round(x,y,w,h,5,C.softGold,[245,215,150]);
+        font(9.5,'bold',C.navy); doc.text('CATATAN SINGKAT',x+12,y+12);
+        const notes=[
+            'Mulai lebih awal memberi peluang pertumbuhan dana yang lebih optimal.',
+            'Hasil investasi dan inflasi dapat berubah dari waktu ke waktu.',
+            'Disiplin menabung dan konsisten adalah kunci keberhasilan.',
+            'Lakukan evaluasi berkala minimal setiap 6–12 bulan.'
+        ];
+        let yy=y+25;
+        notes.forEach(n=>{
+            iconCircle(x+13,yy-2.5,3.4,C.gold,'✓');
+            wrap(n,x+22,yy,w-30,6.7,3.6,C.ink);
+            yy+=9.8;
+        });
     }
-    function moneyShort(n){ return rupiah(n); }
+    function infoStrip(x,y,w,h){
+        round(x,y,w,h,4,C.softBlue,C.line);
+        iconCircle(x+12,y+h/2,6,C.navy,'i');
+        wrap('Perhitungan di atas merupakan estimasi berdasarkan target dana pendidikan, jangka waktu persiapan, asumsi inflasi, dan estimasi hasil investasi yang dimasukkan.',x+24,y+8,w-34,7,3.8,C.ink);
+    }
+    function recommendCard(x,y,w,h,title,value,desc,color){
+        round(x,y,w,h,5,C.white,color);
+        iconCircle(x+15,y+16,8,color,'');
+        font(7.4,'bold',C.navy); doc.text(title,x+30,y+12,{maxWidth:w-38});
+        fitText(value,x+w/2,y+32,w-14,13,8,color,'bold','center');
+        wrap(desc,x+12,y+43,w-24,6.8,3.8,C.ink);
+    }
+    function strategyItem(x,y,w,num,title,text,goal,color){
+        iconCircle(x+5,y+6,5,color,String(num));
+        font(18,'normal',C.navy); doc.text(num===1?'↗':num===2?'🛡':'◎',x+18,y+11);
+        font(7.4,'bold',C.navy); doc.text(title,x+34,y+5);
+        wrap(text,x+34,y+13,w-72,6.2,3.5,C.ink);
+        round(x+w-48,y+1,40,15,3,C.soft,C.line);
+        font(6.2,'bold',C.navy); doc.text('Tujuan:',x+w-28,y+7,{align:'center'});
+        wrap(goal,x+w-45,y+12,34,5.5,3,C.ink,'bold');
+    }
+    function actionList(x,y){
+        font(10,'bold',C.navy); doc.text('3  ACTION PLAN',x,y);
+        const arr=['Mulai investasi sedini mungkin.','Sisihkan dana secara rutin setiap bulan.','Tingkatkan nominal investasi setiap kenaikan pendapatan.','Review rencana minimal 1 tahun sekali.','Lindungi penghasilan orang tua dengan asuransi jiwa.','Hindari pencairan dana sebelum target pendidikan tercapai.'];
+        let yy=y+12;
+        arr.forEach(t=>{ iconCircle(x+3,yy-2.5,3.3,C.navy,'✓'); wrap(t,x+10,yy,58,6.8,3.8,C.ink); yy+=11; });
+    }
+    function ctaBox(x,y,w,h){
+        round(x,y,w,h,6,C.softGold,C.gold);
+        iconCircle(x+15,y+h/2,9,C.gold,'EDU');
+        font(8.2,'bold',C.navy); doc.text('Masa depan anak dimulai dari perencanaan hari ini.',x+33,y+13);
+        wrap('Konsultasikan rencana pendidikan secara personal agar strategi yang dipilih sesuai dengan kebutuhan dan kondisi keuangan keluarga.',x+33,y+24,w*.48,6.5,3.6,C.ink);
+        line(x+w*.62,y+9,x+w*.62,y+h-9,C.gold,.3);
+        font(7.5,'bold',C.navy); doc.text('Hubungi Saya:',x+w*.66,y+11);
+        font(8,'bold',C.ink); doc.text('Septino, QWP®, CIS®',x+w*.66,y+21);
+        font(6.5,'normal',C.muted); doc.text('Financial Planner & Insurance Consultant',x+w*.66,y+29);
+        font(6.8,'normal',C.ink); doc.text('WA 0811-6946-999',x+w*.66,y+38);
+        doc.text('septinogao@gmail.com',x+w*.66,y+46);
+        doc.text('@septino.gao',x+w*.66,y+54);
+    }
 
     // PAGE 1
     header('LAPORAN SIMULASI DANA PENDIDIKAN','Perencanaan Masa Depan Anak',1);
+    dataTable(M,43,116,52);
+    bigNeedCard(142,43,W-M-142,52);
 
-    const yTop = 42;
-    sectionTitle('DATA ANAK',M,yTop,'');
-    card(M,yTop+8,98,55,C.white,C.line,5);
-    const dataRows = [
-        ['Nama Anak',safe(d.namaAnak)],
-        ['Usia Saat Ini',`${d.usiaAnak} tahun`],
-        ['Target Pendidikan',d.targetLabel],
-        ['Estimasi Biaya Saat Ini',rupiah(d.biaya)],
-        ['Inflasi Pendidikan',pctInflasi()],
-        ['Hasil Investasi',d.strategi]
-    ];
-    dataRows.forEach((row,i)=>{
-        const yy=yTop+19+i*7.2;
-        setFont(7.0,'normal',C.ink); doc.text(row[0],M+6,yy);
-        setFont(7.0,'bold',C.navy); doc.text(': '+row[1],M+50,yy,{maxWidth:43});
-    });
+    sectionTitle(M,111,'RINGKASAN HASIL SIMULASI');
+    const sw=(W-M*2-15)/4;
+    const sy=122;
+    summaryCard(M,sy,sw,42,'TOTAL KEBUTUHAN DANA',rupiah(d.target),'Estimasi kebutuhan saat target pendidikan dimulai.',C.navy,'');
+    summaryCard(M+sw+5,sy,sw,42,'DANA YANG SUDAH TERKUMPUL',rupiah(d.danaAda),'Dana pendidikan yang sudah tersedia saat ini.',C.green,'');
+    summaryCard(M+(sw+5)*2,sy,sw,42,'KEKURANGAN DANA',rupiah(d.kurang),'Selisih dana yang perlu dipersiapkan.',C.red,'');
+    summaryCard(M+(sw+5)*3,sy,sw,42,'SETORAN BULANAN YANG DISIAPKAN',rupiah(d.setor),'Estimasi dana yang perlu disiapkan setiap bulan.',C.gold,'');
 
-    card(M+108,yTop+8,78,55,C.navy,C.navy,6);
-    fill(C.gold); doc.circle(M+147,yTop+18,6.5,'F');
-    setFont(8,'bold',C.navy); doc.text('EDU',M+147,yTop+20.5,{align:'center'});
-    setFont(10.2,'bold',C.white); doc.text('KEBUTUHAN DANA',M+147,yTop+31,{align:'center'});
-    doc.text(`SAAT USIA ${d.usiaMasuk} TAHUN`,M+147,yTop+40,{align:'center'});
-    line(M+126,yTop+45,M+168,yTop+45,C.gold,.55);
-    setFont(15,'bold',C.gold); doc.text(moneyShort(d.target),M+147,yTop+53,{align:'center',maxWidth:68});
+    const percent=d.target>0 ? Math.min(100,(d.danaAda/d.target)*100) : 0;
+    round(M,174,118,38,5,C.white,C.line);
+    font(8.4,'bold',C.navy); doc.text('KOMPOSISI KEBUTUHAN DANA',M+10,184);
+    donut(M+14,187,22,percent);
+    font(7,'bold',C.navy); doc.text('Dana Terkumpul',M+62,194);
+    font(7.2,'bold',C.ink); doc.text(`${percent.toFixed(1).replace('.0','')}% (${rupiah(d.danaAda)})`,M+62,203);
+    font(7,'bold',C.muted); doc.text('Kekurangan Dana',M+62,216);
+    font(7.2,'bold',C.gold); doc.text(`${(100-percent).toFixed(1).replace('.0','')}% (${rupiah(d.kurang)})`,M+62,225);
 
-    sectionTitle('RINGKASAN HASIL SIMULASI',M,112);
-    const gap=4.5, statW=(W-M*2-gap*3)/4;
-    statCard(M,122,statW,48,'Total Kebutuhan Dana',moneyShort(d.target),'Estimasi kebutuhan saat target pendidikan dimulai.',C.navy);
-    statCard(M+statW+gap,122,statW,48,'Dana Yang Sudah Terkumpul',moneyShort(d.danaAda),'Dana pendidikan yang sudah tersedia saat ini.',C.green);
-    statCard(M+(statW+gap)*2,122,statW,48,'Kekurangan Dana',moneyShort(d.kurang),'Selisih dana yang perlu dipersiapkan.',C.red);
-    statCard(M+(statW+gap)*3,122,statW,48,'Setoran Bulanan',moneyShort(d.setor),'Estimasi dana yang disiapkan setiap bulan.',C.gold);
-
-    const bottomY=184;
-    card(M,bottomY,92,52,C.white,C.line,5);
-    setFont(8.5,'bold',C.navy); doc.text('KOMPOSISI KEBUTUHAN DANA',M+8,bottomY+10);
-    const persenAda = d.target>0 ? Math.min(100,(d.danaAda/d.target)*100) : 0;
-    donut(M+30,bottomY+31,15,persenAda);
-    fill(C.navy); doc.roundedRect(M+56,bottomY+21,3.2,3.2,.8,.8,'F');
-    setFont(6.8,'bold',C.navy); doc.text('Dana Terkumpul',M+62,bottomY+24);
-    setFont(7.1,'bold',C.ink); doc.text(`${persenAda.toFixed(1).replace('.0','')}% (${moneyShort(d.danaAda)})`,M+62,bottomY+31,{maxWidth:28});
-    fill(C.gold); doc.roundedRect(M+56,bottomY+37,3.2,3.2,.8,.8,'F');
-    setFont(6.8,'bold',C.navy); doc.text('Kekurangan Dana',M+62,bottomY+40);
-    setFont(7.1,'bold',C.gold); doc.text(`${(100-persenAda).toFixed(1).replace('.0','')}% (${moneyShort(d.kurang)})`,M+62,bottomY+47,{maxWidth:28});
-
-    card(M+98,bottomY,88,52,C.goldSoft,C.line,5);
-    setFont(8.6,'bold',C.navy); doc.text('CATATAN SINGKAT',M+108,bottomY+10);
-    const notes = [
-        'Mulai lebih awal memberi peluang pertumbuhan dana yang lebih optimal.',
-        'Hasil investasi dan inflasi dapat berubah dari waktu ke waktu.',
-        'Disiplin menabung dan konsisten adalah kunci keberhasilan.',
-        'Lakukan evaluasi berkala minimal setiap 6–12 bulan.'
-    ];
-    checklist(M+109,bottomY+21,notes,C.gold,8.0);
-
-    infoBox(M,244,W-M*2,'Perhitungan di atas merupakan estimasi berdasarkan target dana pendidikan, jangka waktu persiapan, asumsi inflasi, dan estimasi hasil investasi yang dimasukkan.');
+    noteChecklist(142,174,W-M-142,38);
+    infoStrip(M,222,W-M*2,18);
     footer(1);
 
     // PAGE 2
     doc.addPage();
-    header('REKOMENDASI FINANCIAL PLANNER','Langkah strategis untuk masa depan pendidikan anak Anda',2);
+    header('REKOMENDASI FINANCIAL PLANNER','Langkah strategis untuk masa depan pendidikan anak Anda.',2);
 
-    sectionTitle('RINGKASAN RENCANA DANA PENDIDIKAN',M,43,'1');
-    const recY=53, recW=(W-M*2-10)/3;
-    statCard(M,recY,recW,57,'Target Dana Usia '+d.usiaMasuk+' Tahun',moneyShort(d.target),'Total kebutuhan saat target pendidikan dimulai.',C.navy,C.white);
-    statCard(M+recW+5,recY,recW,57,'Jangka Waktu Persiapan',periodeFull(),'Sesuai periode persiapan yang dipilih.',C.green,C.greenSoft);
-    statCard(M+(recW+5)*2,recY,recW,57,'Dana Disiapkan Per Bulan',moneyShort(d.setor),'Estimasi komitmen dana setiap bulan.',C.gold,C.goldSoft);
+    font(10,'bold',C.navy); doc.text('1  RINGKASAN RENCANA DANA PENDIDIKAN',M+4,47);
+    const rw=(W-M*2-14)/3;
+    recommendCard(M,55,rw,48,'TARGET DANA USIA '+d.usiaMasuk+' TAHUN',rupiah(d.target),'Total kebutuhan saat target pendidikan dimulai.',C.navy);
+    recommendCard(M+rw+7,55,rw,48,'JANGKA WAKTU PERSIAPAN',periodeText(),'Sesuai periode persiapan yang dipilih.',C.green);
+    recommendCard(M+(rw+7)*2,55,rw,48,'DANA DISIAPKAN PER BULAN',rupiah(d.setor),'Estimasi komitmen dana yang perlu disiapkan setiap bulan.',C.gold);
+    infoStrip(M,110,W-M*2,15);
 
-    infoBox(M,118,W-M*2,'Perhitungan ini bersifat estimasi dan perlu dievaluasi berkala sesuai perubahan biaya pendidikan, kemampuan menabung, serta kondisi investasi.');
-
-    sectionTitle('LANGKAH STRATEGIS',M,148,'2');
-    const strategy = [
-        ['Investasi Jangka Panjang','Pilih instrumen investasi yang tepat untuk potensi hasil optimal.','Pertumbuhan Dana'],
-        ['Proteksi','Lindungi rencana pendidikan dari risiko yang tidak terduga.','Menjaga Rencana'],
-        ['Konsistensi','Kunci keberhasilan adalah disiplin dan konsisten menjalankan rencana.','Mewujudkan Tujuan']
-    ];
-    strategy.forEach((it,i)=>{
-        const yy=158+i*25;
-        card(M,yy,111,21,C.white,C.line,4);
-        fill(i===0?C.navy:(i===1?C.green:C.gold)); doc.circle(M+9,yy+10.5,5,'F');
-        setFont(7.4,'bold',C.white); doc.text(String(i+1),M+9,yy+13,{align:'center'});
-        setFont(7.7,'bold',C.navy); doc.text(it[0],M+20,yy+8);
-        wrap(it[1],M+20,yy+14.5,54,5.9,3.0,C.ink);
-        fill(C.soft); doc.roundedRect(M+78,yy+5,28,11,2.8,2.8,'F');
-        setFont(5.8,'bold',C.navy); doc.text('Tujuan:',M+92,yy+9.5,{align:'center'});
-        setFont(5.7,'normal',C.ink); doc.text(doc.splitTextToSize(it[2],24),M+92,yy+14,{align:'center'});
-    });
-
-    sectionTitle('ACTION PLAN',M+123,148,'3');
-    const actions=[
-        'Mulai investasi sedini mungkin.',
-        'Sisihkan dana secara rutin setiap bulan.',
-        'Tingkatkan nominal investasi saat pendapatan meningkat.',
-        'Review rencana minimal 1 tahun sekali.',
-        'Lindungi penghasilan orang tua dengan asuransi jiwa.',
-        'Hindari pencairan dana sebelum target pendidikan tercapai.'
-    ];
-    actions.forEach((txt,i)=>{
-        const yy=160+i*11.3;
-        fill(C.navy); doc.circle(M+126,yy-2.5,3.3,'F');
-        stroke(C.white); doc.setLineWidth(.55); doc.line(M+124.8,yy-2.4,M+126,yy-1.1); doc.line(M+126,yy-1.1,M+128,yy-4.4);
-        wrap(txt,M+133,yy,54,6.7,3.2,C.ink);
-    });
-
-    // CTA contact card, redesigned and includes WA, Email, Instagram.
-    card(M,235,W-M*2,36,C.goldSoft,C.gold,5);
-    fill(C.white); stroke(C.gold); doc.setLineWidth(.35); doc.circle(M+14,253,9,'FD');
-    setFont(9.5,'bold',C.gold); doc.text('CF',M+14,256,{align:'center'});
-    setFont(8.5,'bold',C.navy); doc.text('Masa depan anak dimulai dari perencanaan hari ini.',M+30,246);
-    wrap('Konsultasikan rencana pendidikan secara personal agar strategi yang dipilih sesuai dengan kebutuhan dan kondisi keuangan keluarga.',M+30,255,83,6.4,3.2,C.ink);
-    line(M+120,241,M+120,266,C.line,.3);
-    setFont(7.5,'bold',C.navy); doc.text('Hubungi Saya:',M+126,245);
-    setFont(7.7,'bold',C.navy); doc.text('Septino, QWP®, CIS®',M+126,252);
-    setFont(6.4,'normal',C.muted); doc.text('Financial Planner & Insurance Consultant',M+126,258);
-    setFont(6.5,'normal',C.ink); doc.text('WA 0811-6946-999',M+126,264);
-    doc.text('septinogao@gmail.com',M+158,264);
-    doc.text('@septino.gao',M+126,270);
-
+    font(10,'bold',C.navy); doc.text('2  LANGKAH STRATEGIS',M+4,139);
+    line(M+108,133,M+108,181,C.line,.3);
+    strategyItem(M,148,105,1,'INVESTASI JANGKA PANJANG','Pilih instrumen investasi yang tepat untuk potensi hasil optimal.','Pertumbuhan Dana',C.navy);
+    strategyItem(M,165,105,2,'PROTEKSI','Lindungi rencana pendidikan dari risiko yang tidak terduga.','Menjaga Rencana',C.green);
+    strategyItem(M,182,105,3,'KONSISTENSI','Kunci keberhasilan adalah disiplin dan konsisten menjalankan rencana.','Tujuan Pendidikan',C.gold);
+    actionList(128,139);
+    ctaBox(M,184,W-M*2,39);
     footer(2);
+
     doc.save(`Laporan_Dana_Pendidikan_${cleanName(d.namaAnak)}.pdf`);
 }
-
 function resetForm(){simulasiForm.reset();tahunSekarang.value=new Date().getFullYear();document.querySelector('input[name="strategiInvestasi"][value="0.04"]').checked=true;updatePeriode();kosongkan();}
