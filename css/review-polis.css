@@ -349,3 +349,144 @@ body{margin:0;background:#eef3f8;font-family:Arial,Helvetica,sans-serif;color:#1
     grid-template-columns:1fr;
   }
 }
+
+/* v12: Export PDF / Print A4 Landscape */
+@page{
+  size:A4 landscape;
+  margin:8mm;
+}
+
+@media print{
+  *{
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+
+  html,body{
+    width:297mm;
+    min-height:210mm;
+    background:#fff!important;
+    overflow:visible!important;
+  }
+
+  .top-header,
+  .family-top-card,
+  .member-top-card,
+  .top-legend,
+  .bottom-actions,
+  .edit-btn,
+  .modal-backdrop-custom{
+    display:none!important;
+  }
+
+  .review-page-full{
+    padding:0!important;
+    margin:0!important;
+    max-width:none!important;
+    width:100%!important;
+  }
+
+  .matrix-panel-full,
+  .matrix-sheet{
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    box-shadow:none!important;
+    page-break-inside:avoid;
+  }
+
+  .matrix-sheet{
+    padding:6mm!important;
+    border:1px solid var(--line)!important;
+    border-radius:8px!important;
+  }
+
+  .matrix-redbar{
+    margin-bottom:6mm!important;
+    padding:8px 14px!important;
+    border-radius:6px!important;
+    grid-template-columns:1fr 260px!important;
+  }
+
+  .matrix-redbar>div:first-child{
+    font-size:24px!important;
+    line-height:1.1!important;
+  }
+
+  .matrix-name-box input{
+    height:38px!important;
+    width:180px!important;
+    font-size:14px!important;
+  }
+
+  .matrix-hero{
+    display:grid!important;
+    grid-template-columns:210px 1fr 150px!important;
+    gap:12px!important;
+    align-items:center!important;
+    margin-bottom:5mm!important;
+  }
+
+  .legend-vertical{
+    display:grid!important;
+    gap:6px!important;
+    font-size:12px!important;
+  }
+
+  .legend-dot{
+    width:22px!important;
+    height:16px!important;
+    margin-right:8px!important;
+  }
+
+  .matrix-title{
+    font-size:34px!important;
+    line-height:1.15!important;
+  }
+
+  .brand-logo img{
+    max-width:120px!important;
+    max-height:90px!important;
+  }
+
+  .summary-row{
+    display:none!important;
+  }
+
+  .table-wrap{
+    overflow:visible!important;
+    border-radius:6px!important;
+  }
+
+  .matrix-table{
+    width:100%!important;
+    min-width:0!important;
+    table-layout:fixed!important;
+    page-break-inside:avoid!important;
+  }
+
+  .matrix-table th,
+  .matrix-table td{
+    font-size:8.5px!important;
+    line-height:1.15!important;
+    padding:4px 5px!important;
+    height:auto!important;
+  }
+
+  .status-cell{width:42px!important;}
+  .status-band{height:18px!important;border-radius:3px!important;}
+  .row-no{width:32px!important;}
+
+  .status-pill{
+    font-size:8px!important;
+    padding:3px 5px!important;
+  }
+
+  .note-box{
+    margin-top:5mm!important;
+    padding:8px 12px!important;
+    font-size:12px!important;
+    line-height:1.35!important;
+    border-radius:8px!important;
+  }
+}
