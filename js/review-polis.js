@@ -1109,37 +1109,56 @@ function addCTAPage(doc, logoDataUrl, pageNo){
     doc.text(c[1], x + (cW - 4)/2, gapY + 44, { align:"center" });
   });
 
-  const recX = 24, recY = 145, recW = pageWidth - 48, recH = 42;
+  // Area rekomendasi dibuat lebih rapi dan tidak bertabrakan dengan CTA
+  const recX = 24, recY = 142, recW = pageWidth - 48, recH = 36;
   doc.setFillColor(255,255,255);
   doc.setDrawColor(220,232,242);
   doc.roundedRect(recX, recY, recW, recH, 5, 5, "FD");
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(11,60,93);
-  doc.text("Rekomendasi Prioritas", recX + 6, recY + 11);
+  doc.text("Rekomendasi Prioritas", recX + 6, recY + 10);
+
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.6);
+  doc.setFontSize(7.4);
   doc.setTextColor(71,85,105);
 
+  let recLines = [];
   if(priority.length){
-    const lines = priority.map((item, idx) => `${idx+1}. ${item.member.nama} - ${item.row.kategori} (${item.row.fungsi})`);
-    doc.text(lines.map(safePdfText), recX + 7, recY + 20, { maxWidth: recW - 14, lineHeightFactor: 1.35 });
+    recLines = priority.slice(0, 6).map((item, idx) => `${idx+1}. ${item.member.nama} - ${item.row.kategori} (${item.row.fungsi})`);
   }else if(stats.missing > 0){
-    doc.text("Proteksi wajib sudah lengkap. Lanjut review bagian sesuai kebutuhan, distribusi kekayaan, dan fungsi akumulasi.", recX + 7, recY + 21, { maxWidth: recW - 14 });
+    recLines = ["Proteksi wajib sudah lengkap. Lanjut review bagian sesuai kebutuhan, distribusi kekayaan, dan fungsi akumulasi."];
   }else{
-    doc.text("Semua item matrix sudah terisi. Lakukan review tahunan agar manfaat polis tetap relevan dengan tujuan keuangan keluarga.", recX + 7, recY + 21, { maxWidth: recW - 14 });
+    recLines = ["Semua item matrix sudah terisi. Lakukan review tahunan agar manfaat polis tetap relevan dengan tujuan keuangan keluarga."];
   }
+  doc.text(recLines.map(safePdfText), recX + 7, recY + 18, { maxWidth: recW - 14, lineHeightFactor: 1.28 });
 
+  // CTA bawah halaman
+  const ctaX = 24, ctaY = 184, ctaW = pageWidth - 48, ctaH = 17;
   doc.setFillColor(11,60,93);
-  doc.roundedRect(24, 135, pageWidth - 48, 0.1, 0, 0, "F");
+  doc.setDrawColor(11,60,93);
+  doc.roundedRect(ctaX, ctaY, ctaW, ctaH, 5, 5, "FD");
+
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.setTextColor(180,0,0);
-  doc.text("Langkah Berikutnya", 24, 138);
+  doc.setFontSize(10.5);
+  doc.setTextColor(255,255,255);
+  doc.text("Butuh Review Polis Lebih Detail?", ctaX + 8, ctaY + 7);
+
   doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.2);
+  doc.setTextColor(225,239,249);
+  doc.text("Diskusikan gap polis, prioritas proteksi, UP, limit kesehatan, dan strategi perbaikan bersama Financial Planner.", ctaX + 8, ctaY + 12, { maxWidth: 164 });
+
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(8.2);
-  doc.setTextColor(71,85,105);
-  doc.text("Diskusikan hasil review ini untuk memastikan manfaat polis, UP, limit kesehatan, dan rencana dana masa depan sudah sesuai kebutuhan keluarga.", 72, 138, { maxWidth: pageWidth - 96 });
+  doc.setTextColor(255,255,255);
+  doc.text("Septino, QWP®, CIS®", ctaX + ctaW - 8, ctaY + 7, { align:"right" });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.1);
+  doc.setTextColor(225,239,249);
+  doc.text("WhatsApp: 0811-6946-999", ctaX + ctaW - 8, ctaY + 12, { align:"right" });
 
   addPdfFooter(doc, pageNo);
 }
