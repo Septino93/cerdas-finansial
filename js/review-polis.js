@@ -1057,43 +1057,43 @@ function addCoverPage(doc, logoDataUrl){
   const jumlahAnak = state.keluarga.filter(m => String(m.id).startsWith("anak")).length;
   const tanggal = new Date().toLocaleDateString("id-ID", { day:"2-digit", month:"long", year:"numeric" });
 
-  // Background portrait seperti cover final.
+  // Background putih bersih + aksen lembut
   doc.setFillColor(255,255,255);
   doc.rect(0,0,pageWidth,pageHeight,"F");
   doc.setFillColor(236,246,253);
-  doc.circle(10, 12, 62, "F");
+  doc.circle(20, 18, 54, "F");
   doc.setFillColor(252,242,220);
-  doc.circle(pageWidth - 12, pageHeight - 28, 48, "F");
+  doc.circle(pageWidth - 15, pageHeight - 18, 48, "F");
 
-  // Wave merah di bawah.
-  doc.setFillColor(190,0,0);
-  doc.triangle(0, pageHeight - 54, pageWidth, pageHeight - 28, 0, pageHeight, "F");
-  doc.setFillColor(214,0,0);
-  doc.triangle(0, pageHeight - 34, pageWidth, pageHeight - 13, 0, pageHeight, "F");
+  // Red wave footer, dibuat lebih rendah agar tidak menabrak note
+  doc.setFillColor(185,0,0);
+  doc.triangle(0, pageHeight - 30, pageWidth, pageHeight - 14, 0, pageHeight, "F");
+  doc.setFillColor(210,0,0);
+  doc.triangle(0, pageHeight - 22, pageWidth, pageHeight - 6, 0, pageHeight, "F");
   doc.setFillColor(150,0,0);
-  doc.triangle(0, pageHeight - 20, pageWidth, pageHeight, 0, pageHeight, "F");
+  doc.triangle(0, pageHeight - 12, pageWidth, pageHeight, 0, pageHeight, "F");
   doc.setDrawColor(216,168,44);
   doc.setLineWidth(0.35);
-  doc.line(10, pageHeight - 38, pageWidth - 10, pageHeight - 18);
+  doc.line(8, pageHeight - 24, pageWidth - 8, pageHeight - 10);
 
-  // Logo dan judul.
-  addLogoToPdf(doc, logoDataUrl, pageWidth/2 - 20, 20, 40, 26);
+  // Logo dan judul
+  addLogoToPdf(doc, logoDataUrl, pageWidth/2 - 24, 15, 48, 30);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(28);
+  doc.setFontSize(33);
   doc.setTextColor(185,0,0);
-  doc.text("INSURANCE MATRIX", pageWidth/2, 82, { align:"center" });
-  doc.setFontSize(15);
+  doc.text("INSURANCE MATRIX", pageWidth/2, 68, { align:"center" });
+  doc.setFontSize(16);
   doc.setTextColor(32,38,46);
-  doc.text("Laporan Review Polis Keluarga", pageWidth/2, 97, { align:"center" });
+  doc.text("Laporan Review Polis Keluarga", pageWidth/2, 83, { align:"center" });
 
-  // Card data keluarga.
-  const cardW = 156;
-  const cardH = 82;
+  // Data keluarga card
+  const cardW = 152;
+  const cardH = 62;
   const cardX = (pageWidth - cardW) / 2;
-  const cardY = 116;
+  const cardY = 96;
   doc.setFillColor(255,255,255);
-  doc.setDrawColor(238,90,90);
-  doc.setLineWidth(0.35);
+  doc.setDrawColor(235,120,120);
+  doc.setLineWidth(0.28);
   doc.roundedRect(cardX, cardY, cardW, cardH, 4, 4, "FD");
 
   const rows = [
@@ -1105,48 +1105,48 @@ function addCoverPage(doc, logoDataUrl){
   ];
 
   rows.forEach((row, i) => {
-    const y = cardY + 16 + i * 13.8;
+    const y = cardY + 12 + i * 11;
     doc.setFillColor(190,0,0);
-    doc.circle(cardX + 17, y - 2.8, 5.3, "F");
+    doc.circle(cardX + 15, y - 1.4, 4.2, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10.5);
+    doc.setFontSize(10.2);
     doc.setTextColor(24,24,27);
-    doc.text(row[0], cardX + 31, y);
+    doc.text(row[0], cardX + 27, y);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10.5);
-    doc.text(":", cardX + 90, y);
-    doc.text(safePdfText(row[1]), cardX + 97, y, { maxWidth: cardW - 104 });
+    doc.setFontSize(10.2);
+    doc.text(":", cardX + 86, y);
+    doc.text(safePdfText(row[1]), cardX + 91, y, { maxWidth: cardW - 98 });
   });
 
-  // Catatan merah, aman dari footer/wave.
-  const noteX = 23;
-  const noteY = pageHeight - 70;
-  const noteW = pageWidth - 46;
-  const noteH = 25;
-  doc.setFillColor(255,239,239);
-  doc.setDrawColor(255,185,185);
-  doc.setLineWidth(0.3);
+  // Note khusus cover, posisinya tidak menyentuh wave/footer
+  const noteX = (pageWidth - 174) / 2;
+  const noteY = 162;
+  const noteW = 174;
+  const noteH = 20;
+  doc.setFillColor(255,240,240);
+  doc.setDrawColor(255,190,190);
+  doc.setLineWidth(0.28);
   doc.roundedRect(noteX, noteY, noteW, noteH, 4, 4, "FD");
   doc.setFillColor(190,0,0);
-  doc.circle(noteX + 14, noteY + noteH/2, 6, "F");
+  doc.circle(noteX + 16, noteY + noteH/2, 5.2, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13.5);
+  doc.setFontSize(13);
   doc.setTextColor(255,255,255);
-  doc.text("!", noteX + 14, noteY + noteH/2 + 4.5, { align:"center" });
-  doc.setFontSize(9.4);
-  doc.setTextColor(185,0,0);
-  doc.text("Table ini harus di-review kembali setiap tahun agar", noteX + 32, noteY + 10);
-  doc.text("manfaat polis masih sesuai dengan fungsi dan tujuan keuangan.", noteX + 32, noteY + 18);
+  doc.text("!", noteX + 16, noteY + noteH/2 + 4, { align:"center" });
+  doc.setFontSize(9.8);
+  doc.setTextColor(190,0,0);
+  doc.text("Table ini harus di-review kembali setiap tahun agar", noteX + 30, noteY + 8);
+  doc.text("manfaat polis masih sesuai dengan fungsi dan tujuan keuangan.", noteX + 30, noteY + 15);
 
-  // Footer putih di atas wave merah.
+  // Footer cover di atas wave merah
   doc.setDrawColor(255,255,255);
   doc.setLineWidth(0.18);
-  doc.line(12, pageHeight - 14, pageWidth - 12, pageHeight - 14);
+  doc.line(12, pageHeight - 18, pageWidth - 12, pageHeight - 18);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.8);
+  doc.setFontSize(8.2);
   doc.setTextColor(255,255,255);
-  doc.text("Cerdas Finansial | Insurance Matrix Report", 12, pageHeight - 7);
-  doc.text("Halaman 1", pageWidth - 12, pageHeight - 7, { align:"right" });
+  doc.text("Cerdas Finansial | Insurance Matrix Report", 12, pageHeight - 10);
+  doc.text("Halaman 1", pageWidth - 12, pageHeight - 10, { align:"right" });
 }
 
 function getFamilyCategoryProgress(keywordList){
@@ -1469,20 +1469,20 @@ function addMemberPage(doc, member, logoDataUrl, pageNo){
 
   const barColor = member.id === "anak1" ? [0, 166, 81] : member.id === "anak2" ? [0, 139, 210] : member.id === "anak3" ? [107,42,143] : [192,0,0];
   doc.setFillColor(...barColor);
-  doc.roundedRect(12, 12, pageWidth - 24, 18, 3, 3, "F");
+  doc.roundedRect(10, 9, pageWidth - 20, 18, 3, 3, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(12.5);
+  doc.setFontSize(15);
   doc.setTextColor(255,255,255);
-  doc.text(getMemberNumber(member), 16, 24);
-  doc.setFontSize(8.5);
-  doc.text("Nama:", pageWidth - 70, 24);
+  doc.text(getMemberNumber(member), 14, 21);
+  doc.setFontSize(10);
+  doc.text("Nama:", pageWidth - 76, 21);
   doc.setFillColor(255,255,255);
-  doc.roundedRect(pageWidth - 55, 16, 40, 9, 2, 2, "F");
-  doc.setFontSize(7.8);
+  doc.roundedRect(pageWidth - 62, 13, 49, 10, 2, 2, "F");
+  doc.setFontSize(9);
   doc.setTextColor(20,24,31);
-  doc.text(safePdfText(member.nama), pageWidth - 35, 22.2, { align:"center", maxWidth:38 });
+  doc.text(safePdfText(member.nama), pageWidth - 38, 20, { align:"center", maxWidth:46 });
 
-  const legendY = 39;
+  const legendY = 34;
   const legend = [
     [[224,0,0], "Wajib Dimiliki"],
     [[0,166,81], "Sesuai Kebutuhan / Tidak Wajib"],
@@ -1490,32 +1490,31 @@ function addMemberPage(doc, member, logoDataUrl, pageNo){
     [[0,139,210], "Fungsi Akumulasi"]
   ];
   legend.forEach((item, i) => {
-    const x = 14 + (i * 47);
+    const x = 11 + (i * 58);
     doc.setFillColor(...item[0]);
-    doc.roundedRect(x, legendY, 6.5, 4.2, 1, 1, "F");
+    doc.roundedRect(x, legendY, 8, 5, 1, 1, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(5.4);
+    doc.setFontSize(7.2);
     doc.setTextColor(17,24,39);
-    const label = doc.splitTextToSize(item[1], 38);
-    doc.text(label, x + 8.3, legendY + 3.5);
+    doc.text(item[1], x + 10, legendY + 4);
   });
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
+  doc.setFontSize(22);
   doc.setTextColor(180,0,0);
-  doc.text("INSURANCE MATRIX", pageWidth/2, 62, { align:"center" });
-  addLogoToPdf(doc, logoDataUrl, pageWidth - 43, 46, 30, 18);
+  doc.text("INSURANCE MATRIX", pageWidth/2, 49, { align:"center" });
+  addLogoToPdf(doc, logoDataUrl, pageWidth - 55, 30, 42, 24);
 
   const wajib = getCategorySummary(matrix, "red");
   const kebutuhan = getCategorySummary(matrix, "green");
   const distribusi = getCategorySummary(matrix, "yellow");
   const akumulasi = getCategorySummary(matrix, "blue");
-  const sumY = 70;
-  const boxW = (pageWidth - 30) / 4;
-  drawSummaryBox(doc, 12, sumY, boxW, "Wajib Dimiliki", `${wajib.owned}/${wajib.total}`, `${wajib.percent}% terpenuhi`, [180,0,0]);
-  drawSummaryBox(doc, 12 + (boxW + 2), sumY, boxW, "Sesuai Kebutuhan", `${kebutuhan.owned}/${kebutuhan.total}`, `${kebutuhan.percent}% terpenuhi`, [0,128,61]);
-  drawSummaryBox(doc, 12 + (boxW + 2)*2, sumY, boxW, "Distribusi Kekayaan", `${distribusi.owned}/${distribusi.total}`, `${distribusi.percent}% terpenuhi`, [160,118,0]);
-  drawSummaryBox(doc, 12 + (boxW + 2)*3, sumY, boxW, "Fungsi Akumulasi", `${akumulasi.owned}/${akumulasi.total}`, `${akumulasi.percent}% terpenuhi`, [0,105,180]);
+  const sumY = 55;
+  const boxW = (pageWidth - 24 - 9) / 4;
+  drawSummaryBox(doc, 10, sumY, boxW, "Wajib Dimiliki", `${wajib.owned}/${wajib.total}`, `${wajib.percent}% terpenuhi`, [180,0,0]);
+  drawSummaryBox(doc, 10 + (boxW + 3), sumY, boxW, "Sesuai Kebutuhan", `${kebutuhan.owned}/${kebutuhan.total}`, `${kebutuhan.percent}% terpenuhi`, [0,128,61]);
+  drawSummaryBox(doc, 10 + (boxW + 3)*2, sumY, boxW, "Distribusi Kekayaan", `${distribusi.owned}/${distribusi.total}`, `${distribusi.percent}% terpenuhi`, [160,118,0]);
+  drawSummaryBox(doc, 10 + (boxW + 3)*3, sumY, boxW, "Fungsi Akumulasi", `${akumulasi.owned}/${akumulasi.total}`, `${akumulasi.percent}% terpenuhi`, [0,105,180]);
 
   const body = matrix.map((row, index) => [
     { content:"", styles:{ fillColor: row.warna === "red" ? [224,0,0] : row.warna === "green" ? [0,166,81] : row.warna === "yellow" ? [255,214,0] : [0,139,210] } },
@@ -1530,9 +1529,9 @@ function addMemberPage(doc, member, logoDataUrl, pageNo){
   ]);
 
   doc.autoTable({
-    startY: 100,
-    margin: { left:12, right:12, bottom:18 },
-    tableWidth: pageWidth - 24,
+    startY: 76,
+    margin: { left:10, right:10, bottom:14 },
+    tableWidth: pageWidth - 20,
     head: [["Status", "No", "Kategori", "Fungsi Keuangan", "Brand", "Jenis Produk Dasar", "Manfaat", "Tidak Punya", "Keterangan Tambahan"]],
     body,
     theme: "grid",
@@ -1540,12 +1539,12 @@ function addMemberPage(doc, member, logoDataUrl, pageNo){
     pageBreak: "avoid",
     styles: {
       font: "helvetica",
-      fontSize: 5.2,
-      cellPadding: 1.05,
+      fontSize: 6.7,
+      cellPadding: 1.35,
       overflow: "linebreak",
       valign: "middle",
       lineColor: [230, 90, 90],
-      lineWidth: 0.11,
+      lineWidth: 0.12,
       textColor: [17,24,39]
     },
     headStyles: {
@@ -1553,18 +1552,18 @@ function addMemberPage(doc, member, logoDataUrl, pageNo){
       textColor: [17,24,39],
       fontStyle: "bold",
       halign: "center",
-      fontSize: 5.4
+      fontSize: 6.8
     },
     columnStyles: {
-      0: { cellWidth: 8, halign:"center" },
-      1: { cellWidth: 7, halign:"center", fontStyle:"bold" },
-      2: { cellWidth: 30, fontStyle:"bold" },
-      3: { cellWidth: 32, fontStyle:"bold" },
-      4: { cellWidth: 16, halign:"center" },
-      5: { cellWidth: 25, halign:"center" },
-      6: { cellWidth: 22, halign:"center" },
-      7: { cellWidth: 17, halign:"center" },
-      8: { cellWidth: pageWidth - 24 - 8 - 7 - 30 - 32 - 16 - 25 - 22 - 17 }
+      0: { cellWidth: 11, halign:"center" },
+      1: { cellWidth: 8, halign:"center", fontStyle:"bold" },
+      2: { cellWidth: 38, fontStyle:"bold" },
+      3: { cellWidth: 45, fontStyle:"bold" },
+      4: { cellWidth: 28, halign:"center" },
+      5: { cellWidth: 34, halign:"center" },
+      6: { cellWidth: 35, halign:"center" },
+      7: { cellWidth: 20, halign:"center" },
+      8: { cellWidth: pageWidth - 20 - 11 - 8 - 38 - 45 - 28 - 34 - 35 - 20 }
     },
     didParseCell: function(data){
       if(data.section === "body" && [2,3].includes(data.column.index)){
@@ -1579,8 +1578,11 @@ function addMemberPage(doc, member, logoDataUrl, pageNo){
     }
   });
 
+  // Catatan tahunan hanya ditampilkan di halaman cover agar halaman matrix lebih bersih.
   addPdfFooter(doc, pageNo);
 }
+
+
 
 function drawTinyIcon(doc, type, x, y, color){
   const c = color || [220,0,0];
@@ -1791,7 +1793,7 @@ function addRoadmapPage(doc, logoDataUrl, pageNo){
     }
     if(y + cardH > 172){
       addPdfFooter(doc, pageNo + (doc.internal.getNumberOfPages() - startPageIndex));
-      doc.addPage("a4", "portrait");
+      doc.addPage("a4", "landscape");
       drawHeader();
       y = 42;
       x = 12;
@@ -1844,7 +1846,7 @@ function addRoadmapPage(doc, logoDataUrl, pageNo){
   addPdfFooter(doc, pageNo + (doc.internal.getNumberOfPages() - startPageIndex));
 
   // Halaman CTA penutup, tanpa infografis 12 jenis asuransi agar PDF tetap fokus pada action plan.
-  doc.addPage("a4", "portrait");
+  doc.addPage("a4", "landscape");
   const finalPageNo = pageNo + (doc.internal.getNumberOfPages() - startPageIndex);
   drawBackground();
   if(logoDataUrl){
@@ -2099,7 +2101,7 @@ function addGapPriorityPage(doc, logoDataUrl, pageNo){
     const estimatedH = Math.max(24, 11 + 7 + Math.max(1, group.items.length) * itemH);
     if(y + estimatedH > pageHeight - 18){
       addPdfFooter(doc, pageNo);
-      doc.addPage("a4", "portrait");
+      doc.addPage("a4", "landscape");
       pageNo++;
       drawSimplePageTitle(doc, logoDataUrl, "YANG HARUS DILENGKAPI", "Lanjutan daftar kebutuhan polis wajib keluarga.");
       y = 42;
@@ -2169,86 +2171,93 @@ function addPlannerAnalysisPage(doc, logoDataUrl, pageNo){
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
-  // Background portrait sama dengan cover.
+  // Background sama dengan cover - portrait A4
   doc.setFillColor(255,255,255);
   doc.rect(0,0,pageWidth,pageHeight,"F");
   doc.setFillColor(236,246,253);
-  doc.circle(10, 12, 62, "F");
+  doc.circle(14, 18, 52, "F");
   doc.setFillColor(252,242,220);
   doc.circle(pageWidth - 12, pageHeight - 28, 48, "F");
 
-  // Wave merah bawah.
-  doc.setFillColor(190,0,0);
-  doc.triangle(0, pageHeight - 54, pageWidth, pageHeight - 28, 0, pageHeight, "F");
-  doc.setFillColor(214,0,0);
-  doc.triangle(0, pageHeight - 34, pageWidth, pageHeight - 13, 0, pageHeight, "F");
+  // Red wave footer
+  doc.setFillColor(185,0,0);
+  doc.triangle(0, pageHeight - 34, pageWidth, pageHeight - 17, 0, pageHeight, "F");
+  doc.setFillColor(210,0,0);
+  doc.triangle(0, pageHeight - 26, pageWidth, pageHeight - 9, 0, pageHeight, "F");
   doc.setFillColor(150,0,0);
-  doc.triangle(0, pageHeight - 20, pageWidth, pageHeight, 0, pageHeight, "F");
+  doc.triangle(0, pageHeight - 14, pageWidth, pageHeight, 0, pageHeight, "F");
   doc.setDrawColor(216,168,44);
   doc.setLineWidth(0.35);
-  doc.line(10, pageHeight - 38, pageWidth - 10, pageHeight - 18);
+  doc.line(0, pageHeight - 31, pageWidth, pageHeight - 16);
 
-  // Header.
-  addLogoToPdf(doc, logoDataUrl, pageWidth/2 - 20, 20, 40, 26);
+  // Header
+  addLogoToPdf(doc, logoDataUrl, pageWidth/2 - 23, 15, 46, 31);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
+  doc.setFontSize(22);
   doc.setTextColor(185,0,0);
-  doc.text("ANALISA FINANCIAL PLANNER", pageWidth/2, 72, { align:"center" });
+  doc.text("ANALISA FINANCIAL PLANNER", pageWidth/2, 65, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.7);
+  doc.setFontSize(9.5);
   doc.setTextColor(30,41,59);
-  doc.text("Kesimpulan singkat berdasarkan hasil Review Polis Cerdas Finansial.", pageWidth/2, 82, { align:"center" });
+  doc.text("Kesimpulan singkat berdasarkan hasil Review Polis Cerdas Finansial.", pageWidth/2, 74, { align:"center" });
 
-  // Card utama.
-  const cardW = 172;
-  const cardX = (pageWidth - cardW) / 2;
-  const cardY = 104;
-  const cardH = 104;
+  // Main card
+  const cardX = 22;
+  const cardY = 86;
+  const cardW = pageWidth - 44;
+  const cardH = 145;
   doc.setFillColor(255,255,255);
-  doc.setDrawColor(235,90,90);
+  doc.setDrawColor(235,95,95);
   doc.setLineWidth(0.35);
-  doc.roundedRect(cardX, cardY, cardW, cardH, 4, 4, "FD");
+  doc.roundedRect(cardX, cardY, cardW, cardH, 5, 5, "FD");
 
+  // Narasi singkat
+  const innerX = cardX + 12;
+  let cy = cardY + 20;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9.6);
+  doc.setFontSize(11);
   doc.setTextColor(30,41,59);
-  doc.text(doc.splitTextToSize("Laporan ini merupakan hasil analisis awal berdasarkan data yang telah diinput.", cardW - 24), cardX + 12, cardY + 17);
-  doc.text(doc.splitTextToSize("Hasil review ini dapat digunakan sebagai referensi untuk melihat kondisi perlindungan keluarga saat ini.", cardW - 24), cardX + 12, cardY + 36);
+  let p1 = doc.splitTextToSize("Laporan ini merupakan hasil analisis awal berdasarkan data yang telah diinput.", cardW - 24);
+  doc.text(p1, innerX, cy);
+  cy += p1.length * 6 + 14;
+  let p2 = doc.splitTextToSize("Hasil review ini dapat digunakan sebagai referensi dalam mengevaluasi kondisi perlindungan keluarga saat ini.", cardW - 24);
+  doc.text(p2, innerX, cy);
 
-  doc.setDrawColor(230,150,150);
-  doc.setLineWidth(0.25);
-  doc.line(cardX + 12, cardY + 50, cardX + cardW - 12, cardY + 50);
-
-  // CTA WhatsApp.
-  const ctaY = cardY + 62;
-  const qrSize = 38;
-  const qrX = cardX + cardW - 52;
-  const qrY = ctaY - 8;
-
-  doc.setFillColor(0,166,81);
-  doc.circle(cardX + 20, ctaY + 14, 11, "F");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.setTextColor(255,255,255);
-  doc.text("WA", cardX + 20, ctaY + 18, { align:"center" });
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.8);
-  doc.setTextColor(185,0,0);
-  doc.text("Butuh Penjelasan Lebih Detail?", cardX + 38, ctaY + 3);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.4);
-  doc.setTextColor(30,41,59);
-  doc.text(doc.splitTextToSize("Silakan hubungi Financial Planner melalui WhatsApp untuk mendapatkan penjelasan dan rekomendasi yang lebih sesuai dengan kondisi keluarga Anda.", 72), cardX + 38, ctaY + 12);
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.6);
-  doc.setTextColor(11,60,93);
-  doc.text("WhatsApp: 0811-6946-999", cardX + 38, ctaY + 43);
-  doc.link(cardX + 38, ctaY + 36, 56, 9, { url:"https://wa.me/628116946999" });
-
+  // Garis pemisah
+  const lineY = cardY + 72;
   doc.setDrawColor(235,120,120);
-  doc.line(qrX - 8, ctaY - 7, qrX - 8, ctaY + qrSize + 5);
+  doc.setLineWidth(0.25);
+  doc.line(cardX + 10, lineY, cardX + cardW - 10, lineY);
+
+  // Area CTA WhatsApp
+  const ctaY = lineY + 13;
+  const qrSize = 44;
+  const qrX = cardX + cardW - 56;
+  const qrY = ctaY - 1;
+
+  // Icon WA
+  doc.setFillColor(0,166,81);
+  doc.circle(cardX + 26, ctaY + 22, 12.5, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(15);
+  doc.setTextColor(255,255,255);
+  doc.text("WA", cardX + 26, ctaY + 27, { align:"center" });
+
+  // CTA text
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10.5);
+  doc.setTextColor(185,0,0);
+  doc.text("Butuh Penjelasan Lebih Detail?", cardX + 47, ctaY + 6);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.8);
+  doc.setTextColor(30,41,59);
+  const ctaText = "Silakan hubungi Financial Planner melalui WhatsApp untuk mendapatkan penjelasan dan rekomendasi yang lebih sesuai dengan kondisi keluarga Anda.";
+  doc.text(doc.splitTextToSize(ctaText, 70), cardX + 47, ctaY + 17);
+
+  // Garis pemisah vertikal dan QR
+  doc.setDrawColor(235,120,120);
+  doc.setLineWidth(0.25);
+  doc.line(qrX - 10, ctaY - 3, qrX - 10, ctaY + qrSize + 4);
   try{
     doc.addImage(WHATSAPP_QR_IMAGE, "JPEG", qrX, qrY, qrSize, qrSize, undefined, "FAST");
     doc.link(qrX, qrY, qrSize, qrSize, { url:"https://wa.me/628116946999" });
@@ -2256,40 +2265,65 @@ function addPlannerAnalysisPage(doc, logoDataUrl, pageNo){
     doc.setDrawColor(0,0,0);
     doc.rect(qrX, qrY, qrSize, qrSize);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7);
+    doc.setFontSize(8);
     doc.setTextColor(0,0,0);
     doc.text("QR WhatsApp", qrX + qrSize/2, qrY + qrSize/2, { align:"center" });
   }
-  doc.setFillColor(185,0,0);
-  doc.roundedRect(qrX + 3, qrY + qrSize + 4, qrSize - 6, 8, 2, 2, "F");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.6);
-  doc.setTextColor(255,255,255);
-  doc.text("Scan untuk Chat", qrX + qrSize/2, qrY + qrSize + 9.3, { align:"center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(100,116,139);
+  doc.text("Scan untuk konsultasi", qrX + qrSize/2, qrY + qrSize + 7, { align:"center" });
 
-  // Signature.
-  const sigY = 232;
+  // WhatsApp number strip
+  const stripX = cardX + 10;
+  const stripY = cardY + cardH - 27;
+  const stripW = cardW - 20;
+  const stripH = 17;
+  doc.setFillColor(255,244,244);
+  doc.setDrawColor(255,230,230);
+  doc.roundedRect(stripX, stripY, stripW, stripH, 4, 4, "FD");
+  doc.setFillColor(185,0,0);
+  doc.circle(stripX + 26, stripY + stripH/2, 5.7, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(255,255,255);
+  doc.text("WA", stripX + 26, stripY + stripH/2 + 3, { align:"center" });
+  doc.setDrawColor(160,160,160);
+  doc.line(stripX + 44, stripY + 4, stripX + 44, stripY + stripH - 4);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10.5);
+  doc.setTextColor(30,41,59);
+  doc.text("WhatsApp:", stripX + 54, stripY + 11);
+  doc.setFontSize(16);
+  doc.setTextColor(185,0,0);
+  doc.text("0811-6946-999", stripX + 86, stripY + 11.2);
+  doc.link(stripX, stripY, stripW, stripH, { url:"https://wa.me/628116946999" });
+
+  // Signature
+  const sigY = 248;
   doc.setFont("helvetica", "bolditalic");
-  doc.setFontSize(13);
+  doc.setFontSize(15);
   doc.setTextColor(11,60,93);
   doc.text("Septino, QWP®, CIS®", pageWidth/2, sigY, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.2);
-  doc.setTextColor(71,85,105);
-  doc.text("Financial Planner", pageWidth/2, sigY + 7, { align:"center" });
+  doc.setFontSize(10);
+  doc.setTextColor(30,41,59);
+  doc.text("Financial Planner", pageWidth/2, sigY + 10, { align:"center" });
   doc.setDrawColor(216,168,44);
   doc.setLineWidth(0.4);
-  doc.line(pageWidth/2 - 8, sigY + 13, pageWidth/2 + 8, sigY + 13);
+  doc.line(pageWidth/2 - 14, sigY + 15, pageWidth/2 + 14, sigY + 15);
+  doc.setFillColor(216,168,44);
+  doc.circle(pageWidth/2, sigY + 15, 1.2, "F");
 
-  // Footer putih di atas wave merah.
+  // Footer terakhir di atas wave merah
   doc.setDrawColor(255,255,255);
   doc.setLineWidth(0.18);
-  doc.line(12, pageHeight - 14, pageWidth - 12, pageHeight - 14);
+  doc.line(12, pageHeight - 18, pageWidth - 12, pageHeight - 18);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.8);
+  doc.setFontSize(8.2);
   doc.setTextColor(255,255,255);
-  doc.text("Cerdas Finansial | Insurance Matrix Report", 12, pageHeight - 7);
-  doc.text(`Halaman ${pageNo}`, pageWidth - 12, pageHeight - 7, { align:"right" });
+  doc.text("Cerdas Finansial | Insurance Matrix Report", 12, pageHeight - 10);
+  doc.text(`Halaman ${pageNo}`, pageWidth - 12, pageHeight - 10, { align:"right" });
 }
 
 async function exportFamilyPDF(){
@@ -2325,14 +2359,14 @@ async function exportFamilyPDF(){
     // Halaman matrix per anggota keluarga.
     state.keluarga.forEach(member => {
       pageNo++;
-      doc.addPage("a4", "portrait");
+      doc.addPage("a4", "landscape");
       addMemberPage(doc, member, logoDataUrl, pageNo);
     });
 
     // Halaman penutup: Analisa Financial Planner + CTA WhatsApp.
     // Halaman Yang Harus Dilengkapi / Executive Summary / Timeline / Roadmap / Infografis dihapus agar PDF lebih singkat.
     pageNo++;
-    doc.addPage("a4", "portrait");
+    doc.addPage("a4", "landscape");
     addPlannerAnalysisPage(doc, logoDataUrl, pageNo);
 
     doc.save(getPdfFileName());
