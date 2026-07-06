@@ -18,45 +18,62 @@
     <button class="print-btn" onclick="window.print()"><i class="bi bi-printer"></i> Cetak / PDF</button>
   </header>
 
-  <main class="review-layout">
-    <aside class="side-panel">
-      <section class="side-card">
+  <main class="review-page-full">
+    <section class="family-top-card">
+      <div class="family-top-title">
         <h2><i class="bi bi-people-fill"></i> Data Keluarga</h2>
-        <label class="form-label">Nama Kepala Keluarga</label>
-        <input id="namaKepala" class="form-control" placeholder="Contoh: Budi Santoso" required>
+        <p>Isi data keluarga terlebih dahulu, lalu pilih anggota untuk review polis.</p>
+      </div>
 
-        <label class="form-label mt-3">Nama Pasangan</label>
-        <input id="namaPasangan" class="form-control" placeholder="Contoh: Siti Rahayu" required>
+      <div class="family-form-row">
+        <div class="field-box">
+          <label class="form-label">Nama Kepala Keluarga</label>
+          <input id="namaKepala" class="form-control" placeholder="Contoh: Budi Santoso" required>
+        </div>
 
-        <label class="form-label mt-3">Status Pasangan</label>
-        <select id="statusPasangan" class="form-select" required>
-          <option value="kerja" selected>Kerja / Ada Income</option>
-          <option value="tidak_kerja">Tidak Kerja / Tidak Ada Income</option>
-        </select>
+        <div class="field-box">
+          <label class="form-label">Nama Pasangan</label>
+          <input id="namaPasangan" class="form-control" placeholder="Contoh: Siti Rahayu" required>
+        </div>
 
-        <label class="form-label mt-3">Jumlah Anak</label>
-        <select id="jumlahAnak" class="form-select" required>
-          <option value="0">0 Anak</option>
-          <option value="1">1 Anak</option>
-          <option value="2">2 Anak</option>
-          <option value="3" selected>3 Anak</option>
-          <option value="4">4 Anak</option>
-          <option value="5">5 Anak</option>
-        </select>
+        <div class="field-box compact-field">
+          <label class="form-label">Status Pasangan</label>
+          <select id="statusPasangan" class="form-select" required>
+            <option value="kerja" selected>Kerja / Ada Income</option>
+            <option value="tidak_kerja">Tidak Kerja / Tidak Ada Income</option>
+          </select>
+        </div>
 
-        <div id="familyError" class="family-error d-none"></div>
-        <button class="btn-save w-100 mt-3" onclick="simpanKeluarga()"><i class="bi bi-save2"></i> Simpan Data Keluarga</button>
-        <button class="btn-reset w-100 mt-2" onclick="resetReview()"><i class="bi bi-arrow-clockwise"></i> Reset Review</button>
-      </section>
+        <div class="field-box small-field">
+          <label class="form-label">Jumlah Anak</label>
+          <select id="jumlahAnak" class="form-select" required>
+            <option value="0">0 Anak</option>
+            <option value="1">1 Anak</option>
+            <option value="2">2 Anak</option>
+            <option value="3" selected>3 Anak</option>
+            <option value="4">4 Anak</option>
+            <option value="5">5 Anak</option>
+          </select>
+        </div>
 
-      <section class="side-card mt-3">
+        <div class="family-actions">
+          <button class="btn-save" onclick="simpanKeluarga()"><i class="bi bi-save2"></i> Simpan</button>
+          <button class="btn-reset" onclick="resetReview()"><i class="bi bi-arrow-clockwise"></i> Reset</button>
+        </div>
+      </div>
+
+      <div id="familyError" class="family-error d-none"></div>
+    </section>
+
+    <section class="member-top-card">
+      <div class="member-top-head">
         <h2><i class="bi bi-person-lines-fill"></i> Daftar Anggota</h2>
-        <div id="familyList" class="family-list"></div>
-        <div class="info-box"><i class="bi bi-info-circle-fill"></i> Klik anggota keluarga untuk melihat dan mengedit matrix polis masing-masing.</div>
-      </section>
-    </aside>
+        <p>Klik anggota keluarga untuk melihat dan mengedit matrix polis masing-masing.</p>
+      </div>
+      <div id="familyList" class="family-list family-list-horizontal"></div>
+    </section>
 
-    <section class="matrix-panel">
+    <section class="matrix-panel matrix-panel-full">
       <div class="top-legend">
         <div><span class="legend-dot red"></span> Wajib Dimiliki</div>
         <div><span class="legend-dot green"></span> Sesuai Kebutuhan / Tidak Wajib</div>
@@ -175,3 +192,4 @@
   <script src="../js/review-polis.js"></script>
 </body>
 </html>
+
