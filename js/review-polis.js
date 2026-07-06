@@ -271,7 +271,6 @@ function renderAll(){
   renderFamilyList();
   renderMatrix();
   renderSummary();
-  renderCTA();
   toggleBottomActions();
 }
 
@@ -407,115 +406,6 @@ function renderSummary(){
   setSummaryCard("sumKebutuhan", "sumKebutuhanText", getCategorySummary(matrix, "green"));
   setSummaryCard("sumDistribusi", "sumDistribusiText", getCategorySummary(matrix, "yellow"));
   setSummaryCard("sumAkumulasi", "sumAkumulasiText", getCategorySummary(matrix, "blue"));
-}
-
-function getFamilyReviewStats(){
-  let total = 0;
-  let owned = 0;
-  let missing = 0;
-  let wajibTotal = 0;
-  let wajibMissing = 0;
-  const missingRows = [];
-
-  state.keluarga.forEach(member => {
-    syncMatrixWithTemplate(member.id);
-    const matrix = state.polis[member.id] || [];
-
-    matrix.forEach(row => {
-      total++;
-      if(row.punya === "ya"){
-        owned++;
-      }else{
-        missing++;
-        missingRows.push({ member, row });
-        if(row.warna === "red") wajibMissing++;
-      }
-      if(row.warna === "red") wajibTotal++;
-    });
-  });
-
-  const score = total ? Math.round((owned / total) * 100) : 0;
-  const wajibScore = wajibTotal ? Math.round(((wajibTotal - wajibMissing) / wajibTotal) * 100) : 0;
-
-  return { total, owned, missing, wajibTotal, wajibMissing, score, wajibScore, missingRows };
-}
-
-function getCTAStatus(score){
-  if(score >= 85){
-    return {
-      title:"Proteksi Keluarga Sangat Baik",
-      desc:"Sebagian besar kebutuhan proteksi sudah tersedia. Tetap lakukan review tahunan agar manfaat polis selalu sesuai dengan tujuan keuangan keluarga."
-    };
-  }
-  if(score >= 60){
-    return {
-      title:"Proteksi Cukup Baik, Masih Ada Gap",
-      desc:"Beberapa area proteksi masih perlu disempurnakan. Prioritaskan perlindungan wajib terlebih dahulu sebelum masuk ke kebutuhan tambahan."
-    };
-  }
-  return {
-    title:"Perlu Review Polis Lebih Serius",
-    desc:"Masih banyak area proteksi yang belum lengkap. Segera susun prioritas agar risiko besar tidak mengganggu kondisi keuangan keluarga."
-  };
-}
-
-function renderCTA(){
-  if(!state.keluarga.length) return;
-
-  const stats = getFamilyReviewStats();
-  const status = getCTAStatus(stats.score);
-
-  const ctaTitle = document.getElementById("ctaTitle");
-  const ctaDescription = document.getElementById("ctaDescription");
-  const ctaScore = document.getElementById("ctaScore");
-  const ctaProgressBar = document.getElementById("ctaProgressBar");
-  const ctaOwned = document.getElementById("ctaOwned");
-  const ctaMissing = document.getElementById("ctaMissing");
-  const ctaPriority = document.getElementById("ctaPriority");
-  const list = document.getElementById("ctaRecommendationList");
-
-  if(ctaTitle) ctaTitle.textContent = status.title;
-  if(ctaDescription) ctaDescription.textContent = status.desc;
-  if(ctaScore) ctaScore.textContent = `${stats.score}%`;
-  if(ctaProgressBar) ctaProgressBar.style.width = `${stats.score}%`;
-  if(ctaOwned) ctaOwned.textContent = stats.owned;
-  if(ctaMissing) ctaMissing.textContent = stats.missing;
-  if(ctaPriority) ctaPriority.textContent = stats.wajibMissing;
-
-  if(list){
-    const priority = stats.missingRows
-      .filter(item => item.row.warna === "red")
-      .slice(0, 5);
-
-    if(priority.length){
-      list.innerHTML = priority.map(item => `
-        <li>
-          <strong>${item.member.nama}</strong> — ${item.row.kategori}<br>
-          <small>${item.row.fungsi}</small>
-        </li>
-      `).join("");
-    }else if(stats.missing > 0){
-      list.innerHTML = `
-        <li>
-          Proteksi wajib sudah lengkap. Lanjut review bagian sesuai kebutuhan, distribusi kekayaan, dan fungsi akumulasi.
-        </li>
-      `;
-    }else{
-      list.innerHTML = `
-        <li>
-          Semua item dalam matrix sudah terisi. Lakukan review tahunan untuk memastikan manfaat polis tetap relevan.
-        </li>
-      `;
-    }
-  }
-}
-
-function konsultasiReviewWhatsApp(){
-  const kepala = state.keluarga.find(x => x.id === "kepala");
-  const stats = getFamilyReviewStats();
-  const nama = kepala?.nama || "";
-  const message = `Halo Ko Septino, saya ingin konsultasi Review Polis Cerdas Finansial.%0A%0ANama: ${encodeURIComponent(nama)}%0ASkor Review: ${stats.score}%25%0ABelum Dimiliki: ${stats.missing}%0APrioritas Wajib: ${stats.wajibMissing}%0A%0AMohon bantu review polis keluarga saya.`;
-  window.open(`https://wa.me/628116946999?text=${message}`, "_blank");
 }
 
 function toggleBottomActions(){
