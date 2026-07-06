@@ -508,7 +508,7 @@ line(W-M-38,58,W-M-12,58,C.green,.45);
     setFont(7,'bold',C.white);
     doc.text('SG',M+14,ty+21.4,{align:'center'});
     setFont(9,'bold',C.navy);
-    doc.text('Septino Gao, QWP®, CIS®',M+29,ty+12);
+    doc.text('Septino, QWP®, CIS®',M+29,ty+12);
     setFont(7.2,'normal',C.muted);
     doc.text('Financial Planner',M+29,ty+20);
     setFont(6.8,'normal',C.ink);
