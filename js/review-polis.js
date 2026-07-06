@@ -1049,64 +1049,96 @@ function drawSummaryBox(doc, x, y, w, title, value, subtitle, color){
 function addCoverPage(doc, logoDataUrl){
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const kepala = state.keluarga.find(x => x.id === "kepala");
-  const pasangan = state.keluarga.find(x => x.id === "pasangan");
-  const jumlahAnak = state.keluarga.filter(x => x.id.startsWith("anak")).length;
+  const kepala = state.keluarga.find(m => m.id === "kepala") || {};
+  const pasangan = state.keluarga.find(m => m.id === "pasangan") || {};
+  const jumlahAnak = state.keluarga.filter(m => String(m.id).startsWith("anak")).length;
   const tanggal = new Date().toLocaleDateString("id-ID", { day:"2-digit", month:"long", year:"numeric" });
 
-  doc.setFillColor(248,252,255);
-  doc.rect(0,0,pageWidth,pageHeight,"F");
-  doc.setFillColor(235,244,250);
-  doc.circle(25, 25, 42, "F");
-  doc.setFillColor(245,231,204);
-  doc.circle(pageWidth - 20, pageHeight - 15, 45, "F");
-
-  addLogoToPdf(doc, logoDataUrl, pageWidth/2 - 36, 25, 72, 42);
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(28);
-  doc.setTextColor(180, 0, 0);
-  doc.text("INSURANCE MATRIX", pageWidth/2, 84, { align:"center" });
-  doc.setFontSize(14);
-  doc.setTextColor(11,60,93);
-  doc.text("Laporan Review Polis Keluarga", pageWidth/2, 96, { align:"center" });
-
-  const cardX = 34, cardY = 113, cardW = pageWidth - 68, cardH = 48;
+  // Background
   doc.setFillColor(255,255,255);
-  doc.setDrawColor(220,232,242);
-  doc.roundedRect(cardX, cardY, cardW, cardH, 5, 5, "FD");
+  doc.rect(0,0,pageWidth,pageHeight,"F");
+  doc.setFillColor(245,250,255);
+  doc.circle(18, 18, 50, "F");
+  doc.setFillColor(252,245,232);
+  doc.circle(pageWidth - 10, pageHeight - 10, 54, "F");
 
-  const infos = [
-    ["Kepala Keluarga", kepala?.nama || "-"],
+  // Decorative red wave bottom
+  doc.setFillColor(185,0,0);
+  doc.triangle(0, pageHeight - 46, pageWidth, pageHeight - 14, 0, pageHeight, "F");
+  doc.setFillColor(210,0,0);
+  doc.triangle(0, pageHeight - 32, pageWidth, pageHeight - 6, 0, pageHeight, "F");
+  doc.setFillColor(150,0,0);
+  doc.triangle(0, pageHeight - 18, pageWidth, pageHeight, 0, pageHeight, "F");
+
+  // Logo and title
+  addLogoToPdf(doc, logoDataUrl, pageWidth/2 - 27, 18, 54, 34);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(35);
+  doc.setTextColor(180, 0, 0);
+  doc.text("INSURANCE MATRIX", pageWidth/2, 76, { align:"center" });
+  doc.setFontSize(17);
+  doc.setTextColor(32,38,46);
+  doc.text("Laporan Review Polis Keluarga", pageWidth/2, 91, { align:"center" });
+
+  // Data keluarga card
+  const cardW = 150;
+  const cardH = 68;
+  const cardX = (pageWidth - cardW) / 2;
+  const cardY = 106;
+  doc.setFillColor(255,255,255);
+  doc.setDrawColor(235,120,120);
+  doc.roundedRect(cardX, cardY, cardW, cardH, 4, 4, "FD");
+
+  const rows = [
+    ["Kepala Keluarga", kepala.nama || "-"],
     ["Status", state.statusMenikah === "menikah" ? "Sudah Menikah" : "Belum Menikah"],
-    ["Pasangan", pasangan?.nama || "-"],
+    ["Pasangan", pasangan.nama || "-"],
     ["Jumlah Anak", String(jumlahAnak)],
     ["Tanggal Review", tanggal]
   ];
 
-  const colW = cardW / infos.length;
-  infos.forEach((item, i) => {
-    const x = cardX + i * colW;
-    if(i > 0){
-      doc.setDrawColor(226,232,240);
-      doc.line(x, cardY + 8, x, cardY + cardH - 8);
-    }
+  rows.forEach((row, i) => {
+    const y = cardY + 14 + i * 11.5;
+    doc.setFillColor(190,0,0);
+    doc.circle(cardX + 14, y - 1.5, 4.2, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(100,116,139);
-    doc.text(item[0], x + colW/2, cardY + 18, { align:"center" });
-    doc.setFontSize(11);
-    doc.setTextColor(11,60,93);
-    doc.text(safePdfText(item[1]), x + colW/2, cardY + 31, { align:"center", maxWidth: colW - 8 });
+    doc.setFontSize(10.5);
+    doc.setTextColor(24,24,27);
+    doc.text(row[0], cardX + 26, y);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10.5);
+    doc.text(":", cardX + 84, y);
+    doc.text(safePdfText(row[1]), cardX + 89, y, { maxWidth: cardW - 96 });
   });
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(100,116,139);
-  doc.text("Dokumen ini membantu keluarga melihat kelengkapan polis, fungsi perlindungan, dan area yang perlu ditinjau kembali setiap tahun.", pageWidth/2, 177, { align:"center", maxWidth: pageWidth - 60 });
-  addPdfFooter(doc, 1);
-}
+  // Review note on cover only
+  const noteX = (pageWidth - 190) / 2;
+  const noteY = 185;
+  const noteW = 190;
+  const noteH = 22;
+  doc.setFillColor(255,240,240);
+  doc.setDrawColor(255,190,190);
+  doc.roundedRect(noteX, noteY, noteW, noteH, 4, 4, "FD");
+  doc.setFillColor(190,0,0);
+  doc.circle(noteX + 15, noteY + noteH/2, 5.5, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(255,255,255);
+  doc.text("!", noteX + 15, noteY + noteH/2 + 4.3, { align:"center" });
+  doc.setFontSize(10.5);
+  doc.setTextColor(190,0,0);
+  doc.text("Table ini harus di-review kembali setiap tahun agar", noteX + 28, noteY + 9);
+  doc.text("manfaat polis masih sesuai dengan fungsi dan tujuan keuangan.", noteX + 28, noteY + 16);
 
+  // Footer cover
+  doc.setDrawColor(255,255,255);
+  doc.line(12, pageHeight - 18, pageWidth - 12, pageHeight - 18);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(255,255,255);
+  doc.text("Cerdas Finansial | Insurance Matrix Report", 12, pageHeight - 10);
+  doc.text("Halaman 1", pageWidth - 12, pageHeight - 10, { align:"right" });
+}
 
 function getFamilyCategoryProgress(keywordList){
   let total = 0;
@@ -1537,14 +1569,7 @@ function addMemberPage(doc, member, logoDataUrl, pageNo){
     }
   });
 
-  const noteY = Math.min((doc.lastAutoTable?.finalY || 165) + 5, pageHeight - 20);
-  doc.setFillColor(255,240,240);
-  doc.setDrawColor(255,210,210);
-  doc.roundedRect(10, noteY, pageWidth - 20, 9, 2, 2, "FD");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.2);
-  doc.setTextColor(192,0,0);
-  doc.text("Table ini harus di-review kembali setiap tahun agar manfaat polis masih sesuai dengan fungsi dan tujuan keuangan.", pageWidth/2, noteY + 5.8, { align:"center" });
+  // Catatan tahunan hanya ditampilkan di halaman cover agar halaman matrix lebih bersih.
   addPdfFooter(doc, pageNo);
 }
 
