@@ -1179,71 +1179,68 @@ function getExecutiveSummaryData(){
 
 
 
-function drawExecutiveInfoItem(doc, x, y, w, title, value){
+
+function drawExecutiveInfoItem(doc, x, y, w, title, value, color){
+  // Card putih bersih TANPA singkatan KG/PS/AK/TG/FP
   doc.setFillColor(255,255,255);
-  doc.setDrawColor(220,232,242);
-  doc.roundedRect(x, y, w, 18, 3, 3, "FD");
-  doc.setFillColor(241,247,253);
-  doc.circle(x + 8, y + 9, 5.2, "F");
-  doc.setTextColor(11,60,93);
+  doc.setDrawColor(221,232,242);
+  doc.roundedRect(x, y, w, 20, 4, 4, "FD");
+  doc.setFillColor(color[0], color[1], color[2]);
+  doc.circle(x + 8, y + 10, 4.2, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.2);
-  doc.text(title, x + 17, y + 7);
-  doc.setFontSize(9.5);
-  doc.setTextColor(15,23,42);
-  doc.text(safePdfText(value), x + 17, y + 13.5, { maxWidth:w - 20 });
+  doc.setFontSize(6.8);
+  doc.setTextColor(100,116,139);
+  doc.text(title, x + 15, y + 7.4);
+  doc.setFontSize(9.2);
+  doc.setTextColor(11,60,93);
+  doc.text(safePdfText(value), x + 15, y + 14.2, { maxWidth:w - 18 });
 }
 
 function drawExecutiveStatCard(doc, x, y, w, h, value, title, subtitle, color){
   doc.setFillColor(255,255,255);
-  doc.setDrawColor(220,232,242);
-  doc.roundedRect(x, y, w, h, 4, 4, "FD");
+  doc.setDrawColor(221,232,242);
+  doc.roundedRect(x, y, w, h, 4.5, 4.5, "FD");
   doc.setFillColor(color[0], color[1], color[2]);
   doc.roundedRect(x, y, 2.3, h, 2, 2, "F");
-  doc.setFillColor(color[0], color[1], color[2]);
-  doc.circle(x + 13, y + h/2, 6.8, "F");
+  doc.circle(x + 13, y + h/2, 6.5, "F");
   doc.setTextColor(255,255,255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
-  const icon = title.includes("Kesiapan") ? "✓" : title.includes("Kebutuhan") ? "□" : title.includes("Sudah") ? "✓" : "!";
-  doc.text(icon, x + 13, y + h/2 + 2.3, { align:"center" });
+  doc.setFontSize(7.8);
+  const icon = title.includes("Kesiapan") ? "✓" : title.includes("Kebutuhan") ? "#" : title.includes("Sudah") ? "✓" : "!";
+  doc.text(icon, x + 13, y + h/2 + 2.2, { align:"center" });
   doc.setTextColor(color[0], color[1], color[2]);
   doc.setFontSize(20);
-  doc.text(String(value), x + 27, y + 14);
-  doc.setFontSize(8.2);
+  doc.text(String(value), x + 26, y + 14);
   doc.setTextColor(15,23,42);
-  doc.text(title, x + 27, y + 22);
+  doc.setFontSize(8.1);
+  doc.text(title, x + 26, y + 21.8);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.1);
+  doc.setFontSize(6.8);
   doc.setTextColor(71,85,105);
-  doc.text(subtitle, x + 27, y + 27, { maxWidth:w - 32 });
+  doc.text(subtitle, x + 26, y + 26.5, { maxWidth:w - 30 });
 }
 
 function drawExecutiveProgress(doc, x, y, w, label, percent, color){
-  const iconSize = 10;
-  doc.setFillColor(245,250,255);
-  doc.roundedRect(x, y - 5.2, iconSize, iconSize, 2.2, 2.2, "F");
-  doc.setFillColor(color[0], color[1], color[2]);
-  doc.circle(x + iconSize/2, y - .2, 2.5, "F");
-
+  // Progress bar tanpa tulisan BAIK / RENDAH / BELUM
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.1);
+  doc.setFontSize(7.5);
   doc.setTextColor(15,23,42);
-  doc.text(label, x + 14, y + .7);
+  doc.text(label, x, y);
 
-  const barX = x + 50;
-  const barY = y - 2.9;
-  const barW = w - 67;
+  const barX = x + 42;
+  const barY = y - 3.2;
+  const percentX = x + w;
+  const barW = w - 56;
+
   doc.setFillColor(231,238,246);
   doc.roundedRect(barX, barY, barW, 4.2, 2.1, 2.1, "F");
   if(percent > 0){
     doc.setFillColor(color[0], color[1], color[2]);
-    doc.roundedRect(barX, barY, Math.max(2.2, barW * percent / 100), 4.2, 2.1, 2.1, "F");
+    doc.roundedRect(barX, barY, Math.max(2.4, barW * percent / 100), 4.2, 2.1, 2.1, "F");
   }
-
-  doc.setFontSize(8.4);
+  doc.setFontSize(7.8);
   doc.setTextColor(color[0], color[1], color[2]);
-  doc.text(`${percent}%`, x + w, y + .7, { align:"right" });
+  doc.text(`${percent}%`, percentX, y, { align:"right" });
 }
 
 function addExecutiveSummaryPage(doc, logoDataUrl, pageNo){
@@ -1255,26 +1252,26 @@ function addExecutiveSummaryPage(doc, logoDataUrl, pageNo){
   doc.setFillColor(255,255,255);
   doc.rect(0,0,pageWidth,pageHeight,"F");
 
-  // Soft background accents
+  // Background accents bersih
   doc.setFillColor(235,246,253);
-  doc.circle(-14, 6, 44, "F");
-  doc.setFillColor(252,239,211);
-  doc.circle(pageWidth + 7, -6, 39, "F");
+  doc.circle(-10, 0, 45, "F");
+  doc.setFillColor(253,241,215);
+  doc.circle(pageWidth + 18, pageHeight + 8, 45, "F");
   doc.setFillColor(11,60,93);
-  doc.triangle(pageWidth - 30, 0, pageWidth, 0, pageWidth, 30, "F");
+  doc.triangle(pageWidth - 24, 0, pageWidth, 0, pageWidth, 24, "F");
   doc.setFillColor(242,190,84);
-  doc.triangle(pageWidth - 49, 0, pageWidth - 35, 0, pageWidth, 35, "F");
+  doc.triangle(pageWidth - 43, 0, pageWidth - 30, 0, pageWidth, 30, "F");
 
-  // Header
+  // Header logo + judul
   if(logoDataUrl){
-    try{ doc.addImage(logoDataUrl, "PNG", 14, 8, 30, 24, undefined, "FAST"); }catch(e){}
+    try{ doc.addImage(logoDataUrl, "PNG", 16, 8, 30, 24, undefined, "FAST"); }catch(e){}
   }
   doc.setFont("helvetica", "bold");
   doc.setFontSize(25);
   doc.setTextColor(11,60,93);
   doc.text("EXECUTIVE SUMMARY", pageWidth/2, 18, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10.5);
+  doc.setFontSize(10.2);
   doc.setTextColor(30,41,59);
   doc.text("Review Polis Keluarga", pageWidth/2 - 6, 27, { align:"right" });
   doc.setFont("helvetica", "bold");
@@ -1283,145 +1280,132 @@ function addExecutiveSummaryPage(doc, logoDataUrl, pageNo){
   doc.setDrawColor(226,232,240);
   doc.line(14, 34, pageWidth - 14, 34);
 
-  // Family info row - no abbreviations
-  const infoY = 40;
+  // Info keluarga: card putih, bukan bar biru
+  const infoY = 39;
   const infoGap = 4;
   const infoW = (pageWidth - 24 - infoGap*4) / 5;
   const info = [
-    ["Kepala Keluarga", data.kepala?.nama || "-"],
-    ["Pasangan", data.pasangan?.nama || "-"],
-    ["Anak", `${data.anak.length} Orang`],
-    ["Tanggal Review", tanggal],
-    ["Financial Planner", "Septino, QWP®, CIS®"]
+    ["Kepala Keluarga", data.kepala?.nama || "-", [11,60,93]],
+    ["Pasangan", data.pasangan?.nama || "-", [124,58,237]],
+    ["Anak", `${data.anak.length} Orang`, [0,105,180]],
+    ["Tanggal Review", tanggal, [201,154,54]],
+    ["Financial Planner", "Septino, QWP®, CIS®", [11,60,93]]
   ];
-  info.forEach((item, i) => drawExecutiveInfoItem(doc, 12 + i*(infoW+infoGap), infoY, infoW, item[0], item[1]));
+  info.forEach((item, i) => drawExecutiveInfoItem(doc, 12 + i*(infoW+infoGap), infoY, infoW, item[0], item[1], item[2]));
 
   // KPI cards
   const statY = 66;
   const cardW = (pageWidth - 38) / 4;
   const gap = 4.7;
   drawExecutiveStatCard(doc, 12, statY, cardW, 27, `${data.stats.score}%`, "Skor Kesiapan", "Perlindungan Keluarga", [11,60,93]);
-  drawExecutiveStatCard(doc, 12 + (cardW+gap), statY, cardW, 27, data.stats.total, "Kebutuhan Polis", "Total Polis yang Dibutuhkan", [0,105,180]);
+  drawExecutiveStatCard(doc, 12 + (cardW+gap), statY, cardW, 27, data.stats.total, "Kebutuhan Polis", "Total Polis Dibutuhkan", [0,105,180]);
   drawExecutiveStatCard(doc, 12 + (cardW+gap)*2, statY, cardW, 27, data.stats.owned, "Sudah Dimiliki", "Polis yang Sudah Dimiliki", [0,166,81]);
   drawExecutiveStatCard(doc, 12 + (cardW+gap)*3, statY, cardW, 27, data.stats.missing, "Perlu Dilengkapi", "Polis yang Perlu Dilengkapi", [224,0,0]);
 
-  // Main panels
+  // Panels
   const panelY = 101;
   const leftW = 142;
   const rightX = 160;
   const rightW = pageWidth - rightX - 12;
+
+  // Kondisi Perlindungan
   doc.setFillColor(255,255,255);
   doc.setDrawColor(220,232,242);
-  doc.roundedRect(12, panelY, leftW, 72, 4, 4, "FD");
-  doc.setFillColor(11,60,93);
-  doc.circle(21, panelY + 9, 4.8, "F");
-  doc.setTextColor(255,255,255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.6);
-  doc.text("✓", 21, panelY + 11.2, { align:"center" });
+  doc.roundedRect(12, panelY, leftW, 74, 4, 4, "FD");
   doc.setTextColor(11,60,93);
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(10.2);
-  doc.text("KONDISI PERLINDUNGAN KELUARGA", 30, panelY + 11);
+  doc.text("KONDISI PERLINDUNGAN KELUARGA", 20, panelY + 12);
   doc.setDrawColor(11,60,93);
-  doc.line(30, panelY + 14.5, 146, panelY + 14.5);
+  doc.line(20, panelY + 15.5, 148, panelY + 15.5);
 
-  let py = panelY + 26;
+  let py = panelY + 30;
   data.categories.forEach(cat => {
-    drawExecutiveProgress(doc, 20, py, 118, cat.label, cat.progress.percent, cat.color);
-    py += 11.3;
+    drawExecutiveProgress(doc, 22, py, 116, cat.label, cat.progress.percent, cat.color);
+    py += 11.2;
   });
 
-  // Findings panel
+  // Temuan Utama
   doc.setFillColor(255,255,255);
   doc.setDrawColor(220,232,242);
   doc.roundedRect(rightX, panelY, rightW, 45, 4, 4, "FD");
-  doc.setFillColor(11,60,93);
-  doc.circle(rightX + 9, panelY + 9, 4.8, "F");
-  doc.setTextColor(255,255,255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7);
-  doc.text("!", rightX + 9, panelY + 11.4, { align:"center" });
   doc.setTextColor(11,60,93);
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(10.2);
-  doc.text("TEMUAN UTAMA", rightX + 18, panelY + 11);
+  doc.text("TEMUAN UTAMA", rightX + 9, panelY + 12);
   doc.setDrawColor(11,60,93);
-  doc.line(rightX + 18, panelY + 14.5, pageWidth - 20, panelY + 14.5);
+  doc.line(rightX + 9, panelY + 15.5, pageWidth - 20, panelY + 15.5);
 
   const findings = data.categories.map(cat => {
     if(cat.progress.percent >= 80) return { sign:"✓", color:[0,166,81], text:`${cat.label} keluarga sudah baik.` };
     if(cat.progress.percent > 0) return { sign:"!", color:[230,142,0], text:`${cat.label} masih perlu dilengkapi.` };
     return { sign:"!", color:[230,142,0], text:`${cat.label} belum tersedia.` };
   });
-  let fy = panelY + 24;
+  let fy = panelY + 25;
   findings.slice(0,5).forEach((f, i) => {
     doc.setFillColor(f.color[0], f.color[1], f.color[2]);
     doc.circle(rightX + 10, fy - 1.5, 2.1, "F");
     doc.setTextColor(255,255,255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(4.6);
+    doc.setFontSize(4.7);
     doc.text(f.sign, rightX + 10, fy, { align:"center" });
     doc.setTextColor(15,23,42);
-    doc.setFontSize(7.2);
+    doc.setFontSize(7.25);
     doc.setFont("helvetica", "normal");
     doc.text(safePdfText(f.text), rightX + 15, fy, { maxWidth:rightW - 23 });
-    if(i < 4){ doc.setDrawColor(226,232,240); doc.line(rightX + 15, fy + 3.3, pageWidth - 20, fy + 3.3); }
+    if(i < 4){ doc.setDrawColor(226,232,240); doc.line(rightX + 15, fy + 3.4, pageWidth - 20, fy + 3.4); }
     fy += 6.6;
   });
 
-  // Top priorities panel
+  // 3 Prioritas Teratas
   const prY = panelY + 50;
   doc.setFillColor(255,255,255);
   doc.setDrawColor(220,232,242);
-  doc.roundedRect(rightX, prY, rightW, 23, 4, 4, "FD");
+  doc.roundedRect(rightX, prY, rightW, 25, 4, 4, "FD");
   doc.setTextColor(11,60,93);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
-  doc.text("3 PRIORITAS TERATAS", rightX + 10, prY + 8);
+  doc.text("3 PRIORITAS TERATAS", rightX + 9, prY + 8);
   const priorities = data.priorities.length ? data.priorities : ["Review polis wajib", "Lengkapi proteksi keluarga", "Review tahunan"];
   const pW = (rightW - 18) / 3;
   priorities.slice(0,3).forEach((item, i) => {
-    const cx = rightX + 10 + i*pW;
+    const cx = rightX + 9 + i*pW;
     const colors = [[224,0,0],[230,142,0],[0,105,180]];
     doc.setFillColor(colors[i][0], colors[i][1], colors[i][2]);
-    doc.circle(cx + 5, prY + 16, 3.2, "F");
+    doc.circle(cx + 5, prY + 17, 3.2, "F");
     doc.setTextColor(255,255,255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(5.8);
-    doc.text(String(i+1), cx + 5, prY + 18, { align:"center" });
+    doc.text(String(i+1), cx + 5, prY + 19, { align:"center" });
     doc.setTextColor(11,60,93);
-    doc.setFontSize(6.7);
+    doc.setFontSize(6.8);
     doc.text(safePdfText(item), cx + 12, prY + 16, { maxWidth:pW - 15 });
-    if(i < 2){ doc.setDrawColor(226,232,240); doc.line(cx + pW - 3, prY + 11, cx + pW - 3, prY + 21); }
+    if(i < 2){ doc.setDrawColor(226,232,240); doc.line(cx + pW - 3, prY + 11, cx + pW - 3, prY + 22); }
   });
 
-  // Conclusion
-  const conclY = 181;
+  // Kesimpulan
+  const conclY = 182;
   doc.setFillColor(245,250,255);
   doc.setDrawColor(220,232,242);
-  doc.roundedRect(12, conclY, pageWidth - 24, 18, 4, 4, "FD");
-  doc.setFillColor(11,60,93);
-  doc.circle(22, conclY + 9, 5, "F");
-  doc.setTextColor(255,255,255);
+  doc.roundedRect(12, conclY, pageWidth - 24, 16, 4, 4, "FD");
+  doc.setTextColor(11,60,93);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.3);
-  doc.text("FP", 22, conclY + 11, { align:"center" });
-  doc.setTextColor(11,60,93);
-  doc.setFontSize(7.5);
-  doc.text("KESIMPULAN FINANCIAL PLANNER", 32, conclY + 7);
+  doc.setFontSize(7.4);
+  doc.text("KESIMPULAN FINANCIAL PLANNER", 18, conclY + 6.6);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.55);
+  doc.setFontSize(6.45);
   doc.setTextColor(30,41,59);
-  const conclusion = `Skor kesiapan perlindungan keluarga saat ini ${data.stats.score}% (${data.categoryLabel}). Fokus utama adalah melengkapi polis wajib terlebih dahulu, lalu menyiapkan kebutuhan jangka panjang seperti dana pendidikan anak dan dana pensiun secara bertahap agar masa depan keluarga lebih terjamin.`;
-  doc.text(conclusion, 32, conclY + 13, { maxWidth:pageWidth - 92, lineHeightFactor:1.16 });
+  const conclusion = `Skor kesiapan perlindungan keluarga saat ini ${data.stats.score}% (${data.categoryLabel}). Fokus utama adalah melengkapi polis wajib terlebih dahulu, lalu menyiapkan kebutuhan jangka panjang seperti dana pendidikan anak dan dana pensiun secara bertahap.`;
+  doc.text(conclusion, 18, conclY + 12, { maxWidth:pageWidth - 87, lineHeightFactor:1.13 });
   doc.setDrawColor(148,163,184);
-  doc.line(pageWidth - 66, conclY + 3, pageWidth - 66, conclY + 15);
+  doc.line(pageWidth - 64, conclY + 3, pageWidth - 64, conclY + 13);
   doc.setFont("helvetica", "italic");
-  doc.setFontSize(12.5);
+  doc.setFontSize(12.2);
   doc.setTextColor(11,60,93);
-  doc.text("Septino", pageWidth - 38, conclY + 9, { align:"center" });
+  doc.text("Septino", pageWidth - 38, conclY + 8, { align:"center" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.1);
-  doc.text("Septino, QWP®, CIS®", pageWidth - 38, conclY + 15, { align:"center" });
+  doc.setFontSize(5.8);
+  doc.text("Septino, QWP®, CIS®", pageWidth - 38, conclY + 13.5, { align:"center" });
 
   drawPdfFooter(doc, pageNo || 2);
 }
