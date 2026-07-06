@@ -882,6 +882,122 @@ function addMemberPage(doc, member, logoDataUrl, pageNo){
   addPdfFooter(doc, pageNo);
 }
 
+
+function addCTAPage(doc, logoDataUrl, pageNo){
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const stats = getFamilyReviewStats();
+  const status = getCTAStatus(stats.score);
+  const priority = stats.missingRows.filter(item => item.row.warna === "red").slice(0, 8);
+
+  doc.setFillColor(248,252,255);
+  doc.rect(0,0,pageWidth,pageHeight,"F");
+  doc.setFillColor(235,244,250);
+  doc.circle(18, 20, 36, "F");
+  doc.setFillColor(245,231,204);
+  doc.circle(pageWidth - 18, pageHeight - 12, 42, "F");
+
+  addLogoToPdf(doc, logoDataUrl, 10, 8, 42, 24);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(180,0,0);
+  doc.text("RINGKASAN & REKOMENDASI", pageWidth/2, 22, { align:"center" });
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(15);
+  doc.setTextColor(11,60,93);
+  doc.text(safePdfText(status.title), pageWidth/2, 36, { align:"center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.8);
+  doc.setTextColor(71,85,105);
+  doc.text(safePdfText(status.desc), pageWidth/2, 45, { align:"center", maxWidth: pageWidth - 56 });
+
+  const scoreX = 24, scoreY = 60, scoreW = 70, scoreH = 70;
+  doc.setFillColor(255,255,255);
+  doc.setDrawColor(220,232,242);
+  doc.roundedRect(scoreX, scoreY, scoreW, scoreH, 5, 5, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(100,116,139);
+  doc.text("SKOR KESIAPAN", scoreX + scoreW/2, scoreY + 14, { align:"center" });
+  doc.setFontSize(31);
+  doc.setTextColor(46,139,87);
+  doc.text(`${stats.score}%`, scoreX + scoreW/2, scoreY + 39, { align:"center" });
+  doc.setFillColor(226,232,240);
+  doc.roundedRect(scoreX + 12, scoreY + 50, scoreW - 24, 5, 2, 2, "F");
+  doc.setFillColor(46,139,87);
+  doc.roundedRect(scoreX + 12, scoreY + 50, (scoreW - 24) * stats.score / 100, 5, 2, 2, "F");
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(100,116,139);
+  doc.text("Semakin tinggi skor, semakin lengkap proteksi keluarga.", scoreX + scoreW/2, scoreY + 63, { align:"center", maxWidth: scoreW - 12 });
+
+  const gapX = 105, gapY = 60, gapW = pageWidth - 129, gapH = 70;
+  doc.setFillColor(255,255,255);
+  doc.setDrawColor(220,232,242);
+  doc.roundedRect(gapX, gapY, gapW, gapH, 5, 5, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(11,60,93);
+  doc.text("Ringkasan GAP Keluarga", gapX + 6, gapY + 12);
+
+  const statCards = [
+    ["Sudah Punya", String(stats.owned), [46,139,87]],
+    ["Belum Punya", String(stats.missing), [190,0,0]],
+    ["Prioritas Wajib", String(stats.wajibMissing), [224,0,0]],
+    ["Total Item", String(stats.total), [11,60,93]]
+  ];
+  const cW = (gapW - 18) / 4;
+  statCards.forEach((c, i) => {
+    const x = gapX + 6 + i * cW;
+    doc.setFillColor(248,250,252);
+    doc.setDrawColor(226,232,240);
+    doc.roundedRect(x, gapY + 20, cW - 4, 32, 3, 3, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.2);
+    doc.setTextColor(100,116,139);
+    doc.text(c[0], x + (cW - 4)/2, gapY + 30, { align:"center" });
+    doc.setFontSize(18);
+    doc.setTextColor(c[2][0], c[2][1], c[2][2]);
+    doc.text(c[1], x + (cW - 4)/2, gapY + 44, { align:"center" });
+  });
+
+  const recX = 24, recY = 145, recW = pageWidth - 48, recH = 42;
+  doc.setFillColor(255,255,255);
+  doc.setDrawColor(220,232,242);
+  doc.roundedRect(recX, recY, recW, recH, 5, 5, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(11,60,93);
+  doc.text("Rekomendasi Prioritas", recX + 6, recY + 11);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.6);
+  doc.setTextColor(71,85,105);
+
+  if(priority.length){
+    const lines = priority.map((item, idx) => `${idx+1}. ${item.member.nama} - ${item.row.kategori} (${item.row.fungsi})`);
+    doc.text(lines.map(safePdfText), recX + 7, recY + 20, { maxWidth: recW - 14, lineHeightFactor: 1.35 });
+  }else if(stats.missing > 0){
+    doc.text("Proteksi wajib sudah lengkap. Lanjut review bagian sesuai kebutuhan, distribusi kekayaan, dan fungsi akumulasi.", recX + 7, recY + 21, { maxWidth: recW - 14 });
+  }else{
+    doc.text("Semua item matrix sudah terisi. Lakukan review tahunan agar manfaat polis tetap relevan dengan tujuan keuangan keluarga.", recX + 7, recY + 21, { maxWidth: recW - 14 });
+  }
+
+  doc.setFillColor(11,60,93);
+  doc.roundedRect(24, 135, pageWidth - 48, 0.1, 0, 0, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.setTextColor(180,0,0);
+  doc.text("Langkah Berikutnya", 24, 138);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.2);
+  doc.setTextColor(71,85,105);
+  doc.text("Diskusikan hasil review ini untuk memastikan manfaat polis, UP, limit kesehatan, dan rencana dana masa depan sudah sesuai kebutuhan keluarga.", 72, 138, { maxWidth: pageWidth - 96 });
+
+  addPdfFooter(doc, pageNo);
+}
+
 async function exportFamilyPDF(){
   if(!state.keluarga.length){
     showFamilyError("Isi dan simpan data keluarga terlebih dahulu sebelum export PDF.");
@@ -916,6 +1032,9 @@ async function exportFamilyPDF(){
       addMemberPage(doc, member, logoDataUrl, pageNo);
       pageNo++;
     });
+
+    doc.addPage("a4", "landscape");
+    addCTAPage(doc, logoDataUrl, pageNo);
 
     doc.save(getPdfFileName());
   }catch(err){
