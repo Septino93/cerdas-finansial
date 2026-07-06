@@ -8,73 +8,98 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
+<main class="dashboard-page">
 
-<div class="container py-5">
+  <section class="hero-section">
+    <div class="hero-bg-shape shape-left"></div>
+    <div class="hero-bg-shape shape-right"></div>
 
-  <div class="text-center mb-5 hero-brand">
-   <img src="asset/logo-cerdas-finansial.png"
-     alt="Cerdas Finansial"
-     class="main-logo">
-    <p class="text-secondary mt-3">Digital Financial Planner</p>
-  </div>
+    <div class="hero-content">
+      <img src="asset/logo-cerdas-finansial.png" alt="Cerdas Finansial" class="hero-logo">
+    </div>
+  </section>
 
-  <div class="row g-4">
+  <section class="menu-section">
+    <div class="container">
+      <div class="row g-4">
 
-    <div class="col-md-6">
-      <a href="pages/pendidikan.html" class="text-decoration-none">
-        <div class="menu-card">
-          <i class="bi bi-mortarboard-fill"></i>
-          <h4>Dana Pendidikan</h4>
-          <p>Simulasi dana pendidikan anak</p>
+        <div class="col-md-6">
+          <a href="pages/pendidikan.html" class="menu-link">
+            <div class="menu-card active-card">
+              <div class="menu-icon"><i class="bi bi-mortarboard-fill"></i></div>
+              <div class="menu-text">
+                <h4>Dana Pendidikan</h4>
+                <p>Simulasi dana pendidikan anak</p>
+              </div>
+              <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+            </div>
+          </a>
         </div>
-      </a>
-    </div>
 
-    <div class="col-md-6">
-      <a href="pages/review-polis.html" class="text-decoration-none">
-        <div class="menu-card">
-          <i class="bi bi-clipboard2-check-fill"></i>
-          <h4>Review Polis</h4>
-          <p>Insurance Matrix keluarga</p>
+        <div class="col-md-6">
+          <a href="pages/review-polis.html" class="menu-link">
+            <div class="menu-card active-card">
+              <div class="menu-icon"><i class="bi bi-clipboard2-check-fill"></i></div>
+              <div class="menu-text">
+                <h4>Review Polis</h4>
+                <p>Insurance Matrix keluarga</p>
+              </div>
+              <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+            </div>
+          </a>
         </div>
-      </a>
-    </div>
 
-    <div class="col-md-6">
-      <div class="menu-card disabled">
-        <i class="bi bi-heart-pulse-fill"></i>
-        <h4>Uang Pertanggungan Jiwa</h4>
-        <p>Segera hadir</p>
+        <div class="col-md-6">
+          <div class="menu-card disabled">
+            <div class="menu-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+            <div class="menu-text">
+              <h4>Uang Pertanggungan Jiwa</h4>
+              <p>Segera hadir</p>
+            </div>
+            <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="menu-card disabled">
+            <div class="menu-icon"><i class="bi bi-hospital-fill"></i></div>
+            <div class="menu-text">
+              <h4>Asuransi Kesehatan</h4>
+              <p>Segera hadir</p>
+            </div>
+            <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="menu-card disabled">
+            <div class="menu-icon"><i class="bi bi-shield-plus"></i></div>
+            <div class="menu-text">
+              <h4>Penyakit Kritis</h4>
+              <p>Segera hadir</p>
+            </div>
+            <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="menu-card disabled">
+            <div class="menu-icon"><i class="bi bi-piggy-bank-fill"></i></div>
+            <div class="menu-text">
+              <h4>Dana Pensiun</h4>
+              <p>Segera hadir</p>
+            </div>
+            <div class="menu-arrow"><i class="bi bi-chevron-right"></i></div>
+          </div>
+        </div>
+
       </div>
     </div>
+  </section>
 
-    <div class="col-md-6">
-      <div class="menu-card disabled">
-        <i class="bi bi-hospital-fill"></i>
-        <h4>Asuransi Kesehatan</h4>
-        <p>Segera hadir</p>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="menu-card disabled">
-        <i class="bi bi-shield-plus"></i>
-        <h4>Penyakit Kritis</h4>
-        <p>Segera hadir</p>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="menu-card disabled">
-        <i class="bi bi-piggy-bank-fill"></i>
-        <h4>Dana Pensiun</h4>
-        <p>Segera hadir</p>
-      </div>
-    </div>
-
-  </div>
-</div>
+</main>
 
 <script src="js/script.js"></script>
 </body>
