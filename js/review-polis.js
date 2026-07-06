@@ -494,7 +494,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-/* v13: Export seluruh keluarga dalam 1 PDF landscape */
+
+/* v14: Export PDF keluarga langsung download, tidak lewat printer */
 function escapeHtml(value){
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -504,159 +505,316 @@ function escapeHtml(value){
     .replaceAll("'", "&#039;");
 }
 
-function getSheetClassForMember(member){
-  if(!member) return "";
-  if(member.id === "pasangan") return "pasangan-sheet";
-  if(member.id.startsWith("anak")) return `${member.id}-sheet`;
-  return "";
+function rupiahOrDash(value){
+  const text = String(value || "").trim();
+  return text || "-";
 }
 
-function renderPdfTableRows(matrix){
-  return matrix.map((row, index) => `
-    <tr>
-      <td class="status-cell"><div class="status-band ${escapeHtml(row.warna)}"></div></td>
-      <td class="row-no">${index + 1}</td>
-      <td class="row-category">${escapeHtml(row.kategori)}</td>
-      <td class="row-function">${escapeHtml(row.fungsi)}</td>
-      <td class="text-center">${row.punya === "ya" ? escapeHtml(row.brand || "-") : "-"}</td>
-      <td class="text-center">${row.punya === "ya" ? escapeHtml(row.produk || "-") : "-"}</td>
-      <td class="text-center">${row.punya === "ya" ? escapeHtml(row.manfaat || "-") : "-"}</td>
-      <td class="check-cell">
-        ${row.punya === "ya" ? `<span class="status-pill pill-owned">Sudah</span>` : `<span class="status-pill pill-none">Belum</span>`}
-      </td>
-      <td class="text-center">
-        ${escapeHtml(row.catatan || "-")}
-        ${row.premi ? `<div class="small-muted">Premi: ${escapeHtml(row.premi)}</div>` : ""}
-        ${row.masa ? `<div class="small-muted">Masa: ${escapeHtml(row.masa)}</div>` : ""}
-      </td>
-    </tr>
-  `).join("");
+function safePdfText(value){
+  return String(value ?? "-").replace(/\s+/g, " ").trim() || "-";
 }
 
-function renderPdfSummaryCards(matrix){
-  const wajib = getCategorySummary(matrix, "red");
-  const kebutuhan = getCategorySummary(matrix, "green");
-  const distribusi = getCategorySummary(matrix, "yellow");
-  const akumulasi = getCategorySummary(matrix, "blue");
-  return `
-    <div class="summary-row summary-category-row pdf-summary-row">
-      <div class="summary-card wajib"><span>Wajib Dimiliki</span><strong>${wajib.owned}/${wajib.total}</strong><small>${wajib.percent}% terpenuhi</small></div>
-      <div class="summary-card kebutuhan"><span>Sesuai Kebutuhan</span><strong>${kebutuhan.owned}/${kebutuhan.total}</strong><small>${kebutuhan.percent}% terpenuhi</small></div>
-      <div class="summary-card distribusi"><span>Distribusi Kekayaan</span><strong>${distribusi.owned}/${distribusi.total}</strong><small>${distribusi.percent}% terpenuhi</small></div>
-      <div class="summary-card akumulasi"><span>Fungsi Akumulasi</span><strong>${akumulasi.owned}/${akumulasi.total}</strong><small>${akumulasi.percent}% terpenuhi</small></div>
-    </div>
-  `;
+function getPdfFileName(){
+  const kepala = state.keluarga.find(x => x.id === "kepala");
+  const nama = (kepala?.nama || "Keluarga").replace(/[^a-z0-9\s-]/gi, "").trim() || "Keluarga";
+  return `Insurance Matrix - ${nama}.pdf`;
 }
 
-function renderMemberPdfPage(member){
-  syncMatrixWithTemplate(member.id);
-  const matrix = state.polis[member.id] || [];
-  const sheetClass = getSheetClassForMember(member);
-
-  return `
-    <section class="pdf-member-page">
-      <div class="matrix-sheet ${sheetClass}">
-        <div class="matrix-redbar">
-          <div>${escapeHtml(getMemberNumber(member))}</div>
-          <div class="matrix-name-box">
-            <label>Nama:</label>
-            <input value="${escapeHtml(member.nama)}" readonly>
-          </div>
-        </div>
-
-        <div class="matrix-hero">
-          <div class="legend-vertical">
-            <div><span class="legend-dot red"></span> Wajib Dimiliki</div>
-            <div><span class="legend-dot green"></span> Sesuai Kebutuhan / Tidak Wajib</div>
-            <div><span class="legend-dot yellow"></span> Distribusi Kekayaan</div>
-            <div><span class="legend-dot blue"></span> Fungsi Akumulasi</div>
-          </div>
-          <div class="matrix-title">INSURANCE<br>MATRIX</div>
-          <div class="brand-logo"><img src="../asset/logo-cerdas-finansial.png" alt="Cerdas Finansial"></div>
-        </div>
-
-        ${renderPdfSummaryCards(matrix)}
-
-        <div class="table-wrap">
-          <table class="matrix-table pdf-matrix-table">
-            <thead>
-              <tr>
-                <th rowspan="2">Status</th>
-                <th rowspan="2">No</th>
-                <th rowspan="2">Kategori</th>
-                <th rowspan="2">Fungsi Keuangan</th>
-                <th colspan="3">Punya</th>
-                <th rowspan="2">Tidak<br>Punya</th>
-                <th rowspan="2">Keterangan<br>Tambahan</th>
-              </tr>
-              <tr>
-                <th>Brand</th>
-                <th>Jenis Produk Dasar</th>
-                <th>Manfaat</th>
-              </tr>
-            </thead>
-            <tbody>${renderPdfTableRows(matrix)}</tbody>
-          </table>
-        </div>
-
-        <div class="note-box">Table ini harus di-review kembali setiap tahun agar memastikan apakah manfaat polis tersebut masih sesuai dengan fungsi dan tujuan keuangan.</div>
-      </div>
-    </section>
-  `;
+async function getLogoDataUrl(){
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try{
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      }catch(err){
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = "../asset/logo-cerdas-finansial.png";
+  });
 }
 
-function renderPdfCover(){
+function addPdfFooter(doc, pageNo){
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  doc.setDrawColor(220, 228, 238);
+  doc.setLineWidth(0.2);
+  doc.line(10, pageHeight - 9, pageWidth - 10, pageHeight - 9);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Cerdas Finansial | Insurance Matrix Report", 10, pageHeight - 5);
+  doc.text(`Halaman ${pageNo}`, pageWidth - 10, pageHeight - 5, { align:"right" });
+}
+
+function addLogoToPdf(doc, logoDataUrl, x, y, w, h){
+  if(!logoDataUrl) return;
+  try{
+    doc.addImage(logoDataUrl, "PNG", x, y, w, h, undefined, "FAST");
+  }catch(err){
+    // Logo dilewati jika browser membatasi canvas/CORS.
+  }
+}
+
+function drawSummaryBox(doc, x, y, w, title, value, subtitle, color){
+  doc.setFillColor(255,255,255);
+  doc.setDrawColor(224,232,240);
+  doc.roundedRect(x, y, w, 17, 2.5, 2.5, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6.8);
+  doc.setTextColor(100,116,139);
+  doc.text(title, x + 3, y + 5);
+  doc.setFontSize(13);
+  doc.setTextColor(color[0], color[1], color[2]);
+  doc.text(value, x + 3, y + 11.5);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.2);
+  doc.setTextColor(100,116,139);
+  doc.text(subtitle, x + 3, y + 15);
+}
+
+function addCoverPage(doc, logoDataUrl){
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
   const kepala = state.keluarga.find(x => x.id === "kepala");
   const pasangan = state.keluarga.find(x => x.id === "pasangan");
   const jumlahAnak = state.keluarga.filter(x => x.id.startsWith("anak")).length;
   const tanggal = new Date().toLocaleDateString("id-ID", { day:"2-digit", month:"long", year:"numeric" });
 
-  return `
-    <section class="pdf-cover-page">
-      <div class="pdf-cover-card">
-        <img src="../asset/logo-cerdas-finansial.png" alt="Cerdas Finansial" class="pdf-cover-logo">
-        <h1>INSURANCE MATRIX</h1>
-        <h2>Laporan Review Polis Keluarga</h2>
-        <div class="pdf-cover-info">
-          <div><span>Kepala Keluarga</span><strong>${escapeHtml(kepala?.nama || "-")}</strong></div>
-          <div><span>Status</span><strong>${state.statusMenikah === "menikah" ? "Sudah Menikah" : "Belum Menikah"}</strong></div>
-          <div><span>Pasangan</span><strong>${escapeHtml(pasangan?.nama || "-")}</strong></div>
-          <div><span>Jumlah Anak</span><strong>${jumlahAnak}</strong></div>
-          <div><span>Tanggal Review</span><strong>${tanggal}</strong></div>
-        </div>
-      </div>
-    </section>
-  `;
+  doc.setFillColor(248,252,255);
+  doc.rect(0,0,pageWidth,pageHeight,"F");
+  doc.setFillColor(235,244,250);
+  doc.circle(25, 25, 42, "F");
+  doc.setFillColor(245,231,204);
+  doc.circle(pageWidth - 20, pageHeight - 15, 45, "F");
+
+  addLogoToPdf(doc, logoDataUrl, pageWidth/2 - 36, 25, 72, 42);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(28);
+  doc.setTextColor(180, 0, 0);
+  doc.text("INSURANCE MATRIX", pageWidth/2, 84, { align:"center" });
+  doc.setFontSize(14);
+  doc.setTextColor(11,60,93);
+  doc.text("Laporan Review Polis Keluarga", pageWidth/2, 96, { align:"center" });
+
+  const cardX = 34, cardY = 113, cardW = pageWidth - 68, cardH = 48;
+  doc.setFillColor(255,255,255);
+  doc.setDrawColor(220,232,242);
+  doc.roundedRect(cardX, cardY, cardW, cardH, 5, 5, "FD");
+
+  const infos = [
+    ["Kepala Keluarga", kepala?.nama || "-"],
+    ["Status", state.statusMenikah === "menikah" ? "Sudah Menikah" : "Belum Menikah"],
+    ["Pasangan", pasangan?.nama || "-"],
+    ["Jumlah Anak", String(jumlahAnak)],
+    ["Tanggal Review", tanggal]
+  ];
+
+  const colW = cardW / infos.length;
+  infos.forEach((item, i) => {
+    const x = cardX + i * colW;
+    if(i > 0){
+      doc.setDrawColor(226,232,240);
+      doc.line(x, cardY + 8, x, cardY + cardH - 8);
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(100,116,139);
+    doc.text(item[0], x + colW/2, cardY + 18, { align:"center" });
+    doc.setFontSize(11);
+    doc.setTextColor(11,60,93);
+    doc.text(safePdfText(item[1]), x + colW/2, cardY + 31, { align:"center", maxWidth: colW - 8 });
+  });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(100,116,139);
+  doc.text("Dokumen ini membantu keluarga melihat kelengkapan polis, fungsi perlindungan, dan area yang perlu ditinjau kembali setiap tahun.", pageWidth/2, 177, { align:"center", maxWidth: pageWidth - 60 });
+  addPdfFooter(doc, 1);
 }
 
-function exportFamilyPDF(){
+function addMemberPage(doc, member, logoDataUrl, pageNo){
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  syncMatrixWithTemplate(member.id);
+  const matrix = state.polis[member.id] || [];
+
+  doc.setFillColor(255,255,255);
+  doc.rect(0,0,pageWidth,pageHeight,"F");
+
+  const barColor = member.id === "anak1" ? [0, 166, 81] : member.id === "anak2" ? [0, 139, 210] : member.id === "anak3" ? [107,42,143] : [192,0,0];
+  doc.setFillColor(...barColor);
+  doc.roundedRect(10, 9, pageWidth - 20, 18, 3, 3, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(15);
+  doc.setTextColor(255,255,255);
+  doc.text(getMemberNumber(member), 14, 21);
+  doc.setFontSize(10);
+  doc.text("Nama:", pageWidth - 76, 21);
+  doc.setFillColor(255,255,255);
+  doc.roundedRect(pageWidth - 62, 13, 49, 10, 2, 2, "F");
+  doc.setFontSize(9);
+  doc.setTextColor(20,24,31);
+  doc.text(safePdfText(member.nama), pageWidth - 38, 20, { align:"center", maxWidth:46 });
+
+  const legendY = 34;
+  const legend = [
+    [[224,0,0], "Wajib Dimiliki"],
+    [[0,166,81], "Sesuai Kebutuhan / Tidak Wajib"],
+    [[255,214,0], "Distribusi Kekayaan"],
+    [[0,139,210], "Fungsi Akumulasi"]
+  ];
+  legend.forEach((item, i) => {
+    const x = 11 + (i * 58);
+    doc.setFillColor(...item[0]);
+    doc.roundedRect(x, legendY, 8, 5, 1, 1, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.2);
+    doc.setTextColor(17,24,39);
+    doc.text(item[1], x + 10, legendY + 4);
+  });
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(180,0,0);
+  doc.text("INSURANCE MATRIX", pageWidth/2, 49, { align:"center" });
+  addLogoToPdf(doc, logoDataUrl, pageWidth - 55, 30, 42, 24);
+
+  const wajib = getCategorySummary(matrix, "red");
+  const kebutuhan = getCategorySummary(matrix, "green");
+  const distribusi = getCategorySummary(matrix, "yellow");
+  const akumulasi = getCategorySummary(matrix, "blue");
+  const sumY = 55;
+  const boxW = (pageWidth - 24 - 9) / 4;
+  drawSummaryBox(doc, 10, sumY, boxW, "Wajib Dimiliki", `${wajib.owned}/${wajib.total}`, `${wajib.percent}% terpenuhi`, [180,0,0]);
+  drawSummaryBox(doc, 10 + (boxW + 3), sumY, boxW, "Sesuai Kebutuhan", `${kebutuhan.owned}/${kebutuhan.total}`, `${kebutuhan.percent}% terpenuhi`, [0,128,61]);
+  drawSummaryBox(doc, 10 + (boxW + 3)*2, sumY, boxW, "Distribusi Kekayaan", `${distribusi.owned}/${distribusi.total}`, `${distribusi.percent}% terpenuhi`, [160,118,0]);
+  drawSummaryBox(doc, 10 + (boxW + 3)*3, sumY, boxW, "Fungsi Akumulasi", `${akumulasi.owned}/${akumulasi.total}`, `${akumulasi.percent}% terpenuhi`, [0,105,180]);
+
+  const body = matrix.map((row, index) => [
+    { content:"", styles:{ fillColor: row.warna === "red" ? [224,0,0] : row.warna === "green" ? [0,166,81] : row.warna === "yellow" ? [255,214,0] : [0,139,210] } },
+    String(index + 1),
+    safePdfText(row.kategori),
+    safePdfText(row.fungsi),
+    row.punya === "ya" ? safePdfText(row.brand || "-") : "-",
+    row.punya === "ya" ? safePdfText(row.produk || "-") : "-",
+    row.punya === "ya" ? safePdfText(row.manfaat || "-") : "-",
+    row.punya === "ya" ? "Sudah" : "Belum",
+    safePdfText([row.catatan, row.premi ? `Premi: ${row.premi}` : "", row.masa ? `Masa: ${row.masa}` : ""].filter(Boolean).join(" | ") || "-")
+  ]);
+
+  doc.autoTable({
+    startY: 76,
+    margin: { left:10, right:10, bottom:14 },
+    tableWidth: pageWidth - 20,
+    head: [["Status", "No", "Kategori", "Fungsi Keuangan", "Brand", "Jenis Produk Dasar", "Manfaat", "Tidak Punya", "Keterangan Tambahan"]],
+    body,
+    theme: "grid",
+    rowPageBreak: "avoid",
+    pageBreak: "avoid",
+    styles: {
+      font: "helvetica",
+      fontSize: 6.7,
+      cellPadding: 1.35,
+      overflow: "linebreak",
+      valign: "middle",
+      lineColor: [230, 90, 90],
+      lineWidth: 0.12,
+      textColor: [17,24,39]
+    },
+    headStyles: {
+      fillColor: [255,245,245],
+      textColor: [17,24,39],
+      fontStyle: "bold",
+      halign: "center",
+      fontSize: 6.8
+    },
+    columnStyles: {
+      0: { cellWidth: 11, halign:"center" },
+      1: { cellWidth: 8, halign:"center", fontStyle:"bold" },
+      2: { cellWidth: 38, fontStyle:"bold" },
+      3: { cellWidth: 45, fontStyle:"bold" },
+      4: { cellWidth: 28, halign:"center" },
+      5: { cellWidth: 34, halign:"center" },
+      6: { cellWidth: 35, halign:"center" },
+      7: { cellWidth: 20, halign:"center" },
+      8: { cellWidth: pageWidth - 20 - 11 - 8 - 38 - 45 - 28 - 34 - 35 - 20 }
+    },
+    didParseCell: function(data){
+      if(data.section === "body" && [2,3].includes(data.column.index)){
+        data.cell.styles.fontStyle = "bold";
+      }
+      if(data.section === "body" && data.column.index === 7){
+        const txt = String(data.cell.raw || "");
+        data.cell.styles.fontStyle = "bold";
+        data.cell.styles.textColor = txt === "Sudah" ? [0,120,58] : [190,0,0];
+        data.cell.styles.fillColor = txt === "Sudah" ? [232,247,238] : [255,240,240];
+      }
+    }
+  });
+
+  const noteY = Math.min((doc.lastAutoTable?.finalY || 165) + 5, pageHeight - 20);
+  doc.setFillColor(255,240,240);
+  doc.setDrawColor(255,210,210);
+  doc.roundedRect(10, noteY, pageWidth - 20, 9, 2, 2, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.2);
+  doc.setTextColor(192,0,0);
+  doc.text("Table ini harus di-review kembali setiap tahun agar manfaat polis masih sesuai dengan fungsi dan tujuan keuangan.", pageWidth/2, noteY + 5.8, { align:"center" });
+  addPdfFooter(doc, pageNo);
+}
+
+async function exportFamilyPDF(){
   if(!state.keluarga.length){
     showFamilyError("Isi dan simpan data keluarga terlebih dahulu sebelum export PDF.");
     window.scrollTo({ top:0, behavior:"smooth" });
     return;
   }
 
+  if(!window.jspdf || !window.jspdf.jsPDF){
+    alert("Library PDF belum berhasil dimuat. Pastikan koneksi internet aktif, lalu refresh halaman.");
+    return;
+  }
+
   state.keluarga.forEach(member => syncMatrixWithTemplate(member.id));
   saveState();
 
-  const oldArea = document.getElementById("familyPdfPrintArea");
-  if(oldArea) oldArea.remove();
+  const btn = document.querySelector(".btn-export-pdf");
+  const oldText = btn ? btn.innerHTML : "";
+  if(btn){
+    btn.disabled = true;
+    btn.innerHTML = `<i class="bi bi-hourglass-split"></i> Membuat PDF...`;
+  }
 
-  const printArea = document.createElement("div");
-  printArea.id = "familyPdfPrintArea";
-  printArea.className = "family-pdf-print-area";
-  printArea.innerHTML = renderPdfCover() + state.keluarga.map(member => renderMemberPdfPage(member)).join("");
-  document.body.appendChild(printArea);
+  try{
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:"landscape", unit:"mm", format:"a4", compress:true });
+    const logoDataUrl = await getLogoDataUrl();
 
-  document.body.classList.add("pdf-family-mode");
+    addCoverPage(doc, logoDataUrl);
+    let pageNo = 2;
+    state.keluarga.forEach(member => {
+      doc.addPage("a4", "landscape");
+      addMemberPage(doc, member, logoDataUrl, pageNo);
+      pageNo++;
+    });
 
-  const cleanup = () => {
-    document.body.classList.remove("pdf-family-mode");
-    const area = document.getElementById("familyPdfPrintArea");
-    if(area) area.remove();
-    window.removeEventListener("afterprint", cleanup);
-  };
-
-  window.addEventListener("afterprint", cleanup);
-  setTimeout(() => window.print(), 250);
+    doc.save(getPdfFileName());
+  }catch(err){
+    console.error(err);
+    alert("PDF belum berhasil dibuat. Coba refresh halaman lalu export ulang.");
+  }finally{
+    if(btn){
+      btn.disabled = false;
+      btn.innerHTML = oldText;
+    }
+  }
 }

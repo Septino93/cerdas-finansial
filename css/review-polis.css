@@ -622,3 +622,10 @@ body{margin:0;background:#eef3f8;font-family:Arial,Helvetica,sans-serif;color:#1
     padding:4px 5px!important;
   }
 }
+
+/* v14: tombol export saat proses */
+.btn-export-pdf:disabled{
+  opacity:.75;
+  cursor:wait;
+  transform:none!important;
+}
