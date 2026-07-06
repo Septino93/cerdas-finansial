@@ -1,4 +1,4 @@
-const STORAGE_KEY = "cerdasFinansial_reviewPolis_v10";
+const STORAGE_KEY = "cerdasFinansial_reviewPolis_v11";
 
 let state = {
   keluarga: [],
@@ -271,6 +271,7 @@ function renderAll(){
   renderFamilyList();
   renderMatrix();
   renderSummary();
+  toggleBottomActions();
 }
 
 function fillFamilyForm(){
@@ -405,6 +406,12 @@ function renderSummary(){
   setSummaryCard("sumKebutuhan", "sumKebutuhanText", getCategorySummary(matrix, "green"));
   setSummaryCard("sumDistribusi", "sumDistribusiText", getCategorySummary(matrix, "yellow"));
   setSummaryCard("sumAkumulasi", "sumAkumulasiText", getCategorySummary(matrix, "blue"));
+}
+
+function toggleBottomActions(){
+  const actions = document.getElementById("bottomActions");
+  if(!actions) return;
+  actions.classList.toggle("d-none", !state.keluarga.length);
 }
 
 function openModal(index){
