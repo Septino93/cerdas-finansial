@@ -66,3 +66,56 @@ body{background:#eef3f8;font-family:Arial,Helvetica,sans-serif;color:#172033}
 .status-band.blue{
   background:#008bd2;
 }
+
+.member-matrix-label{
+  background:#c00000;
+  color:white;
+  font-size:28px;
+  font-weight:900;
+  padding:12px 18px;
+  border-radius:10px;
+  margin-bottom:14px;
+  width:100%;
+}
+
+.matrix-title{
+  color:#b40000;
+}
+
+.matrix-table th,
+.matrix-table td{
+  border:1px solid rgba(224,0,0,.35);
+}
+
+.matrix-table th{
+  background:#fff6f6;
+  color:#111;
+}
+
+.row-category,
+.row-function{
+  color:#111;
+  font-weight:900;
+}
+
+.note-box{
+  background:#fff0f0;
+  color:#c00000;
+  border:0;
+}
+
+.status-band.red{
+  background:#e00000;
+}
+
+.status-band.green{
+  background:#00a651;
+}
+
+.status-band.yellow{
+  background:#ffe100;
+}
+
+.status-band.blue{
+  background:#008bd2;
+}

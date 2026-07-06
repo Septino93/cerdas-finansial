@@ -1,17 +1,18 @@
 const STORAGE_KEY = "cerdasFinansial_reviewPolis";
+
 let state = {
   keluarga: [],
   activeId: null,
   polis: {}
 };
 
-const matrixTemplate = [
+const baseMatrixBeforeEducation = [
   { kategori: "ASURANSI KESEHATAN", fungsi: "PROTEKSI ASET", warna: "red" },
   { kategori: "ASURANSI PENYAKIT KRITIS", fungsi: "PROTEKSI INCOME", warna: "red" },
-  { kategori: "ASURANSI JIWA", fungsi: "PROTEKSI INCOME", warna: "red" },
-  { kategori: "ASURANSI PENDIDIKAN ANAK", fungsi: "PENDIDIKAN ANAK 1", warna: "red" },
-  { kategori: "ASURANSI PENDIDIKAN ANAK", fungsi: "PENDIDIKAN ANAK 2", warna: "red" },
-  { kategori: "ASURANSI PENDIDIKAN ANAK", fungsi: "PENDIDIKAN ANAK 3", warna: "red" },
+  { kategori: "ASURANSI JIWA", fungsi: "PROTEKSI INCOME", warna: "red" }
+];
+
+const baseMatrixAfterEducation = [
   { kategori: "ASURANSI JIWA", fungsi: "DANA PENSIUN PASANGAN", warna: "red" },
   { kategori: "ASURANSI JIWA", fungsi: "PELUNASAN HUTANG", warna: "red" },
   { kategori: "ASURANSI JIWA", fungsi: "BIAYA PEMAKAMAN", warna: "red" },
@@ -32,6 +33,42 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getJumlahAnak() {
+  return state.keluarga.filter(member => member.id.startsWith("anak")).length || 0;
+}
+
+function getMatrixTemplate() {
+  const jumlahAnak = getJumlahAnak();
+
+  const educationRows = [];
+  for (let i = 1; i <= jumlahAnak; i++) {
+    educationRows.push({
+      kategori: "ASURANSI PENDIDIKAN ANAK",
+      fungsi: `PENDIDIKAN ANAK ${i}`,
+      warna: "red"
+    });
+  }
+
+  return [
+    ...baseMatrixBeforeEducation,
+    ...educationRows,
+    ...baseMatrixAfterEducation
+  ];
+}
+
+function createEmptyMatrix() {
+  return getMatrixTemplate().map(item => ({
+    ...item,
+    punya: "tidak",
+    brand: "",
+    produk: "",
+    manfaat: "",
+    premi: "",
+    masa: "",
+    catatan: ""
+  }));
 }
 
 function simpanKeluarga() {
@@ -55,28 +92,14 @@ function simpanKeluarga() {
 
   state.keluarga = keluarga;
   state.activeId = "kepala";
+  state.polis = {};
 
   keluarga.forEach(member => {
-    if (!state.polis[member.id]) {
-      state.polis[member.id] = createEmptyMatrix();
-    }
+    state.polis[member.id] = createEmptyMatrix();
   });
 
   saveState();
   renderAll();
-}
-
-function createEmptyMatrix() {
-  return matrixTemplate.map(item => ({
-    ...item,
-    punya: "tidak",
-    brand: "",
-    produk: "",
-    manfaat: "",
-    premi: "",
-    masa: "",
-    catatan: ""
-  }));
 }
 
 function renderAll() {
@@ -129,10 +152,22 @@ function getActiveMember() {
 
 function getActiveMatrix() {
   if (!state.activeId) return [];
+
   if (!state.polis[state.activeId]) {
     state.polis[state.activeId] = createEmptyMatrix();
   }
+
   return state.polis[state.activeId];
+}
+
+function getMemberNumber(active) {
+  if (!active) return "";
+
+  if (active.id === "kepala") return "1. KEPALA KELUARGA";
+  if (active.id === "pasangan") return "2. PASANGAN";
+
+  const nomorAnak = active.id.replace("anak", "");
+  return `${parseInt(nomorAnak) + 2}. ANAK ${nomorAnak}`;
 }
 
 function renderMatrix() {
@@ -153,7 +188,7 @@ function renderMatrix() {
   }
 
   document.getElementById("matrixName").value = active.nama;
-  document.getElementById("matrixTitle").textContent = `INSURANCE MATRIX - ${active.peran.toUpperCase()}`;
+  document.getElementById("matrixTitle").textContent = "INSURANCE MATRIX";
 
   const matrix = getActiveMatrix();
 
@@ -185,6 +220,23 @@ function renderMatrix() {
       </td>
     </tr>
   `).join("");
+
+  updateMatrixHeaderLabel(active);
+}
+
+function updateMatrixHeaderLabel(active) {
+  const oldLabel = document.getElementById("memberMatrixLabel");
+  if (oldLabel) oldLabel.remove();
+
+  const matrixHead = document.querySelector(".matrix-head");
+  if (!matrixHead || !active) return;
+
+  const label = document.createElement("div");
+  label.id = "memberMatrixLabel";
+  label.textContent = getMemberNumber(active);
+  label.className = "member-matrix-label";
+
+  matrixHead.prepend(label);
 }
 
 function renderSummary() {
@@ -254,6 +306,7 @@ function resetReview() {
   if (!yakin) return;
 
   localStorage.removeItem(STORAGE_KEY);
+
   state = {
     keluarga: [],
     activeId: null,
@@ -263,6 +316,9 @@ function resetReview() {
   document.getElementById("namaKepala").value = "";
   document.getElementById("namaPasangan").value = "";
   document.getElementById("jumlahAnak").value = "3";
+
+  const oldLabel = document.getElementById("memberMatrixLabel");
+  if (oldLabel) oldLabel.remove();
 
   renderAll();
 }
