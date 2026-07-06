@@ -194,6 +194,15 @@ function readiness(d){
     readinessChecklist.innerHTML = r.items.map(itemHTML).join('');
 }
 
+function periodeDetailText(tahun){
+    const y = Math.floor(Number(tahun)||0);
+    const m = Math.round(((Number(tahun)||0)-y)*12);
+    const total = Math.round((Number(tahun)||0)*12);
+    if(y<=0 && m<=0) return '0 Tahun';
+    let label = y + ' Tahun' + (m ? ' ' + m + ' Bulan' : '');
+    return label + ' (' + total + ' Bulan)';
+}
+
 function konsultasiWhatsApp(){if(!last)return;let d=last,msg=`Halo Pak Septino,\n\nSaya baru menggunakan aplikasi Cerdas Finansial dan ingin berkonsultasi mengenai hasil simulasi dana pendidikan.\n\nNama Anak: ${d.namaAnak}\nTarget Pendidikan: ${d.targetLabel}\nDana Dibutuhkan: ${rupiah(d.target)}\nDana Saat Ini: ${rupiah(d.danaAda)}\nKekurangan Dana: ${rupiah(d.kurang)}\nEstimasi Setoran: ${rupiah(d.setor)} / bulan\nPeriode Persiapan: ${formatTahun(d.periode)}\n\nMohon dibantu membuatkan strategi yang sesuai. Terima kasih.`;window.open(`https://wa.me/${FP.whatsapp}?text=${encodeURIComponent(msg)}`,'_blank');}function konsultasiEmail(){let subject='Konsultasi Dana Pendidikan';location.href=`mailto:${FP.email}?subject=${encodeURIComponent(subject)}`;}function konsultasiInstagram(){window.open(FP.instagram,'_blank');}
 async function exportPDF(){
     if(!last){
@@ -400,14 +409,16 @@ async function exportPDF(){
     setFont(8,'bold',C.white); doc.text('1',M+5,ry+1.8,{align:'center'});
     setFont(10,'bold',C.navy); doc.text('Persiapkan Dana Sesuai Kebutuhan',M+16,ry+1);
     ry+=11;
-    metricCard(M,ry,(W-M*2-8)/2,33,`Kebutuhan Dana di Usia ${d.usiaMasuk} Tahun`,rupiah(d.target),'Target dana pendidikan yang perlu tersedia.',C.navy);
-    metricCard(M+(W-M*2+8)/2,ry,(W-M*2-8)/2,33,'Dana yang Perlu Disiapkan per Bulan',rupiah(d.setor),'Estimasi komitmen bulanan.',C.gold);
-    ry+=43;
-    card(M,ry,W-M*2,13,C.softBlue,C.line,4);
-    setFont(7.2,'bold',C.navy); doc.text('Catatan:',M+7,ry+8.5);
-    wrap('Angka ini merupakan estimasi ideal agar tujuan pendidikan anak dapat tercapai sesuai asumsi yang digunakan.',M+25,ry+8.5,W-M*2-32,6.6,3.4,C.muted);
+    const recW = (W-M*2-12)/3;
+    metricCard(M,ry,recW,35,`Target Dana Usia ${d.usiaMasuk} Tahun`,rupiah(d.target),'Total kebutuhan saat target pendidikan dimulai.',C.navy);
+    metricCard(M+recW+6,ry,recW,35,'Jangka Waktu Persiapan',periodeDetailText(d.periode),'Sesuai periode persiapan yang dipilih.',C.green);
+    metricCard(M+(recW+6)*2,ry,recW,35,'Dana Disiapkan per Bulan',rupiah(d.setor),'Estimasi komitmen bulanan.',C.gold);
+    ry+=45;
+    card(M,ry,W-M*2,15,C.softBlue,C.line,4);
+    setFont(7.2,'bold',C.navy); doc.text('Catatan:',M+7,ry+9.5);
+    wrap('Angka ini merupakan estimasi berdasarkan target dana pendidikan, jangka waktu persiapan, asumsi inflasi, dan estimasi hasil investasi yang dimasukkan.',M+25,ry+9.5,W-M*2-32,6.3,3.2,C.muted);
 
-    ry+=30;
+    ry+=29;
     // nomor 2 dirapikan
     fill(C.navy); doc.roundedRect(M,ry-5,10,10,2,2,'F');
     setFont(8,'bold',C.white); doc.text('2',M+5,ry+1.8,{align:'center'});
